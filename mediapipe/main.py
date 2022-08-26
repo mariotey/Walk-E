@@ -7,11 +7,17 @@ mp_pose = mp.solutions.pose
 # For static images:
 IMAGE_FILES = []
 BG_COLOR = (192, 192, 192) # gray
+
+print("with Line is here")
+
 with mp_pose.Pose(
     static_image_mode=True,
     model_complexity=2,
     enable_segmentation=True,
     min_detection_confidence=0.5) as pose:
+  
+  print("For loop is here")
+
   for idx, file in enumerate(IMAGE_FILES):
     image = cv2.imread(file)
     image_height, image_width, _ = image.shape
@@ -41,6 +47,7 @@ with mp_pose.Pose(
         mp_pose.POSE_CONNECTIONS,
         landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
     cv2.imwrite('/tmp/annotated_image' + str(idx) + '.png', annotated_image)
+
     # Plot pose world landmarks.
     mp_drawing.plot_landmarks(
         results.pose_world_landmarks, mp_pose.POSE_CONNECTIONS)
@@ -73,6 +80,7 @@ with mp_pose.Pose(
         landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
     # Flip the image horizontally for a selfie-view display.
     cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
+    # cv2.imwrite('./Pictures/hello.jpg', cv2.flip(image, 1))
     if cv2.waitKey(5) & 0xFF == 27:
       break
 cap.release()

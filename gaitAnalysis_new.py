@@ -8,6 +8,10 @@ FONT_SCALE = 0.5
 LINE_THICK = 1
 LINE_TYPE = cv2.LINE_AA
 
+MIN_CHUNKSIZE = 3
+MIN_STRIDETIME = 3
+POINTS_SPACE = 20
+
 WEBCAM_RES = [640,480]
 
 mp_pose = mp.solutions.pose # Pose Estimation Model
@@ -66,7 +70,7 @@ def get_gaitcycle_data(heel_baseline, raw_heel, raw_time):
     modified_time = []
     separate_index = []
 
-    format_data, format_time = modify_raw(raw_heel, raw_time, 20)
+    format_data, format_time = modify_raw(raw_heel, raw_time, POINTS_SPACE)
 
     for elem in format_data:
        if round(elem,2) == round(heel_baseline,2):
@@ -83,7 +87,7 @@ def get_gaitcycle_data(heel_baseline, raw_heel, raw_time):
     valid_time = []
 
     for i in range(len(modified_gait)):
-        if len(modified_gait[i]) > 3:
+        if len(modified_gait[i]) > MIN_CHUNKSIZE:
             if i != len(modified_gait) -1:
                 modified_gait[i].append(heel_baseline)
                 modified_time[i].append(modified_time[i][-1])
@@ -98,7 +102,7 @@ def get_gaitcycle_data(heel_baseline, raw_heel, raw_time):
     for x in range(len(valid_gait)):
         if max(valid_gait[x]) > heel_baseline:            
             try:
-                if (valid_time[x+1][-1] - valid_time[x][0]) < 3: 
+                if (valid_time[x+1][-1] - valid_time[x][0]) < MIN_STRIDETIME: 
                     new_gait.append(valid_gait[x] + valid_gait[x+1])
                     new_time.append(valid_time[x] + valid_time[x+1])
             except:

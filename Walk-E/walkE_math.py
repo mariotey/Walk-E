@@ -17,9 +17,9 @@ def cal_twoD_angle(first, sec, third):
 
     return result
 
-def cal_threeD_angle(first, sec, third):
-    vector_u = [first[0] - sec[0], first[1] - sec[1], first[2] - sec[2]]
-    vector_v = [third[0] - sec[0], third[1] - sec[1], third[2] - sec[2]]
+def cal_threeD_angle(first, sec, third):   
+    vector_u = [first["x"] - sec["x"], first["y"] - sec["y"], first["z"] - sec["z"]]
+    vector_v = [third["x"] - sec["x"], third["y"] - sec["y"], third["z"] - sec["z"]]
 
     u_v = vector_u[0] * vector_v[0] + vector_u[1] * vector_v[1] + vector_u[2] * vector_v[2]
 

@@ -3,7 +3,7 @@ from flask import Flask, Response, render_template, request
 
 import cv2
 import mediapipe as mp
-import gaitAnalysis_new
+import gaitAnalysis
 
 app = Flask(__name__)
 
@@ -54,7 +54,7 @@ def start_page():
                 camera_landmarks = results.pose_landmarks.landmark
                 world_landmarks = results.pose_world_landmarks.landmark
 
-                heel_x, heel_y, heel_z = gaitAnalysis_new.get_heel_data(image, camera_landmarks, world_landmarks)      
+                heel_x, heel_y, heel_z = gaitAnalysis.get_heel_data(image, camera_landmarks, world_landmarks)      
                 
             except:
                 # print("Nothing / Errors detected")
@@ -85,3 +85,4 @@ def statistics_page():
 if __name__ == "__main__":
     app.run(debug=True)
 
+# .\venv\Scripts\python.exe -m pylint .\Walk-E\main.py

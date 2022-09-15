@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 import dist
 import gaitAnalysis
 
-HEEL_DOF = 6
-HIPFLEX_DOF = 6
-KNEEFLEX_DOF = 12
+HEEL_DOF = 5
+HIPFLEX_DOF = 5
+KNEEFLEX_DOF = 10
 ANKLEFLEX_DOF = 10
 
 # Drawing utilities for visualizing poses

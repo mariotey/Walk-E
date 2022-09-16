@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import dist
 import gaitAnalysis
 
+CUT_OFF = 0.78
 HEEL_DOF = 5
 HIPFLEX_DOF = 5
 KNEEFLEX_DOF = 10
@@ -66,24 +67,18 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
 
         # Extract landmarks
         try:
-            camera_landmarks = results.pose_landmarks.landmark
-            world_landmarks = results.pose_world_landmarks.landmark
+            camera_lm = results.pose_landmarks.landmark
+            world_lm = results.pose_world_landmarks.landmark
 
-            joint_data["ref_heel"].append(gaitAnalysis.get_body_lm(
-                "LEFT_HEEL", world_landmarks))  # Heel Reference
-            joint_data["shoulder"].append(gaitAnalysis.get_body_lm(
-                "LEFT_SHOULDER", world_landmarks))  # Shoulder Info
-            joint_data["hip"].append(gaitAnalysis.get_body_lm(
-                "LEFT_HIP", world_landmarks))  # Hip Info
-            joint_data["knee"].append(gaitAnalysis.get_body_lm(
-                "LEFT_KNEE", world_landmarks))  # Knee Info
-            joint_data["ankle"].append(gaitAnalysis.get_body_lm(
-                "LEFT_ANKLE", world_landmarks))  # Ankle Info
-            joint_data["toe"].append(gaitAnalysis.get_body_lm(
-                "LEFT_FOOT_INDEX", world_landmarks))  # Toe Info
+            joint_data["ref_heel"].append(gaitAnalysis.get_body_lm("LEFT_HEEL", world_lm))  # Heel Reference
+            joint_data["shoulder"].append(gaitAnalysis.get_body_lm("LEFT_SHOULDER", world_lm))  # Shoulder Info
+            joint_data["hip"].append(gaitAnalysis.get_body_lm("LEFT_HIP", world_lm))  # Hip Info
+            joint_data["knee"].append(gaitAnalysis.get_body_lm("LEFT_KNEE", world_lm))  # Knee Info
+            joint_data["ankle"].append(gaitAnalysis.get_body_lm("LEFT_ANKLE", world_lm))  # Ankle Info
+            joint_data["toe"].append(gaitAnalysis.get_body_lm("LEFT_FOOT_INDEX", world_lm))  # Toe Info
             joint_data["time"].append(time.time() - start_time)  # Time Info
 
-            dist.detect(image, camera_landmarks)
+            dist.detect(image, camera_lm)
 
         except AttributeError:
             # print("Nothing / Errors detected")
@@ -95,24 +90,18 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
         if cv2.waitKey(10) & 0xFF == ord("q"):
             break
 
-gait_jointdata = gaitAnalysis.get_gait(0.80, joint_data)
+gait_jointdata = gaitAnalysis.get_gait(CUT_OFF, joint_data)
 
 hipflex_data = gaitAnalysis.get_flex(gait_jointdata, "shoulder", "hip", "knee")
 kneeflex_data = gaitAnalysis.get_flex(gait_jointdata, "hip", "knee", "ankle")
 ankleflex_data = gaitAnalysis.get_flex(gait_jointdata, "knee", "ref_heel", "toe")
 
-heelX_x, heelX_y, heelX_polyfit = gaitAnalysis.polyfit_heel(gait_jointdata, "x", 
-                                                            HEEL_DOF)
-heelY_x, heelY_y, heelY_polyfit = gaitAnalysis.polyfit_heel(gait_jointdata, "y", 
-                                                            HEEL_DOF)
-heelZ_x, heelZ_y, heelZ_polyfit = gaitAnalysis.polyfit_heel(gait_jointdata, "z", 
-                                                            HEEL_DOF)
-hipflex_x, hipflex_y, hipflex_polyfit = gaitAnalysis.polyfit_flex(hipflex_data, 
-                                                                HIPFLEX_DOF)
-kneeflex_x, kneeflex_y, kneeflex_polyfit = gaitAnalysis.polyfit_flex(kneeflex_data, 
-                                                                KNEEFLEX_DOF)
-ankleflex_x, ankleflex_y, ankleflex_polyfit = gaitAnalysis.polyfit_flex(ankleflex_data, 
-                                                                    ANKLEFLEX_DOF)
+heelX_x, heelX_y, heelX_polyfit = gaitAnalysis.polyfit_heel(gait_jointdata, "x", HEEL_DOF)
+heelY_x, heelY_y, heelY_polyfit = gaitAnalysis.polyfit_heel(gait_jointdata, "y", HEEL_DOF)
+heelZ_x, heelZ_y, heelZ_polyfit = gaitAnalysis.polyfit_heel(gait_jointdata, "z", HEEL_DOF)
+hipflex_x, hipflex_y, hipflex_polyfit = gaitAnalysis.polyfit_flex(hipflex_data, HIPFLEX_DOF)
+kneeflex_x, kneeflex_y, kneeflex_polyfit = gaitAnalysis.polyfit_flex(kneeflex_data, KNEEFLEX_DOF)
+ankleflex_x, ankleflex_y, ankleflex_polyfit = gaitAnalysis.polyfit_flex(ankleflex_data, ANKLEFLEX_DOF)
 
 ###################################################################################################
 fig, axs = plt.subplots(3, 3, constrained_layout = True)
@@ -199,6 +188,7 @@ axs[2, 2].set(xlabel="Gait Cycle", ylabel = "Ankle Flex (Degree)",
             title = "Best Fit Curve of Ankle Flex")
 
 plt.show()
+print("Complete")
 
 ###################################################################################################
 

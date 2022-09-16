@@ -10,7 +10,7 @@ LINE_THICK = 1
 LINE_TYPE = cv2.LINE_AA
 
 MIN_CHUNKSIZE = 3
-MIN_STRIDETIME = 3
+MIN_STRIDETIME = 2
 POINTS_SPACE = 20
 
 WEBCAM_RES = [640, 480]
@@ -120,8 +120,8 @@ def get_gait(heel_baseline, joint_data):
         "ankle": [data for data in modified_joint["ankle"] if len(data) > MIN_CHUNKSIZE],
         "toe": [data for data in modified_joint["toe"] if len(data) > MIN_CHUNKSIZE],
         "time": [data for data in modified_joint["time"] if len(data) > MIN_CHUNKSIZE]
-    }
-
+    } 
+            
     ##############################################################################################
 
     # Retrieve complete waveforms and remove wavelengths that are too long
@@ -136,10 +136,10 @@ def get_gait(heel_baseline, joint_data):
     }
 
     for wave in range(len(modified_joint["ref_heel"])):
-        ref_list = [modified_joint["ref_heel"][wave][data_index]["y"]
+        first_wave = [modified_joint["ref_heel"][wave][data_index]["y"]
                     for data_index in range(len(modified_joint["ref_heel"][wave]))]
 
-        if max(ref_list) > heel_baseline:
+        if max(first_wave) > heel_baseline:
             try:
                 if (modified_joint["time"][wave+1][-1] - modified_joint["time"][wave][0]) < MIN_STRIDETIME:
                     combined_joint["ref_heel"].append(modified_joint["ref_heel"][wave] + modified_joint["ref_heel"][wave + 1])
@@ -153,7 +153,7 @@ def get_gait(heel_baseline, joint_data):
                 pass
     
     ##############################################################################################
-    
+
     # Identify waveforms based on Max Points and remove wavelengths that are too long
     gait_joint = {
         "ref_heel": [],
@@ -169,20 +169,21 @@ def get_gait(heel_baseline, joint_data):
     for wave in range(len(combined_joint["ref_heel"])):
         try:
             ref_list_first = [combined_joint["ref_heel"][wave][data_index]["y"]
-                              for data_index in range(len(combined_joint["ref_heel"][wave]))]
-            ref_list_second = [combined_joint["ref_heel"][wave + 1][data_index]["y"]
-                               for data_index in range(len(combined_joint["ref_heel"][wave + 1]))]
+                            for data_index in range(len(combined_joint["ref_heel"][wave]))]
+            ref_list_sec = [combined_joint["ref_heel"][wave + 1][data_index]["y"]
+                            for data_index in range(len(combined_joint["ref_heel"][wave + 1]))]
 
             max_first_index = ref_list_first.index(max(ref_list_first))
-            max_second_index = ref_list_second.index(max(ref_list_second))
+            max_sec_index = ref_list_sec.index(max(ref_list_sec))
 
-            gait_joint["ref_heel"].append(combined_joint["ref_heel"][wave][max_first_index::] + combined_joint["ref_heel"][wave+1][0:max_second_index])
-            gait_joint["shoulder"].append(combined_joint["shoulder"][wave][max_first_index::] + combined_joint["shoulder"][wave+1][0:max_second_index])
-            gait_joint["hip"].append(combined_joint["hip"][wave][max_first_index::] + combined_joint["hip"][wave+1][0:max_second_index])
-            gait_joint["knee"].append(combined_joint["knee"][wave][max_first_index::] + combined_joint["knee"][wave+1][0:max_second_index])
-            gait_joint["ankle"].append(combined_joint["ankle"][wave][max_first_index::] + combined_joint["ankle"][wave+1][0:max_second_index])
-            gait_joint["toe"].append(combined_joint["toe"][wave][max_first_index::] + combined_joint["toe"][wave+1][0:max_second_index])
-            gait_joint["time"].append(combined_joint["time"][wave][max_first_index::] + combined_joint["time"][wave+1][0:max_second_index])
+            if (combined_joint["time"][wave+1][max_sec_index] - combined_joint["time"][wave][max_first_index]) < MIN_STRIDETIME:
+                gait_joint["ref_heel"].append(combined_joint["ref_heel"][wave][max_first_index::] + combined_joint["ref_heel"][wave+1][0:max_sec_index])
+                gait_joint["shoulder"].append(combined_joint["shoulder"][wave][max_first_index::] + combined_joint["shoulder"][wave+1][0:max_sec_index])
+                gait_joint["hip"].append(combined_joint["hip"][wave][max_first_index::] + combined_joint["hip"][wave+1][0:max_sec_index])
+                gait_joint["knee"].append(combined_joint["knee"][wave][max_first_index::] + combined_joint["knee"][wave+1][0:max_sec_index])
+                gait_joint["ankle"].append(combined_joint["ankle"][wave][max_first_index::] + combined_joint["ankle"][wave+1][0:max_sec_index])
+                gait_joint["toe"].append(combined_joint["toe"][wave][max_first_index::] + combined_joint["toe"][wave+1][0:max_sec_index])
+                gait_joint["time"].append(combined_joint["time"][wave][max_first_index::] + combined_joint["time"][wave+1][0:max_sec_index])
 
         except:
             pass

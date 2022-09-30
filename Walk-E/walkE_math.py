@@ -16,13 +16,22 @@ def cal_twoD_angle(first, sec, third):
     return result
 
 def cal_threeD_angle(first, sec, third):   
-    u = np.array([first["x"] - sec["x"], first["y"] - sec["y"], first["z"] - sec["z"]])
+    u = np.array([first["x"] - sec["x"], first["y"] - sec["y"], first["z"] - sec["z"]])    
     v = np.array([third["x"] - sec["x"], third["y"] - sec["y"], third["z"] - sec["z"]])
 
-    uv = np.dot(u,v)
-    mag_u, mag_v = np.linalg.norm(u), np.linalg.norm(v)
+    # Projected Vector on Normal
+    normal = np.array([1,0,0])
+    norm_mag = np.linalg.norm(normal)
+    u_norm_proj, v_norm_proj = (np.dot(u, normal)/norm_mag) * u, (np.dot(v, normal)/norm_mag) * v
 
-    radians = np.arccos(uv/(mag_u * mag_v))
+    # Projected Vector on Sagittal Plane
+    u_proj = u - u_norm_proj
+    v_proj = v - v_norm_proj
+
+    uv_project = np.dot(u_proj, v_proj)
+    u_proj_mag, v_proj_mag = np.linalg.norm(u_proj), np.linalg.norm(v_proj)
+
+    radians = np.arccos(uv_project/(u_proj_mag * v_proj_mag))
     result = np.abs(radians * 180.0/np.pi)
 
     if result > 180.0:
@@ -52,6 +61,3 @@ def normalize_gait(time_list):
     
     return new_list
 
-# Equation of Sagittal Plane: 10x = 0
-# Find the projection of vector onto normal vector (11, 0 ,0); Coefficients of the plane
-# Projected vector = Vector - Normal Vector

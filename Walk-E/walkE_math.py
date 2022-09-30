@@ -57,7 +57,7 @@ def normalize_gait(time_list):
         gait_value = (elem - min_time)/(max_time - min_time) * 100
         new_list.append(gait_value)
 
-    print(new_list[0], new_list[-1])
+    print(time_list[0], "to", time_list[-1], ":", new_list[0], "to", new_list[-1], "\n")
     
     return new_list
 

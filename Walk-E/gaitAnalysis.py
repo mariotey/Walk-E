@@ -3,6 +3,7 @@ import cv2
 import mediapipe as mp
 import walkE_math
 import walkE_plot
+import time 
 
 FONT_STYLE = cv2.FONT_HERSHEY_SIMPLEX
 FONT_SCALE = 0.5
@@ -17,20 +18,30 @@ WEBCAM_RES = [640, 480]
 
 mp_pose = mp.solutions.pose  # Pose Estimation Model
 
-def get_body_lm(bodypart, world_landmarks):
-    body_part = mp_pose.PoseLandmark[bodypart].value
+def get_lm(json, world_lm, start_time):
+    def format_lm(bodypart, world_landmarks):
+        body_part = mp_pose.PoseLandmark[bodypart].value
 
-    data_json = {
-        "x": world_landmarks[body_part].x,
-        "y": world_landmarks[body_part].y,
-        "z": world_landmarks[body_part].z
-    }
-    
-    print(bodypart, ":", data_json["x"], ",",
-                         data_json["y"], ",",
-                         data_json["z"], "\n")
+        data_json = {
+            "x": world_landmarks[body_part].x,
+            "y": world_landmarks[body_part].y,
+            "z": world_landmarks[body_part].z
+        }
+        
+        print(bodypart, ":", data_json["x"], ",",
+                            data_json["y"], ",",
+                            data_json["z"], "\n")
 
-    return data_json
+        return data_json
+        
+    # Extract landmarks
+    json["ref_heel"].append(format_lm("LEFT_HEEL", world_lm))  # Heel Reference
+    json["shoulder"].append(format_lm("LEFT_SHOULDER", world_lm))  # Shoulder Info
+    json["hip"].append(format_lm("LEFT_HIP", world_lm))  # Hip Info
+    json["knee"].append(format_lm("LEFT_KNEE", world_lm))  # Knee Info
+    json["ankle"].append(format_lm("LEFT_ANKLE", world_lm))  # Ankle Info
+    json["toe"].append(format_lm("LEFT_FOOT_INDEX", world_lm))  # Toe Info
+    json["time"].append(time.time() - start_time)  # Time Info
 
 def modify_raw(joint_data, unit_space):
     new_jointdata = {
@@ -109,7 +120,7 @@ def get_gait(heel_baseline, joint_data):
         modified_joint["toe"].append(format_jointdata["ref_heel"][cutoff_index[-1]::])
         modified_joint["time"].append(format_jointdata["time"][cutoff_index[-1]::])
     except:
-        return [], []
+        pass
 
     # Remove data points that are too short in length
     modified_joint = {
@@ -216,6 +227,27 @@ def get_flex(joint_data, first, sec, third):
 
         flex_data["flex_data"].append(flex_list)
         flex_data["gait_cycle"].append(gait_list)
+
+    return flex_data
+
+def calibrate_flex(joint_data, first, sec, third):
+    flex_data = {
+        "flex_data": [],
+        "time": []
+    }
+
+    for data_point in range(len(joint_data[first])):
+        flex_list, time_list = [], []
+        
+        first_pt = joint_data[first][data_point]
+        sec_pt = joint_data[sec][data_point]
+        third_pt = joint_data[third][data_point]
+
+        flex_list.append(180 - walkE_math.cal_threeD_angle(first_pt, sec_pt, third_pt))
+        time_list.append(joint_data["time"][data_point])
+
+        flex_data["flex_data"].append(flex_list)
+        flex_data["time"].append(time_list)
 
     return flex_data
 

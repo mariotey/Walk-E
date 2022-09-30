@@ -6,7 +6,7 @@ import dist
 import gaitAnalysis as ga
 import walkE_plot
 
-CUT_OFF = 0.78
+# CUT_OFF = 0.78
 WAIT_TIME = 5
 
 record_flag = False
@@ -110,11 +110,10 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
         else:
             pass
 
-# gait_data = ga.get_gait(CUT_OFF, joint_data)
-walkE_plot.calibrate(calibrate_data)
+offsetdata = walkE_plot.calibrate(calibrate_data)
+gait_data = ga.get_gait(offsetdata["cut_off"], joint_data)
 
-# walkE_plot.stats_result(calibrate_data, gait_data)
-# walkE_plot.stats_result(joint_data, gait_data)
+walkE_plot.stats_result(joint_data, gait_data, offsetdata)
 
 ###################################################################################################
 

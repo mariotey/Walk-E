@@ -22,8 +22,6 @@ def calibrate(calibrate_data):
     heelY_list = [data_point["y"] for data_point in calibrate_data["ref_heel"]]
     heelZ_list = [data_point["z"] for data_point in calibrate_data["ref_heel"]]
 
-    print("Cut-off:" , np.mean(heelY_list), "\n")
-
     axs[1, 0].scatter(calibrate_data["time"], heelX_list,
                     c=["#808080"]*len(heelX_list),
                     s=[2]*len(heelX_list))
@@ -66,9 +64,17 @@ def calibrate(calibrate_data):
     axs[2, 2].set(xlabel="time (sec)", ylabel = "Ankle Flex (Degree)",
                 title = "Ankle Flex")  
 
+    offset_json = {
+        "cut_off": np.mean(heelY_list),
+        "hipflex": np.mean(hipflex_data["flex_data"]),
+        "kneeflex": np.mean(kneeflex_data["flex_data"]),
+        "ankleflex": np.mean(ankleflex_data["flex_data"])
+    }
+
     plt.show()
     print("Complete")
 
+    return offset_json
 
 def modified_gait(joint_data, new_jointdata, gait_jointdata):
     fig, axs = plt.subplots(2, 2, constrained_layout = True)
@@ -100,7 +106,7 @@ def modified_gait(joint_data, new_jointdata, gait_jointdata):
     plt.show()
     print("Complete")
 
-def stats_result(joint_data, gait_jointdata):
+def stats_result(joint_data, gait_jointdata, offset):
     
     hipflex_data = ga.get_flex(gait_jointdata, "shoulder", "hip", "knee")
     kneeflex_data = ga.get_flex(gait_jointdata, "hip", "knee", "ankle")
@@ -112,7 +118,7 @@ def stats_result(joint_data, gait_jointdata):
     hipflex_x, hipflex_y, hipflex_polyfit = ga.polyfit_flex(hipflex_data, HIPFLEX_DOF)
     kneeflex_x, kneeflex_y, kneeflex_polyfit = ga.polyfit_flex(kneeflex_data, KNEEFLEX_DOF)
     ankleflex_x, ankleflex_y, ankleflex_polyfit = ga.polyfit_flex(ankleflex_data, ANKLEFLEX_DOF)
-
+    
     #############################################################################################
     
     fig, axs = plt.subplots(3, 3, constrained_layout = True)
@@ -181,15 +187,15 @@ def stats_result(joint_data, gait_jointdata):
     axs[1, 2].set(xlabel="Gait Cycle", ylabel = "z-coordinate of Heel",
                 title = "Best Fit Curve of Z Movement of Heel")
 
-    axs[2, 0].plot(hipflex_x, hipflex_y, "r")
+    axs[2, 0].plot(hipflex_x, np.array(hipflex_y) - offset["hipflex"], "r")
     axs[2, 0].set(xlabel="Gait Cycle", ylabel = "Hip Flex (Degree)",
                 title = "Best Fit Curve of Hip Flex")
 
-    axs[2, 1].plot(kneeflex_x, kneeflex_y, "r")
+    axs[2, 1].plot(kneeflex_x, np.array(kneeflex_y) - offset["kneeflex"], "r")
     axs[2, 1].set(xlabel="Gait Cycle", ylabel = "Knee Flex (Degree)",
                 title = "Best Fit Curve of Knee Flex")
 
-    axs[2, 2].plot(ankleflex_x, ankleflex_y, "r")
+    axs[2, 2].plot(ankleflex_x, np.array(ankleflex_y) - offset["ankleflex"], "r")
     axs[2, 2].set(xlabel="Gait Cycle", ylabel = "Ankle Flex (Degree)",
                 title = "Best Fit Curve of Ankle Flex")
 

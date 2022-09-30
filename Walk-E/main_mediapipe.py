@@ -6,7 +6,6 @@ import dist
 import gaitAnalysis as ga
 import walkE_plot
 
-# CUT_OFF = 0.78
 WAIT_TIME = 5
 
 record_flag = False

@@ -18,6 +18,19 @@ WEBCAM_RES = [640, 480]
 
 mp_pose = mp.solutions.pose  # Pose Estimation Model
 
+def arraySortedOrNot(arr):
+ 
+    # Calculating length
+    n = len(arr)
+ 
+    # Array has one or no element or the
+    # rest are already checked and approved.
+    if n == 1 or n == 0:
+        return True
+ 
+    # Recursion applied till last element
+    return arr[0] <= arr[1] and arraySortedOrNot(arr[1:])
+
 def get_lm(json, world_lm, start_time):
     def format_lm(bodypart, world_landmarks):
         body_part = mp_pose.PoseLandmark[bodypart].value
@@ -177,27 +190,31 @@ def get_gait(heel_baseline, joint_data):
         "gait_cycle": []
     }
 
-    for wave in range(len(combined_joint["ref_heel"])):
-        try:
-            ref_list_first = [combined_joint["ref_heel"][wave][data_index]["y"]
-                            for data_index in range(len(combined_joint["ref_heel"][wave]))]
-            ref_list_sec = [combined_joint["ref_heel"][wave + 1][data_index]["y"]
-                            for data_index in range(len(combined_joint["ref_heel"][wave + 1]))]
+    for wave in range(len(combined_joint["ref_heel"])-1):
+        ref_list_first = [combined_joint["ref_heel"][wave][data_index]["y"]
+                        for data_index in range(len(combined_joint["ref_heel"][wave]))]
+        ref_list_sec = [combined_joint["ref_heel"][wave + 1][data_index]["y"]
+                        for data_index in range(len(combined_joint["ref_heel"][wave + 1]))]
 
-            max_first_index = ref_list_first.index(max(ref_list_first))
-            max_sec_index = ref_list_sec.index(max(ref_list_sec))
+        max_first_index = ref_list_first.index(max(ref_list_first))
+        max_sec_index = ref_list_sec.index(max(ref_list_sec))
 
-            # if (combined_joint["time"][wave+1][max_sec_index] - combined_joint["time"][wave][max_first_index]) < MIN_STRIDETIME:
-            gait_joint["ref_heel"].append(combined_joint["ref_heel"][wave][max_first_index::] + combined_joint["ref_heel"][wave+1][0:max_sec_index])
-            gait_joint["shoulder"].append(combined_joint["shoulder"][wave][max_first_index::] + combined_joint["shoulder"][wave+1][0:max_sec_index])
-            gait_joint["hip"].append(combined_joint["hip"][wave][max_first_index::] + combined_joint["hip"][wave+1][0:max_sec_index])
-            gait_joint["knee"].append(combined_joint["knee"][wave][max_first_index::] + combined_joint["knee"][wave+1][0:max_sec_index])
-            gait_joint["ankle"].append(combined_joint["ankle"][wave][max_first_index::] + combined_joint["ankle"][wave+1][0:max_sec_index])
-            gait_joint["toe"].append(combined_joint["toe"][wave][max_first_index::] + combined_joint["toe"][wave+1][0:max_sec_index])
-            gait_joint["time"].append(combined_joint["time"][wave][max_first_index::] + combined_joint["time"][wave+1][0:max_sec_index])
+        gait_joint["ref_heel"].append(combined_joint["ref_heel"][wave][max_first_index::] + combined_joint["ref_heel"][wave+1][0:max_sec_index])       
+        gait_joint["shoulder"].append(combined_joint["shoulder"][wave][max_first_index::] + combined_joint["shoulder"][wave+1][0:max_sec_index])
+        gait_joint["hip"].append(combined_joint["hip"][wave][max_first_index::] + combined_joint["hip"][wave+1][0:max_sec_index])
+        gait_joint["knee"].append(combined_joint["knee"][wave][max_first_index::] + combined_joint["knee"][wave+1][0:max_sec_index])
+        gait_joint["ankle"].append(combined_joint["ankle"][wave][max_first_index::] + combined_joint["ankle"][wave+1][0:max_sec_index])
+        gait_joint["toe"].append(combined_joint["toe"][wave][max_first_index::] + combined_joint["toe"][wave+1][0:max_sec_index])
+        
+        time_first = combined_joint["time"][wave][max_first_index::]
+        time_sec = combined_joint["time"][wave+1][0:max_sec_index]
 
-        except:
-            pass
+        if arraySortedOrNot(time_first + time_sec):
+            print("Yes")
+        else:
+            print("No")
+        
+        gait_joint["time"].append(time_first + time_sec)
 
     for time in gait_joint["time"]:
         gait_joint["gait_cycle"].append(walkE_math.normalize_gait(time))

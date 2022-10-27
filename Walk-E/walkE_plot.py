@@ -7,78 +7,65 @@ HIPFLEX_DOF = 5
 KNEEFLEX_DOF = 10
 ANKLEFLEX_DOF = 10
 
-def calibrate(calibrate_data):    
+def calibrate(ref_list, heelX, heelY, heelZ, hipflex, kneeflex, ankleflex, time):    
     fig, axs = plt.subplots(3, 3, constrained_layout = True)
 
-    ref_list = []
-    for elem in calibrate_data["ref_heel"]:
-        ref_list.append(elem["y"])
-
-    axs[0, 0].plot(calibrate_data["time"], ref_list)
+    axs[0, 0].plot(time, ref_list)
     axs[0, 0].set(xlabel = "time (sec)", ylabel = "y-coordinate of heel",
                 title = "Raw Data of Heel")
 
-    heelX_list = [data_point["x"] for data_point in calibrate_data["ref_heel"]]
-    heelY_list = [data_point["y"] for data_point in calibrate_data["ref_heel"]]
-    heelZ_list = [data_point["z"] for data_point in calibrate_data["ref_heel"]]
-
-    axs[1, 0].scatter(calibrate_data["time"], heelX_list,
-                    c=["#808080"]*len(heelX_list),
-                    s=[2]*len(heelX_list))
+    axs[1, 0].scatter(time, heelX,
+                    c=["#808080"]*len(heelX),
+                    s=[2]*len(heelX))
     axs[1, 0].set(xlabel="time (sec)", ylabel = "x-coordinate of Heel",
                 title = "X Movement of Heel")
 
-    axs[1, 1].scatter(calibrate_data["time"], heelY_list,
-                    c=["#808080"]*len(heelY_list),
-                    s=[2]*len(heelY_list))
+    axs[1, 1].scatter(time, heelY,
+                    c=["#808080"]*len(heelY),
+                    s=[2]*len(heelY))
     axs[1, 1].set(xlabel="time (sec)", ylabel = "y-coordinate of Heel",
                 title = "Y Movement of Heel")
 
-    axs[1, 2].scatter(calibrate_data["time"], heelZ_list,
-                    c=["#808080"]*len(heelZ_list),
-                    s=[2]*len(heelZ_list))
+    axs[1, 2].scatter(time, heelZ,
+                    c=["#808080"]*len(heelZ),
+                    s=[2]*len(heelZ))
     axs[1, 2].set(xlabel="time (sec)", ylabel = "z-coordinate of Heel",
                 title = "Z Movement of Heel")
 
 #################################################################################################
-    
-    hipflex_data = ga.calibrate_flex(calibrate_data, "shoulder", "hip", "knee")
-    kneeflex_data = ga.calibrate_flex(calibrate_data, "hip", "knee", "ankle")
-    ankleflex_data = ga.calibrate_flex(calibrate_data, "knee", "ref_heel", "toe")
 
-    axs[2, 0].scatter(hipflex_data["time"], hipflex_data["flex_data"],
-                    c=["#808080"]*len(hipflex_data["flex_data"]),
-                    s=[2]*len(hipflex_data["flex_data"]))
+    axs[2, 0].scatter(hipflex["time"], hipflex["flex_data"],
+                    c=["#808080"]*len(hipflex["flex_data"]),
+                    s=[2]*len(hipflex["flex_data"]))
     axs[2, 0].set(xlabel="time (sec)", ylabel = "Hip Flex (Degree)",
                 title = "Hip Flex")
 
-    axs[2, 1].scatter(kneeflex_data["time"], kneeflex_data["flex_data"],
-                    c=["#808080"]*len(kneeflex_data["flex_data"]),
-                    s=[2]*len(kneeflex_data["flex_data"]))
+    axs[2, 1].scatter(kneeflex["time"], kneeflex["flex_data"],
+                    c=["#808080"]*len(kneeflex["flex_data"]),
+                    s=[2]*len(kneeflex["flex_data"]))
     axs[2, 1].set(xlabel="time (sec)", ylabel = "Knee Flex (Degree)",
                 title = "Knee Flex")
 
-    axs[2, 2].scatter(ankleflex_data["time"], ankleflex_data["flex_data"],
-                    c=["#808080"]*len(ankleflex_data["flex_data"]),
-                    s=[2]*len(ankleflex_data["flex_data"]))
+    axs[2, 2].scatter(ankleflex["time"], ankleflex["flex_data"],
+                    c=["#808080"]*len(ankleflex["flex_data"]),
+                    s=[2]*len(ankleflex["flex_data"]))
     axs[2, 2].set(xlabel="time (sec)", ylabel = "Ankle Flex (Degree)",
                 title = "Ankle Flex")  
-
-    offset_json = {
-        "cut_off": np.mean(heelY_list),
-        "hipflex": np.mean(hipflex_data["flex_data"]),
-        "kneeflex": np.mean(kneeflex_data["flex_data"]),
-        "ankleflex": np.mean(ankleflex_data["flex_data"])
-    }
 
     plt.show()
     print("Complete")
 
-    return offset_json
-
-def modified_gait(joint_data, new_jointdata, gait_jointdata):
+def get_gait(raw_data, joint_data, new_jointdata, gait_jointdata):
     fig, axs = plt.subplots(2, 2, constrained_layout = True)
     
+    for index in range(len(raw_data["ref_heel"])):
+        ref_list = []
+
+        for elem in raw_data["ref_heel"]:
+            ref_list.append(elem["y"])
+        
+        axs[0,0].plot(raw_data["time"], ref_list)
+
     #############################################################################################
     
     for index in range(len(joint_data["ref_heel"])):
@@ -87,7 +74,7 @@ def modified_gait(joint_data, new_jointdata, gait_jointdata):
         for elem in joint_data["ref_heel"][index]:
             ref_list.append(elem["y"])
         
-        axs[0,0].plot(joint_data["time"][index], ref_list)
+        axs[0,1].plot(joint_data["time"][index], ref_list)
     
     #############################################################################################
 
@@ -97,7 +84,7 @@ def modified_gait(joint_data, new_jointdata, gait_jointdata):
         for elem in new_jointdata["ref_heel"][index]:
             ref_list.append(elem["y"])
         
-        axs[0,1].plot(new_jointdata["time"][index], ref_list)
+        axs[1,0].plot(new_jointdata["time"][index], ref_list)
 
     #############################################################################################
 
@@ -107,7 +94,7 @@ def modified_gait(joint_data, new_jointdata, gait_jointdata):
         for elem in gait_jointdata["ref_heel"][index]:
             ref_list.append(elem["y"])
         
-        axs[1,0].plot(gait_jointdata["time"][index], ref_list)
+        axs[1,1].plot(gait_jointdata["time"][index], ref_list)
 
     #############################################################################################
 
@@ -118,7 +105,7 @@ def stats_result(joint_data, gait_jointdata, offset):
     
     hipflex_data = ga.get_flex(gait_jointdata, "shoulder", "hip", "knee")
     kneeflex_data = ga.get_flex(gait_jointdata, "hip", "knee", "ankle")
-    ankleflex_data = ga.get_flex(gait_jointdata, "knee", "ref_heel", "toe")
+    ankleflex_data = ga.get_flex(gait_jointdata, "knee", "ankle", "toe")
 
     heelX_x, heelX_y, heelX_polyfit = ga.polyfit_heel(gait_jointdata, "x", HEEL_DOF)
     heelY_x, heelY_y, heelY_polyfit = ga.polyfit_heel(gait_jointdata, "y", HEEL_DOF)
@@ -160,7 +147,7 @@ def stats_result(joint_data, gait_jointdata, offset):
 
         axs[0, 2].scatter(gait_jointdata["gait_cycle"][waveform], heelY_list,
                         s=[2 for i in range(len(heelY_list))])
-        axs[0, 2].set(xlabel = "time (sec)", ylabel = "y-coordinate of Heel",
+        axs[0, 2].set(xlabel = "Gait Cycle", ylabel = "y-coordinate of Heel",
                     title = "Scatterplot of Identified Gait Cycles")
 
         axs[1, 0].scatter(gait_jointdata["gait_cycle"][waveform], heelX_list,

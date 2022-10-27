@@ -67,12 +67,13 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
         mp_drawing.draw_landmarks(image,
                                 results.pose_landmarks,
                                 mp_pose.POSE_CONNECTIONS,
-                                mp_drawing.DrawingSpec(color=(245, 117, 66),
-                                                        thickness=2,
-                                                        circle_radius=2),
+                                mp_drawing.DrawingSpec(color=(245, 66, 230),
+                                                        thickness=0,
+                                                        circle_radius=0),
                                 mp_drawing.DrawingSpec(color=(245, 66, 230),
                                                         thickness=2,
-                                                        circle_radius=2))
+                                                        circle_radius=0)
+                                )
         try:
             camera_lm = results.pose_landmarks.landmark
             world_lm = results.pose_world_landmarks.landmark
@@ -109,7 +110,7 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
         else:
             pass
 
-offsetdata = walkE_plot.calibrate(calibrate_data)
+offsetdata = ga.calibrate(calibrate_data)
 gait_data = ga.get_gait(offsetdata["cut_off"], joint_data)
 
 walkE_plot.stats_result(joint_data, gait_data, offsetdata)

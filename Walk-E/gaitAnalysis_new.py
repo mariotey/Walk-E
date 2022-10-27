@@ -56,55 +56,9 @@ def get_lm(json, world_lm, start_time):
     json["toe"].append(format_lm("LEFT_FOOT_INDEX", world_lm))  # Toe Info
     json["time"].append(time.time() - start_time)  # Time Info
 
-def modify_raw(joint_data, unit_space):
-    new_jointdata = {
-        "ref_heel": [],
-        "shoulder": [],
-        "hip": [],
-        "knee": [],
-        "ankle": [],
-        "toe": [],
-        "time": []
-    }
-
-    # For each component of joint_data
-    for bodykey in joint_data:
-        if bodykey == "time":
-            for index in range(len(joint_data["ref_heel"])-1):
-                new_time = list(np.linspace(joint_data[bodykey][index],
-                                       joint_data[bodykey][index+1],
-                                       num=unit_space))
-
-                new_jointdata["time"] += new_time
-        else:
-            # For each data set of a component of joint_data
-            for index in range(len(joint_data[bodykey])-1):
-                # Create a new list of x,y and z_coord
-                new_x = list(np.linspace(joint_data[bodykey][index]["x"],
-                                    joint_data[bodykey][index+1]["x"],
-                                    num=unit_space))
-
-                new_y = list(np.linspace(joint_data[bodykey][index]["y"],
-                                    joint_data[bodykey][index+1]["y"],
-                                    num=unit_space))
-
-                new_z = list(np.linspace(joint_data[bodykey][index]["z"],
-                                    joint_data[bodykey][index+1]["z"],
-                                    num=unit_space))
-
-                # Append the new x,y and z_coord into new_join_data              
-                for index in range(len(new_x)):
-                    new_jointdata[bodykey].append({"x": new_x[index],
-                                                    "y": new_y[index],
-                                                    "z": new_z[index]})
-
-    print(len(new_jointdata["ref_heel"]), len(new_jointdata["shoulder"]), len(new_jointdata["hip"]), len(
-        new_jointdata["knee"]), len(new_jointdata["ankle"]), len(new_jointdata["toe"]), len(new_jointdata["time"]))
-        
-    return new_jointdata
 
 def get_gait(heel_baseline, joint_data):
-    cutoff_index, format_jointdata = [], modify_raw(joint_data, POINTS_SPACE)
+    cutoff_index, format_jointdata = [], joint_data
 
     # Identify cutoff points in data
     for elem in format_jointdata["ref_heel"]:

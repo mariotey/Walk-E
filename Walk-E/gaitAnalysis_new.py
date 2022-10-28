@@ -18,6 +18,8 @@ WEBCAM_RES = [640, 480]
 
 mp_pose = mp.solutions.pose  # Pose Estimation Model
 
+#################################################################################################
+
 def arraySortedOrNot(arr):
  
     # Calculating length
@@ -30,6 +32,8 @@ def arraySortedOrNot(arr):
  
     # Recursion applied till last element
     return arr[0] <= arr[1] and arraySortedOrNot(arr[1:])
+
+#################################################################################################
 
 def get_lm(json, world_lm, start_time):
     def format_lm(bodypart, world_landmarks):
@@ -56,9 +60,57 @@ def get_lm(json, world_lm, start_time):
     json["toe"].append(format_lm("LEFT_FOOT_INDEX", world_lm))  # Toe Info
     json["time"].append(time.time() - start_time)  # Time Info
 
+#################################################################################################
+
+def add_points(joint_data, unit_space):
+    new_jointdata = {
+        "ref_heel": [],
+        "shoulder": [],
+        "hip": [],
+        "knee": [],
+        "ankle": [],
+        "toe": [],
+        "time": []
+    }
+
+    # For each component of joint_data
+    for bodykey in joint_data:
+        if bodykey == "time":
+            for index in range(len(joint_data["ref_heel"])-1):
+                new_time = list(np.linspace(joint_data[bodykey][index],
+                                       joint_data[bodykey][index+1],
+                                       num=unit_space))
+
+                new_jointdata["time"] += new_time
+        else:
+            # For each data set of a component of joint_data
+            for index in range(len(joint_data[bodykey])-1):
+                # Create a new list of x,y and z_coord
+                new_x = list(np.linspace(joint_data[bodykey][index]["x"],
+                                    joint_data[bodykey][index+1]["x"],
+                                    num=unit_space))
+
+                new_y = list(np.linspace(joint_data[bodykey][index]["y"],
+                                    joint_data[bodykey][index+1]["y"],
+                                    num=unit_space))
+
+                new_z = list(np.linspace(joint_data[bodykey][index]["z"],
+                                    joint_data[bodykey][index+1]["z"],
+                                    num=unit_space))
+
+                # Append the new x,y and z_coord into new_join_data              
+                for index in range(len(new_x)):
+                    new_jointdata[bodykey].append({"x": new_x[index],
+                                                    "y": new_y[index],
+                                                    "z": new_z[index]})
+
+    print(len(new_jointdata["ref_heel"]), len(new_jointdata["shoulder"]), len(new_jointdata["hip"]), len(
+        new_jointdata["knee"]), len(new_jointdata["ankle"]), len(new_jointdata["toe"]), len(new_jointdata["time"]))
+        
+    return new_jointdata
 
 def get_gait(heel_baseline, joint_data):
-    cutoff_index, format_jointdata = [], joint_data
+    cutoff_index, format_jointdata = [], add_points(joint_data, POINTS_SPACE)
 
     # Identify cutoff points in data
     for elem in format_jointdata["ref_heel"]:
@@ -79,13 +131,13 @@ def get_gait(heel_baseline, joint_data):
     }
 
     try:
-        modified_joint["ref_heel"].append(format_jointdata["ref_heel"][cutoff_index[-1]::])
-        modified_joint["shoulder"].append(format_jointdata["ref_heel"][cutoff_index[-1]::])
-        modified_joint["hip"].append(format_jointdata["ref_heel"][cutoff_index[-1]::])
-        modified_joint["knee"].append(format_jointdata["ref_heel"][cutoff_index[-1]::])
-        modified_joint["ankle"].append(format_jointdata["ref_heel"][cutoff_index[-1]::])
-        modified_joint["toe"].append(format_jointdata["ref_heel"][cutoff_index[-1]::])
-        modified_joint["time"].append(format_jointdata["time"][cutoff_index[-1]::])
+        modified_joint["ref_heel"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
+        modified_joint["shoulder"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
+        modified_joint["hip"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
+        modified_joint["knee"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
+        modified_joint["ankle"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
+        modified_joint["toe"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
+        modified_joint["time"].append(format_jointdata["time"][cutoff_index[-1]:])
     except:
         pass
 
@@ -103,103 +155,99 @@ def get_gait(heel_baseline, joint_data):
     ##############################################################################################
 
     # Retrieve complete waveforms and remove wavelengths that are too long
-    combined_joint = {
-        "ref_heel": [],
-        "shoulder": [],
-        "hip": [],
-        "knee": [],
-        "ankle": [],
-        "toe": [],
-        "time": []
-    }
-
-    for wave in range(len(modified_joint["ref_heel"])):
-        first_wave = [modified_joint["ref_heel"][wave][data_index]["y"]
-                    for data_index in range(len(modified_joint["ref_heel"][wave]))]
-
-        if max(first_wave) > heel_baseline:
-            try:
-                if (modified_joint["time"][wave+1][-1] - modified_joint["time"][wave][0]) < MIN_STRIDETIME:
-                    combined_joint["ref_heel"].append(modified_joint["ref_heel"][wave] + modified_joint["ref_heel"][wave + 1])
-                    combined_joint["shoulder"].append(modified_joint["shoulder"][wave] + modified_joint["shoulder"][wave + 1])
-                    combined_joint["hip"].append(modified_joint["hip"][wave] + modified_joint["hip"][wave + 1])
-                    combined_joint["knee"].append(modified_joint["knee"][wave] + modified_joint["knee"][wave + 1])
-                    combined_joint["ankle"].append(modified_joint["ankle"][wave] + modified_joint["ankle"][wave + 1])
-                    combined_joint["toe"].append(modified_joint["toe"][wave] + modified_joint["toe"][wave + 1])
-                    combined_joint["time"].append(modified_joint["time"][wave] + modified_joint["time"][wave+1])
-            except:
-                pass
-    
-    ##############################################################################################
-
-    # Identify waveforms based on Max Points and remove wavelengths that are too long
     gait_joint = {
         "ref_heel": [],
         "shoulder": [],
         "hip": [],
         "knee": [],
         "ankle": [],
-        "time": [],
         "toe": [],
+        "time": [],
         "gait_cycle": []
     }
+    
+    ref_first = [modified_joint["ref_heel"][0][data_index]["y"]
+                        for data_index in range(len(modified_joint["ref_heel"][0]))]
+    
+    if max(ref_first) <= heel_baseline:
+        start_elem = 1
+    else:
+        start_elem = 0
 
-    for wave in range(len(combined_joint["ref_heel"])-1):
-        ref_list_first = [combined_joint["ref_heel"][wave][data_index]["y"]
-                        for data_index in range(len(combined_joint["ref_heel"][wave]))]
-        ref_list_sec = [combined_joint["ref_heel"][wave + 1][data_index]["y"]
-                        for data_index in range(len(combined_joint["ref_heel"][wave + 1]))]
+    for wave in range(start_elem, len(modified_joint["ref_heel"]),2):
+        try:
+            ref_list_first = [modified_joint["ref_heel"][wave][data_index]["y"]
+                        for data_index in range(len(modified_joint["ref_heel"][wave]))]
+            ref_list_third = [modified_joint["ref_heel"][wave + 2][data_index]["y"]
+                        for data_index in range(len(modified_joint["ref_heel"][wave + 2]))]
+            
+            max_first_index = ref_list_first.index(max(ref_list_first))
+            max_third_index = ref_list_third.index(max(ref_list_third))
 
-        max_first_index = ref_list_first.index(max(ref_list_first))
-        max_sec_index = ref_list_sec.index(max(ref_list_sec))
-
-        gait_joint["ref_heel"].append(combined_joint["ref_heel"][wave][max_first_index::] + combined_joint["ref_heel"][wave+1][0:max_sec_index])       
-        gait_joint["shoulder"].append(combined_joint["shoulder"][wave][max_first_index::] + combined_joint["shoulder"][wave+1][0:max_sec_index])
-        gait_joint["hip"].append(combined_joint["hip"][wave][max_first_index::] + combined_joint["hip"][wave+1][0:max_sec_index])
-        gait_joint["knee"].append(combined_joint["knee"][wave][max_first_index::] + combined_joint["knee"][wave+1][0:max_sec_index])
-        gait_joint["ankle"].append(combined_joint["ankle"][wave][max_first_index::] + combined_joint["ankle"][wave+1][0:max_sec_index])
-        gait_joint["toe"].append(combined_joint["toe"][wave][max_first_index::] + combined_joint["toe"][wave+1][0:max_sec_index])
-        
-        time_first = combined_joint["time"][wave][max_first_index::]
-        time_sec = combined_joint["time"][wave+1][0:max_sec_index]
-
-        if arraySortedOrNot(time_first + time_sec):
-            print("Yes")
-        else:
-            print("No")
-        
-        gait_joint["time"].append(time_first + time_sec)
+            gait_joint["ref_heel"].append(modified_joint["ref_heel"][wave][max_first_index:] + modified_joint["ref_heel"][wave + 1] + modified_joint["ref_heel"][wave + 2 ][:max_third_index])       
+            gait_joint["shoulder"].append(modified_joint["shoulder"][wave][max_first_index:] + modified_joint["shoulder"][wave + 1] + modified_joint["shoulder"][wave + 2][:max_third_index])
+            gait_joint["hip"].append(modified_joint["hip"][wave][max_first_index:] + modified_joint["hip"][wave + 1] + modified_joint["hip"][wave + 2][:max_third_index])
+            gait_joint["knee"].append(modified_joint["knee"][wave][max_first_index:] + modified_joint["knee"][wave + 1] + modified_joint["knee"][wave + 2][:max_third_index])
+            gait_joint["ankle"].append(modified_joint["ankle"][wave][max_first_index:] + modified_joint["ankle"][wave + 1] + modified_joint["ankle"][wave + 2][:max_third_index])
+            gait_joint["toe"].append(modified_joint["toe"][wave][max_first_index:] + modified_joint["toe"][wave + 1] + modified_joint["toe"][wave + 2][:max_third_index])
+            gait_joint["time"].append(modified_joint["time"][wave][max_first_index:] + modified_joint["time"][wave + 1] + modified_joint["time"][wave + 2][:max_third_index])
+            
+        except:
+            pass
 
     for time in gait_joint["time"]:
         gait_joint["gait_cycle"].append(walkE_math.normalize_gait(time))
     
     ##############################################################################################
+
+    # Identify waveforms based on Max Points and remove wavelengths that are too long
+    # gait_joint = {
+    #     "ref_heel": [],
+    #     "shoulder": [],
+    #     "hip": [],
+    #     "knee": [],
+    #     "ankle": [],
+    #     "time": [],
+    #     "toe": [],
+    #     "gait_cycle": []
+    # }
+
+    # for wave in range(len(combined_joint["ref_heel"])-1):
+    #     ref_list_first = [combined_joint["ref_heel"][wave][data_index]["y"]
+    #                     for data_index in range(len(combined_joint["ref_heel"][wave]))]
+    #     ref_list_sec = [combined_joint["ref_heel"][wave + 1][data_index]["y"]
+    #                     for data_index in range(len(combined_joint["ref_heel"][wave + 1]))]
+
+    #     max_first_index = ref_list_first.index(max(ref_list_first))
+    #     max_sec_index = ref_list_sec.index(max(ref_list_sec))
+
+    #     gait_joint["ref_heel"].append(combined_joint["ref_heel"][wave][max_first_index::] + combined_joint["ref_heel"][wave+1][0:max_sec_index])       
+    #     gait_joint["shoulder"].append(combined_joint["shoulder"][wave][max_first_index::] + combined_joint["shoulder"][wave+1][0:max_sec_index])
+    #     gait_joint["hip"].append(combined_joint["hip"][wave][max_first_index::] + combined_joint["hip"][wave+1][0:max_sec_index])
+    #     gait_joint["knee"].append(combined_joint["knee"][wave][max_first_index::] + combined_joint["knee"][wave+1][0:max_sec_index])
+    #     gait_joint["ankle"].append(combined_joint["ankle"][wave][max_first_index::] + combined_joint["ankle"][wave+1][0:max_sec_index])
+    #     gait_joint["toe"].append(combined_joint["toe"][wave][max_first_index::] + combined_joint["toe"][wave+1][0:max_sec_index])
+        
+    #     time_first = combined_joint["time"][wave][max_first_index::]
+    #     time_sec = combined_joint["time"][wave+1][0:max_sec_index]
+
+    #     if arraySortedOrNot(time_first + time_sec):
+    #         print("Yes")
+    #     else:
+    #         print("No")
+        
+    #     gait_joint["time"].append(time_first + time_sec)
+
+    # for time in gait_joint["time"]:
+    #     gait_joint["gait_cycle"].append(walkE_math.normalize_gait(time))
     
-    walkE_plot.get_gait(joint_data, modified_joint, combined_joint, gait_joint)
+    ##############################################################################################
+    
+    walkE_plot.get_gait(joint_data, modified_joint, gait_joint)
 
     return gait_joint   
 
-def get_flex(joint_data, first, sec, third):
-    flex_data = {
-        "flex_data": [],
-        "gait_cycle": []
-    }
-
-    for wave in range(len(joint_data[first])):
-        flex_list, gait_list = [], []
-
-        for data in range(len(joint_data[first][wave])):
-            first_pt = joint_data[first][wave][data]
-            sec_pt = joint_data[sec][wave][data]
-            third_pt = joint_data[third][wave][data]
-
-            flex_list.append(180 - walkE_math.cal_threeD_angle(first_pt, sec_pt, third_pt))
-            gait_list.append(joint_data["gait_cycle"][wave][data])
-
-        flex_data["flex_data"].append(flex_list)
-        flex_data["gait_cycle"].append(gait_list)
-
-    return flex_data
+#################################################################################################
 
 def calibrate_flex(joint_data, first, sec, third):
     flex_data = {
@@ -221,6 +269,36 @@ def calibrate_flex(joint_data, first, sec, third):
         flex_data["time"].append(time_list)
 
     return flex_data
+
+def calibrate(calibrate_data):        
+    ref_list = []
+    for elem in calibrate_data["ref_heel"]:
+        ref_list.append(elem["y"])
+
+    heelX_list = [data_point["x"] for data_point in calibrate_data["ref_heel"]]
+    heelY_list = [data_point["y"] for data_point in calibrate_data["ref_heel"]]
+    heelZ_list = [data_point["z"] for data_point in calibrate_data["ref_heel"]]
+    
+    hipflex_data = calibrate_flex(calibrate_data, "shoulder", "hip", "knee")
+    kneeflex_data = calibrate_flex(calibrate_data, "hip", "knee", "ankle")
+    ankleflex_data = calibrate_flex(calibrate_data, "knee", "ref_heel", "toe")
+
+    walkE_plot.calibrate(ref_list, heelX_list, heelY_list, heelZ_list, 
+                        hipflex_data, kneeflex_data, ankleflex_data,
+                        calibrate_data["time"])
+
+    offset_json = {
+        "cut_off": np.mean(heelY_list),
+        "hipflex": np.mean(hipflex_data["flex_data"]),
+        "kneeflex": np.mean(kneeflex_data["flex_data"]),
+        "ankleflex": np.mean(ankleflex_data["flex_data"])
+    }
+
+    print("Complete")
+
+    return offset_json
+
+#################################################################################################
 
 def polyfit_heel(joint_data, axis, dof):
     x, y = [], []
@@ -256,36 +334,30 @@ def polyfit_flex(joint_data, dof):
     
     return x, new_y, poly
 
+#################################################################################################
 
-def calibrate(calibrate_data):        
-    ref_list = []
-    for elem in calibrate_data["ref_heel"]:
-        ref_list.append(elem["y"])
-
-    heelX_list = [data_point["x"] for data_point in calibrate_data["ref_heel"]]
-    heelY_list = [data_point["y"] for data_point in calibrate_data["ref_heel"]]
-    heelZ_list = [data_point["z"] for data_point in calibrate_data["ref_heel"]]
-    
-    hipflex_data = calibrate_flex(calibrate_data, "shoulder", "hip", "knee")
-    kneeflex_data = calibrate_flex(calibrate_data, "hip", "knee", "ankle")
-    ankleflex_data = calibrate_flex(calibrate_data, "knee", "ref_heel", "toe")
-
-    walkE_plot.calibrate(ref_list, heelX_list, heelY_list, heelZ_list, 
-                        hipflex_data, kneeflex_data, ankleflex_data,
-                        calibrate_data["time"])
-
-    offset_json = {
-        "cut_off": np.mean(heelY_list),
-        "hipflex": np.mean(hipflex_data["flex_data"]),
-        "kneeflex": np.mean(kneeflex_data["flex_data"]),
-        "ankleflex": np.mean(ankleflex_data["flex_data"])
+def get_flex(joint_data, first, sec, third):
+    flex_data = {
+        "flex_data": [],
+        "gait_cycle": []
     }
 
-    print("Complete")
+    for wave in range(len(joint_data[first])):
+        flex_list, gait_list = [], []
 
-    return offset_json
+        for data in range(len(joint_data[first][wave])):
+            first_pt = joint_data[first][wave][data]
+            sec_pt = joint_data[sec][wave][data]
+            third_pt = joint_data[third][wave][data]
 
+            flex_list.append(180 - walkE_math.cal_threeD_angle(first_pt, sec_pt, third_pt))
+            gait_list.append(joint_data["gait_cycle"][wave][data])
 
+        flex_data["flex_data"].append(flex_list)
+        flex_data["gait_cycle"].append(gait_list)
 
+    return flex_data
+
+#################################################################################################
 
 #  .\venv\Scripts\python.exe -m pylint .\Walk-E\gaitAnalysis.py

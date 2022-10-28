@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
-import gaitAnalysis as ga
+import gaitAnalysis_new as ga
 import numpy as np
+from scipy import optimize
 
 HEEL_DOF = 5
 HIPFLEX_DOF = 5
@@ -55,7 +56,9 @@ def calibrate(ref_list, heelX, heelY, heelZ, hipflex, kneeflex, ankleflex, time)
     plt.show()
     print("Complete")
 
-def get_gait(raw_data, joint_data, new_jointdata, gait_jointdata):
+#################################################################################################
+
+def get_gait(raw_data, joint_data, new_jointdata):
     fig, axs = plt.subplots(2, 2, constrained_layout = True)
     
     for index in range(len(raw_data["ref_heel"])):
@@ -65,6 +68,10 @@ def get_gait(raw_data, joint_data, new_jointdata, gait_jointdata):
             ref_list.append(elem["y"])
         
         axs[0,0].plot(raw_data["time"], ref_list)
+    
+    axs[0, 0].set(xlabel = "time (sec)", ylabel = "y-coordinate of heel",
+                title = "Raw Data")
+
 
     #############################################################################################
     
@@ -76,6 +83,9 @@ def get_gait(raw_data, joint_data, new_jointdata, gait_jointdata):
         
         axs[0,1].plot(joint_data["time"][index], ref_list)
     
+    axs[0, 1].set(xlabel = "time (sec)", ylabel = "y-coordinate of heel",
+                title = "Upper & Lower Sinewaves of Heel")
+    
     #############################################################################################
 
     for index in range(len(new_jointdata["ref_heel"])):
@@ -85,21 +95,44 @@ def get_gait(raw_data, joint_data, new_jointdata, gait_jointdata):
             ref_list.append(elem["y"])
         
         axs[1,0].plot(new_jointdata["time"][index], ref_list)
+    
+    axs[1, 0].set(xlabel = "time (sec)", ylabel = "y-coordinate of heel",
+                title = "Gait Waveform of Heel")
 
     #############################################################################################
 
-    for index in range(len(gait_jointdata["ref_heel"])):
-        ref_list = []
-
-        for elem in gait_jointdata["ref_heel"][index]:
-            ref_list.append(elem["y"])
+    for wave in range(len(new_jointdata["ref_heel"])):
+        x = [new_jointdata["time"][wave][index]
+                     for index in range(len(new_jointdata["time"][wave]))]
+        y = [new_jointdata["ref_heel"][wave][index]["y"]
+                    for index in range(len(new_jointdata["ref_heel"][wave]))]
         
-        axs[1,1].plot(gait_jointdata["time"][index], ref_list)
+        axs[1,1].scatter(x,y,
+                c=["#808080"]*len(y),
+                s=[2]*len(y))
 
-    #############################################################################################
+        # def test_func(x,a,b):
+        #     return a* np.sin(b*x)
+
+        # params, params_covar = optimize.curve_fit(test_func, x, y)
+
+        curve = np.polyfit(x, y, 4)
+        poly = np.poly1d(curve)
+
+        x.sort()
+        
+        # new_y = [test_func(elem, params[0], params[1]) for elem in x]
+        new_y = [poly(data) for data in x]
+        
+        axs[1,1].plot(x, new_y)
+    
+    axs[1, 1].set(xlabel = "time (sec)", ylabel = "y-coordinate of heel",
+                title = "Best Fit Curve Waveform of Heel")
 
     plt.show()
     print("Complete")
+
+#################################################################################################
 
 def stats_result(joint_data, gait_jointdata, offset):
     
@@ -196,4 +229,6 @@ def stats_result(joint_data, gait_jointdata, offset):
 
     plt.show()
     print("Complete")
+
+#################################################################################################
  

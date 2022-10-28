@@ -3,7 +3,7 @@ import cv2
 import mediapipe as mp
 
 import dist
-import gaitAnalysis as ga
+import gaitAnalysis_new as ga
 import walkE_plot
 
 WAIT_TIME = 5

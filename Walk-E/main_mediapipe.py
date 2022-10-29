@@ -114,6 +114,7 @@ offsetdata = ga.calibrate(calibrate_data)
 gait_data = ga.get_gait(offsetdata["cut_off"], joint_data)
 
 walkE_plot.stats_result(joint_data, gait_data, offsetdata)
+walkE_plot.stats(joint_data, gait_data, offsetdata)
 
 ###################################################################################################
 

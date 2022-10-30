@@ -53,18 +53,20 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
 
         # Recolour Image feed (from openCV) from BGR to RGB
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
         # Save memory by setting writeable attribute as false; improves performance
         image.flags.writeable = False
 
         # Pass recoloured image feed to Pose Estimation model for processing
         results = pose.process(image)
-
         image.flags.writeable = True
+
         # Recolour Image back to BGR for openCV to process, Make Detection
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        noimage = cv2.cvtColor(cv2.imread(r"C:\Users\Tey Ming Chuan\OneDrive - National University of Singapore\Desktop\BN4101\Walk-E\Walk-E\static\img\Black.png"), cv2.COLOR_RGB2BGR)
 
-        # Draw Pose Estimation landmarks
-        mp_drawing.draw_landmarks(image,
+        # Draw Pose Estimation landmarks                                       
+        mp_drawing.draw_landmarks(noimage,
                                 results.pose_landmarks,
                                 mp_pose.POSE_CONNECTIONS,
                                 mp_drawing.DrawingSpec(color=(245, 66, 230),
@@ -74,6 +76,7 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
                                                         thickness=2,
                                                         circle_radius=0)
                                 )
+
         try:
             camera_lm = results.pose_landmarks.landmark
             world_lm = results.pose_world_landmarks.landmark
@@ -91,6 +94,7 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
             pass  # Pass if there is no detection or error   
          
         cv2.imshow("Mediapipe Feed", image)  # Render image result on screen
+        cv2.imshow("Mediapipe Feed (No Image)", noimage)  # Render image result on screen
 
         # TBC when integrated with Walk-E
         if cv2.waitKey(WAIT_TIME) & 0xFF == ord("q"):

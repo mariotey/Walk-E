@@ -1,6 +1,7 @@
 import time
 import cv2
 import mediapipe as mp
+import os
 
 import dist
 import gaitAnalysis_new as ga
@@ -63,7 +64,9 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
 
         # Recolour Image back to BGR for openCV to process, Make Detection
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        noimage = cv2.cvtColor(cv2.imread(r"C:\Users\Tey Ming Chuan\OneDrive - National University of Singapore\Desktop\BN4101\Walk-E\Walk-E\static\img\Black.png"), cv2.COLOR_RGB2BGR)
+        
+        image_path = os.getcwd() + "\Walk-E\static\img\Black.png"
+        noimage = cv2.cvtColor(cv2.imread(image_path), cv2.COLOR_RGB2BGR)
 
         # Draw Pose Estimation landmarks                                       
         mp_drawing.draw_landmarks(noimage,

@@ -4,7 +4,7 @@ import mediapipe as mp
 import os
 
 import dist
-import gaitAnalysis_new as ga
+import gaitAnalysis as ga
 import walkE_plot
 
 WAIT_TIME = 5
@@ -120,7 +120,6 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
 offsetdata = ga.calibrate(calibrate_data)
 gait_data = ga.get_gait(offsetdata["cut_off"], joint_data)
 
-walkE_plot.stats_result(joint_data, gait_data, offsetdata)
 walkE_plot.stats(joint_data, gait_data, offsetdata)
 
 ###################################################################################################

@@ -20,11 +20,6 @@ MAX_MSE = 100
 MAX_ITR = 10
 WINLEN_PER = 1
 
-HEEL_DOF = 5
-HIPFLEX_DOF = 4
-KNEEFLEX_DOF = 7
-ANKLEFLEX_DOF = 7
-
 WEBCAM_RES = [640, 480]
 
 mp_pose = mp.solutions.pose  # Pose Estimation Model

@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import gaitAnalysis as ga
 import numpy as np
-from matplotlib.widgets import Slider
 
 HEEL_DOF = 5
 HIPFLEX_DOF = 4

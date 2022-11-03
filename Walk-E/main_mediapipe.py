@@ -120,7 +120,7 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
 offsetdata = ga.calibrate(calibrate_data)
 gait_data = ga.get_gait(offsetdata["cut_off"], joint_data)
 
-walkE_plot.stats(joint_data, gait_data, offsetdata)
+stats_data = ga.stats(joint_data, gait_data, offsetdata)
 
 ###################################################################################################
 

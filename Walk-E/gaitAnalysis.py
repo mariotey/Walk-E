@@ -4,6 +4,8 @@ import mediapipe as mp
 import walkE_math
 import walkE_plot
 import time 
+from scipy.signal import savgol_filter
+from sklearn.metrics import mean_squared_error as mse
 
 FONT_STYLE = cv2.FONT_HERSHEY_SIMPLEX
 FONT_SCALE = 0.5
@@ -13,6 +15,10 @@ LINE_TYPE = cv2.LINE_AA
 MIN_CHUNKSIZE = 3
 MIN_STRIDETIME = 2
 POINTS_SPACE = 20
+
+MAX_MSE = 100
+MAX_ITR = 10
+WINLEN_PER = 1
 
 WEBCAM_RES = [640, 480]
 
@@ -256,105 +262,115 @@ def get_gait(heel_baseline, raw_joint):
     return gait_joint   
 
 #################################################################################################
+def digi_filter(y):
+    """
+    Applies Savitzky-Golay filter
+    """
+    win_len = int(len(y) * WINLEN_PER)
 
-def get_flex(joint_data, first, sec, third):
-    flex_data = {
-        "flex_data": [],
-        "gait_cycle": []
-    }
+    if win_len % 2 == 1:
+        win_len = win_len
+    else:
+        win_len = win_len - 1
 
-    for wave in range(len(joint_data[first])):
-        flex_list, gait_list = [], []
+    dof, mean_square = 0, MAX_MSE
 
-        for data in range(len(joint_data[first][wave])):
-            first_pt = joint_data[first][wave][data]
-            sec_pt = joint_data[sec][wave][data]
-            third_pt = joint_data[third][wave][data]
+    for dof_itera in range(1, MAX_ITR):
+        try:
+            filtered_y = list(savgol_filter(y, win_len, dof_itera))
+            
+            msq = mse(y, filtered_y) 
 
-            flex_list.append(180 - walkE_math.cal_threeD_angle(first_pt, sec_pt, third_pt))
-            gait_list.append(joint_data["gait_cycle"][wave][data])
+            if msq < mean_square:
+                mean_square = msq
+                dof = dof_itera
 
-        flex_data["flex_data"].append(flex_list)
-        flex_data["gait_cycle"].append(gait_list)
+        except:
+            pass
 
-    return flex_data
+    return list(savgol_filter(y, win_len, dof))
 
-def polyfit_heel(joint_data, axis, dof):
-    x, y = [], []
-
-    for wave in range(len(joint_data["ref_heel"])):
-        x += [joint_data["gait_cycle"][wave][index]
-                     for index in range(len(joint_data["gait_cycle"][wave]))]
-        y += [joint_data["ref_heel"][wave][index][axis]
-                    for index in range(len(joint_data["ref_heel"][wave]))]
-
-    curve = np.polyfit(x, y, dof)
-    poly = np.poly1d(curve)
-
-    x.sort()
-    new_y = [poly(data) for data in x]
-
-    return x, new_y
-
-def polyfit_flex(joint_data, dof):
-    x, y = [], []
-
-    for wave in range(len(joint_data["flex_data"])):
-        x += [joint_data["gait_cycle"][wave][index]
-                     for index in range(len(joint_data["gait_cycle"][wave]))]
-        y += [joint_data["flex_data"][wave][index]
-                     for index in range(len(joint_data["flex_data"][wave]))]
-           
-    curve = np.polyfit(x, y, dof)
-    poly = np.poly1d(curve)
-
-    x.sort()
-    new_y = [poly(data) for data in x]
-    
-    return x, new_y
-
-#################################################################################################
-
-def poly_heel(gait_data, waveform, axis, dof):
-    x, y = [], []
+def poly_heel(gait_data, waveform, axis):
+    x, y, mse_dof, mean_square = [], [], 0, MAX_MSE
 
     x += [gait_data["gait_cycle"][waveform][index]
                 for index in range(len(gait_data["gait_cycle"][waveform]))]
     y += [gait_data["ref_heel"][waveform][index][axis]
                 for index in range(len(gait_data["ref_heel"][waveform]))]
 
-    curve = np.polyfit(x, y, dof)
-    poly = np.poly1d(curve)
+    def poly_fit(x,y,dof):
+        curve = np.polyfit(x, y, dof)
+        poly = np.poly1d(curve)
 
-    x.sort()
-    new_y = [poly(data) for data in x]
+        new_x = x
+        new_x.sort()
 
-    return x, new_y, y
-
-def poly_flex(gait_data, waveform, first, sec, third, dof):
-    flex_list = []
-
-    for data in range(len(gait_data[first][waveform])):
-        first_pt = gait_data[first][waveform][data]
-        sec_pt = gait_data[sec][waveform][data]
-        third_pt = gait_data[third][waveform][data]
-
-        flex_list.append(180 - walkE_math.cal_threeD_angle(first_pt, sec_pt, third_pt)) 
-
-    x = []
-
-    x += [gait_data["gait_cycle"][waveform][index]
-                for index in range(len(gait_data["gait_cycle"][waveform]))]
-           
-    curve = np.polyfit(x, flex_list, dof)
-    poly = np.poly1d(curve)
-
-    x.sort()
-    new_y = [poly(data) for data in x]
+        return new_x, [poly(data) for data in new_x]
     
-    return x, new_y, flex_list
+    for dof_itera in range(1, MAX_ITR):
+        try:
+            msq = mse(y, poly_fit(x,y,dof_itera)[1]) 
 
-def poly_poly(json, dof):
+            if msq < mean_square:
+                mean_square = msq
+                mse_dof = dof_itera
+
+        except:
+            pass
+    
+    new_x, new_y = poly_fit(x,y,mse_dof)
+
+    return new_x, new_y, y
+
+# def get_flex(gait_data, waveform, first, secnd, third):
+#     x, y = [], []
+
+#     for index in range(len(gait_data[first][waveform])):
+#         first_pt = gait_data[first][waveform][index]
+#         secnd_pt = gait_data[secnd][waveform][index]
+#         third_pt = gait_data[third][waveform][index]
+
+#         x.append(gait_data["gait_cycle"][waveform][index])
+#         y.append(180 - walkE_math.cal_threeD_angle(first_pt, secnd_pt, third_pt)) 
+    
+#     return x, digi_filter(y), y
+
+def get_flex(gait_data, waveform, first, secnd, third):
+    x, y, mse_dof, mean_square = [], [], 0, MAX_MSE
+
+    for index in range(len(gait_data[first][waveform])):
+        first_pt = gait_data[first][waveform][index]
+        secnd_pt = gait_data[secnd][waveform][index]
+        third_pt = gait_data[third][waveform][index]
+
+        x.append(gait_data["gait_cycle"][waveform][index])
+        y.append(180 - walkE_math.cal_threeD_angle(first_pt, secnd_pt, third_pt)) 
+    
+    def poly_fit(x,y,dof):
+        curve = np.polyfit(x, y, dof)
+        poly = np.poly1d(curve)
+
+        new_x = x
+        new_x.sort()
+
+        return new_x, [poly(data) for data in new_x]
+    
+    for dof_itera in range(1, MAX_ITR):
+        try:
+            msq = mse(y, poly_fit(x,y,dof_itera)[1]) 
+
+            if msq < mean_square:
+                mean_square = msq
+                mse_dof = dof_itera
+
+        except:
+            pass
+    
+    new_x, new_y = poly_fit(x,y,mse_dof)
+
+    return new_x, new_y, y
+
+def best_fit(json, dof):
     x, y = json["x"], json["y"]
     
     curve = np.polyfit(x, y, dof)
@@ -364,5 +380,6 @@ def poly_poly(json, dof):
     new_y = [poly(data) for data in x]
     
     return x, new_y
+
 #################################################################################################
 #  .\venv\Scripts\python.exe -m pylint .\Walk-E\gaitAnalysis.py

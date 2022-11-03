@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
 import gaitAnalysis as ga
 import numpy as np
+from matplotlib.widgets import Slider
 
 HEEL_DOF = 5
-HIPFLEX_DOF = 5
-KNEEFLEX_DOF = 10
-ANKLEFLEX_DOF = 10
+HIPFLEX_DOF = 4
+KNEEFLEX_DOF = 7
+ANKLEFLEX_DOF = 7
 
 def calibrate(ref_list, heelX, heelY, heelZ, hipflex, kneeflex, ankleflex, time):    
     fig, axs = plt.subplots(3, 3, constrained_layout = True)
@@ -93,7 +94,7 @@ def get_gait(raw_data, joint_data, new_jointdata):
         for elem in new_jointdata["ref_heel"][index]:
             ref_list.append(elem["y"])
         
-        axs[1,0].plot(new_jointdata["time"][index], ref_list)
+        axs[1, 0].plot(new_jointdata["time"][index], ref_list)
     
     axs[1, 0].set(xlabel = "time (sec)", ylabel = "y-coordinate of heel",
                 title = "Gait Waveform of Heel")
@@ -106,14 +107,9 @@ def get_gait(raw_data, joint_data, new_jointdata):
         y = [new_jointdata["ref_heel"][wave][index]["y"]
                     for index in range(len(new_jointdata["ref_heel"][wave]))]
         
-        axs[1,1].scatter(x,y,
+        axs[1, 1].scatter(x,y,
                 c=["#808080"]*len(y),
                 s=[2]*len(y))
-
-        # def test_func(x,a,b):
-        #     return a* np.sin(b*x)
-
-        # params, params_covar = optimize.curve_fit(test_func, x, y)
 
         curve = np.polyfit(x, y, 4)
         poly = np.poly1d(curve)
@@ -142,7 +138,7 @@ def stats(raw_data, gait_data, offset):
 
     gaitCycle_list, superGaitCycle_list = {"x": [], "y": []}, {"x": [], "y": []}
     heelX_list, heelY_list, heelZ_list = {"x": [], "y": []}, {"x": [], "y": []}, {"x": [], "y": []}
-    hipflex_list, kneeflex_list, ankle_list = {"x": [], "y": []}, {"x": [], "y": []}, {"x": [], "y": []}
+    hipflex_list, kneeflex_list, ankleflex_list = {"x": [], "y": []}, {"x": [], "y": []}, {"x": [], "y": []}
     
     for wave in range(len(gait_data["ref_heel"])):
         #########################################################################################
@@ -170,7 +166,7 @@ def stats(raw_data, gait_data, offset):
                         c=["#808080"]*len(superGaitCycle["y"]),
                         s=[2]*len(superGaitCycle["y"]))
         
-        poly_x, poly_y = ga.poly_poly(superGaitCycle, HEEL_DOF)
+        poly_x, poly_y = ga.best_fit(superGaitCycle, HEEL_DOF)
         axs[0, 2].plot(poly_x, poly_y)
 
         superGaitCycle_list["x"] += superGaitCycle["x"]
@@ -178,23 +174,23 @@ def stats(raw_data, gait_data, offset):
 
         #########################################################################################
 
-        heelX_x, heelX_y, old_heelX_y = ga.poly_heel(gait_data, wave, "x", HEEL_DOF)
-        heelY_x, heelY_y, old_heelY_y = ga.poly_heel(gait_data, wave, "y", HEEL_DOF)
-        heelZ_x, heelZ_y, old_heelZ_y = ga.poly_heel(gait_data, wave, "z", HEEL_DOF)
+        heelX_x, heelX_y, old_heelX_y = ga.poly_heel(gait_data, wave, "x")
+        heelY_x, heelY_y, old_heelY_y = ga.poly_heel(gait_data, wave, "y")
+        heelZ_x, heelZ_y, old_heelZ_y = ga.poly_heel(gait_data, wave, "z")
         
-        axs[1, 0].scatter(heelX_x, old_heelX_y,
-                    c=["#808080"]*len(old_heelX_y),
-                    s=[2]*len(old_heelX_y))
-        axs[1, 1].scatter(heelY_x, old_heelY_y,
-                    c=["#808080"]*len(old_heelY_y),
-                    s=[2]*len(old_heelY_y))
-        axs[1, 2].scatter(heelZ_x, old_heelZ_y,
-                    c=["#808080"]*len(old_heelZ_y),
-                    s=[2]*len(old_heelZ_y))
+        # axs[1, 0].scatter(heelX_x, old_heelX_y,
+        #             c=["#FF0000"]*len(old_heelX_y),
+        #             s=[2]*len(old_heelX_y))
+        # axs[1, 1].scatter(heelY_x, old_heelY_y,
+        #             c=["#FF0000"]*len(old_heelY_y),
+        #             s=[2]*len(old_heelY_y))
+        # axs[1, 2].scatter(heelZ_x, old_heelZ_y,
+        #             c=["#FF0000"]*len(old_heelZ_y),
+        #             s=[2]*len(old_heelZ_y))
         
-        # axs[1, 0].plot(heelX_x, heelX_y, "k")
-        # axs[1, 1].plot(heelY_x, heelY_y, "k")
-        # axs[1, 2].plot(heelZ_x, heelZ_y, "k")
+        axs[1, 0].plot(heelX_x, heelX_y, color = "gray")
+        axs[1, 1].plot(heelY_x, heelY_y, color = "gray")
+        axs[1, 2].plot(heelZ_x, heelZ_y, color = "gray")
 
         heelX_list["x"] += heelX_x
         heelX_list["y"] += heelX_y
@@ -205,40 +201,40 @@ def stats(raw_data, gait_data, offset):
 
         #########################################################################################
 
-        hipflex_x, hipflex_y, old_hipflex_y = ga.poly_flex(gait_data, wave, "shoulder", "hip", "knee", HIPFLEX_DOF)
-        kneeflex_x, kneeflex_y, old_kneeflex_y= ga.poly_flex(gait_data, wave, "hip", "knee", "ankle", KNEEFLEX_DOF)
-        ankleflex_x, ankleflex_y, old_ankleflex_y = ga.poly_flex(gait_data, wave, "knee", "ankle", "toe", ANKLEFLEX_DOF)
+        hipflex_x, hipflex_y, old_hipflex_y = ga.get_flex(gait_data, wave, "shoulder", "hip", "knee")
+        kneeflex_x, kneeflex_y, old_kneeflex_y= ga.get_flex(gait_data, wave, "hip", "knee", "ankle")
+        ankleflex_x, ankleflex_y, old_ankleflex_y = ga.get_flex(gait_data, wave, "knee", "ankle", "toe")
 
-        axs[2, 0].scatter(hipflex_x, np.array(old_hipflex_y) - offset["hipflex"],
-                    c=["#808080"]*len(old_hipflex_y),
-                    s=[2]*len(old_hipflex_y))
-        axs[2, 1].scatter(kneeflex_x, np. array(old_kneeflex_y) - offset["kneeflex"],
-                    c=["#808080"]*len(old_kneeflex_y),
-                    s=[2]*len(old_kneeflex_y))
-        axs[2, 2].scatter(ankleflex_x, np.array(old_ankleflex_y) - offset["ankleflex"],
-                    c=["#808080"]*len(old_ankleflex_y),
-                    s=[2]*len(old_ankleflex_y))
-        
-        # axs[2, 0].plot(hipflex_x, np.array(hipflex_y) - offset["hipflex"], "k")
-        # axs[2, 1].plot(kneeflex_x, np.array(kneeflex_y) - offset["kneeflex"], "k")
-        # axs[2, 2].plot(ankleflex_x, np.array(ankleflex_y) - offset["ankleflex"], "k")    
+        # axs[2, 0].scatter(hipflex_x, np.array(old_hipflex_y) - offset["hipflex"],
+        #             c=["#FF0000"]*len(old_hipflex_y),
+        #             s=[2]*len(old_hipflex_y))
+        # axs[2, 1].scatter(kneeflex_x, np. array(old_kneeflex_y) - offset["kneeflex"],
+        #             c=["#FF0000"]*len(old_kneeflex_y),
+        #             s=[2]*len(old_kneeflex_y))
+        # axs[2, 2].scatter(ankleflex_x, np.array(old_ankleflex_y) - offset["ankleflex"],
+        #             c=["#FF0000"]*len(old_ankleflex_y),
+        #             s=[2]*len(old_ankleflex_y)) 
+
+        axs[2, 0].plot(hipflex_x, np.array(hipflex_y) - offset["hipflex"], color = "gray")
+        axs[2, 1].plot(kneeflex_x, np.array(kneeflex_y) - offset["kneeflex"], color = "gray")
+        axs[2, 2].plot(ankleflex_x, np.array(ankleflex_y) - offset["ankleflex"], color = "gray")
 
         hipflex_list["x"] += hipflex_x
         hipflex_list["y"] += hipflex_y
         kneeflex_list["x"] += kneeflex_x
         kneeflex_list["y"] += kneeflex_y
-        ankle_list["x"] += ankleflex_x
-        ankle_list["y"] += ankleflex_y
+        ankleflex_list["x"] += ankleflex_x
+        ankleflex_list["y"] += ankleflex_y
         
         #########################################################################################
 
-    poly_heelX_x, poly_heelX_y = ga.poly_poly(heelX_list, HEEL_DOF)
-    poly_heelY_x, poly_heelY_y = ga.poly_poly(heelY_list, HEEL_DOF)
-    poly_heelZ_x, poly_heelZ_y = ga.poly_poly(heelZ_list, HEEL_DOF)
+    poly_heelX_x, poly_heelX_y = ga.best_fit(heelX_list, HEEL_DOF)
+    poly_heelY_x, poly_heelY_y = ga.best_fit(heelY_list, HEEL_DOF)
+    poly_heelZ_x, poly_heelZ_y = ga.best_fit(heelZ_list, HEEL_DOF)
 
-    poly_hipflex_x, poly_hipflex_y = ga.poly_poly(hipflex_list, HIPFLEX_DOF)
-    poly_kneeflex_x, poly_kneeflex_y = ga.poly_poly(kneeflex_list, KNEEFLEX_DOF)
-    poly_ankleflex_x, poly_ankleflex_y = ga.poly_poly(ankle_list, ANKLEFLEX_DOF)
+    poly_hipflex_x, poly_hipflex_y = ga.best_fit(hipflex_list, HIPFLEX_DOF)
+    poly_kneeflex_x, poly_kneeflex_y = ga.best_fit(kneeflex_list, KNEEFLEX_DOF)
+    poly_ankleflex_x, poly_ankleflex_y = ga.best_fit(ankleflex_list, ANKLEFLEX_DOF)
     
     axs[0, 1].set(xlabel = "time (sec)", ylabel = "y-coordinate of Heel", 
                     title= "Segregation of Gait Cycle")
@@ -268,7 +264,7 @@ def stats(raw_data, gait_data, offset):
 
     axs[2, 2].plot(poly_ankleflex_x, np.array(poly_ankleflex_y) - offset["ankleflex"], "r")
     axs[2, 2].set(xlabel="Gait Cycle", ylabel = "Ankle Flex (Degree)",
-                title = "Best Fit Curve of Ankle Flex")
+                title = "Best Fit Curve of Ankle Flex")  
 
     plt.show()
     print("Complete")

@@ -295,15 +295,11 @@ def digi_filter(y):
 
     return list(savgol_filter(y, win_len, dof))
 
-def poly_heel(gait_data, waveform, axis):
-    x, y, mse_dof, mean_square = [], [], 0, MAX_MSE
+def poly_fit(x,y):
+    
+    mse_dof, mean_square =  0, MAX_MSE
 
-    x += [gait_data["gait_cycle"][waveform][index]
-                for index in range(len(gait_data["gait_cycle"][waveform]))]
-    y += [gait_data["ref_heel"][waveform][index][axis]
-                for index in range(len(gait_data["ref_heel"][waveform]))]
-
-    def poly_fit(x,y,dof):
+    def poly_func(x,y,dof):
         curve = np.polyfit(x, y, dof)
         poly = np.poly1d(curve)
 
@@ -311,10 +307,10 @@ def poly_heel(gait_data, waveform, axis):
         new_x.sort()
 
         return new_x, [poly(data) for data in new_x]
-    
+
     for dof_itera in range(1, MAX_ITR):
         try:
-            msq = mse(y, poly_fit(x,y,dof_itera)[1]) 
+            msq = mse(y, poly_func(x,y,dof_itera)[1]) 
 
             if msq < mean_square:
                 mean_square = msq
@@ -323,8 +319,18 @@ def poly_heel(gait_data, waveform, axis):
         except:
             pass
     
-    new_x, new_y = poly_fit(x,y,mse_dof)
+    return poly_func(x,y,mse_dof)
 
+def get_heel(gait_data, waveform, axis):
+    x, y = [], []
+
+    x += [gait_data["gait_cycle"][waveform][index]
+                for index in range(len(gait_data["gait_cycle"][waveform]))]
+    y += [gait_data["ref_heel"][waveform][index][axis]
+                for index in range(len(gait_data["ref_heel"][waveform]))]
+   
+    new_x, new_y = poly_fit(x, y)
+    
     return new_x, new_y, y
 
 # def get_flex(gait_data, waveform, first, secnd, third):
@@ -341,7 +347,7 @@ def poly_heel(gait_data, waveform, axis):
 #     return x, digi_filter(y), y
 
 def get_flex(gait_data, waveform, first, secnd, third):
-    x, y, mse_dof, mean_square = [], [], 0, MAX_MSE
+    x, y = [], []
 
     for index in range(len(gait_data[first][waveform])):
         first_pt = gait_data[first][waveform][index]
@@ -350,28 +356,8 @@ def get_flex(gait_data, waveform, first, secnd, third):
 
         x.append(gait_data["gait_cycle"][waveform][index])
         y.append(180 - walkE_math.cal_threeD_angle(first_pt, secnd_pt, third_pt)) 
-    
-    def poly_fit(x,y,dof):
-        curve = np.polyfit(x, y, dof)
-        poly = np.poly1d(curve)
-
-        new_x = x
-        new_x.sort()
-
-        return new_x, [poly(data) for data in new_x]
-    
-    for dof_itera in range(1, MAX_ITR):
-        try:
-            msq = mse(y, poly_fit(x,y,dof_itera)[1]) 
-
-            if msq < mean_square:
-                mean_square = msq
-                mse_dof = dof_itera
-
-        except:
-            pass
-    
-    new_x, new_y = poly_fit(x,y,mse_dof)
+        
+    new_x, new_y = poly_fit(x,y)
 
     return new_x, new_y, y
 
@@ -415,9 +401,9 @@ def stats(raw_data, gait_data, offset):
 
         #########################################################################################
 
-        heelX_x, heelX_y, old_heelX_y = poly_heel(gait_data, wave, "x")
-        heelY_x, heelY_y, old_heelY_y = poly_heel(gait_data, wave, "y")
-        heelZ_x, heelZ_y, old_heelZ_y = poly_heel(gait_data, wave, "z")
+        heelX_x, heelX_y, old_heelX_y = get_heel(gait_data, wave, "x")
+        heelY_x, heelY_y, old_heelY_y = get_heel(gait_data, wave, "y")
+        heelZ_x, heelZ_y, old_heelZ_y = get_heel(gait_data, wave, "z")
 
         heelX_list.append({"x": heelX_x, "y": heelX_y})
         heelY_list.append({"x": heelY_x, "y": heelY_y})

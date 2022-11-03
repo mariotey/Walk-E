@@ -20,6 +20,12 @@ MAX_MSE = 100
 MAX_ITR = 10
 WINLEN_PER = 1
 
+HEEL_DOF = 5
+HIPFLEX_DOF = 4
+KNEEFLEX_DOF = 7
+ANKLEFLEX_DOF = 7
+
+
 WEBCAM_RES = [640, 480]
 
 mp_pose = mp.solutions.pose  # Pose Estimation Model
@@ -382,4 +388,71 @@ def best_fit(json, dof):
     return x, new_y
 
 #################################################################################################
+
+def stats(raw_data, gait_data, offset):
+
+    gaitCycle_list, superGaitCycle_list = {"x": [], "y": []}, {"x": [], "y": []}
+    heelX_list, heelY_list, heelZ_list = {"x": [], "y": []}, {"x": [], "y": []}, {"x": [], "y": []}
+    hipflex_list, kneeflex_list, ankleflex_list = {"x": [], "y": []}, {"x": [], "y": []}, {"x": [], "y": []}
+    
+    for wave in range(len(gait_data["ref_heel"])):
+        #########################################################################################
+
+        gaitCycle_x = [gait_data["time"][wave][index]
+                     for index in range(len(gait_data["time"][wave]))]
+        gaitCycle_y = [gait_data["ref_heel"][wave][index]["y"]
+                    for index in range(len(gait_data["ref_heel"][wave]))]
+       
+        gaitCycle_list["x"] += gaitCycle_x
+        gaitCycle_list["y"] += gaitCycle_y
+
+        #########################################################################################
+        
+        superGaitCycle = {
+            "x": [gait_data["gait_cycle"][wave][index]
+                    for index in range(len(gait_data["gait_cycle"][wave]))],
+            "y": [gait_data["ref_heel"][wave][index]["y"]
+                    for index in range(len(gait_data["ref_heel"][wave]))]
+        }
+
+        superGaitCycle_list["x"] += superGaitCycle["x"]
+        superGaitCycle_list["y"] += superGaitCycle["y"]
+
+        #########################################################################################
+
+        heelX_x, heelX_y, old_heelX_y = poly_heel(gait_data, wave, "x")
+        heelY_x, heelY_y, old_heelY_y = poly_heel(gait_data, wave, "y")
+        heelZ_x, heelZ_y, old_heelZ_y = poly_heel(gait_data, wave, "z")
+        
+        heelX_list["x"] += heelX_x
+        heelX_list["y"] += heelX_y
+        heelY_list["x"] += heelY_x
+        heelY_list["y"] += heelY_y
+        heelZ_list["x"] += heelZ_x
+        heelZ_list["y"] += heelZ_y
+
+        #########################################################################################
+
+        hipflex_x, hipflex_y, old_hipflex_y = get_flex(gait_data, wave, "shoulder", "hip", "knee")
+        kneeflex_x, kneeflex_y, old_kneeflex_y= get_flex(gait_data, wave, "hip", "knee", "ankle")
+        ankleflex_x, ankleflex_y, old_ankleflex_y = get_flex(gait_data, wave, "knee", "ankle", "toe")
+
+        hipflex_list["x"] += hipflex_x
+        hipflex_list["y"] += hipflex_y
+        kneeflex_list["x"] += kneeflex_x
+        kneeflex_list["y"] += kneeflex_y
+        ankleflex_list["x"] += ankleflex_x
+        ankleflex_list["y"] += ankleflex_y
+        
+        #########################################################################################
+
+    poly_heelX_x, poly_heelX_y = best_fit(heelX_list, HEEL_DOF)
+    poly_heelY_x, poly_heelY_y = best_fit(heelY_list, HEEL_DOF)
+    poly_heelZ_x, poly_heelZ_y = best_fit(heelZ_list, HEEL_DOF)
+
+    poly_hipflex_x, poly_hipflex_y = best_fit(hipflex_list, HIPFLEX_DOF)
+    poly_kneeflex_x, poly_kneeflex_y = best_fit(kneeflex_list, KNEEFLEX_DOF)
+    poly_ankleflex_x, poly_ankleflex_y = best_fit(ankleflex_list, ANKLEFLEX_DOF)
+    
+    print("Complete")
 #  .\venv\Scripts\python.exe -m pylint .\Walk-E\gaitAnalysis.py

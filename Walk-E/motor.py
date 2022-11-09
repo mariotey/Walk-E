@@ -46,14 +46,13 @@ def goStraight(delay, duty_left, duty_right):
 
     print("Left Motor:", duty_left, ", Right Motor:", duty_right)
 
-def printHello():
-    print("Hello World")
+goStraight(0.5, 37, 40)
 
-try:       
-    while True:
-        duty_right = 40
-        duty_left = 37    
-        goStraight(0.5, duty_left, duty_right)
+# try:       
+#     while True:
+#         duty_right = 40
+#         duty_left = 37    
+#         goStraight(0.5, duty_left, duty_right)
     
-finally:
-    GPIO.cleanup()
+# finally:
+#     GPIO.cleanup()

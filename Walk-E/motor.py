@@ -45,6 +45,10 @@ def goStraight(delay, duty_left, duty_right):
     sleep(delay)
 
     print("Left Motor:", duty_left, ", Right Motor:", duty_right)
+
+def printHello():
+    print("Hello World")
+
 try:       
     while True:
         duty_right = 40

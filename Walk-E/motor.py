@@ -32,7 +32,7 @@ pwm_left = GPIO.PWM(EN2, 1000)
 pwm_right.start(0)
 pwm_left.start(0)
 
-def goStraight(delay, duty_left, duty_right):
+def drive(delay, duty_left, duty_right):
     GPIO.output(IN1, 0)
     GPIO.output(IN3, 0)
 
@@ -46,14 +46,27 @@ def goStraight(delay, duty_left, duty_right):
 
     print("Left Motor:", duty_left, ", Right Motor:", duty_right)
 
-def printHello():
-    print("Hello World")
+# Go Straight
+drive(3, 99.9, 100)
 
-try:       
-    while True:
-        duty_right = 40
-        duty_left = 37    
-        goStraight(0.5, duty_left, duty_right)
+# Turn Left
+drive(0.55, 0, 100)
+drive(1, 0, 0)
+drive(0.55, 0, 100)
+
+# Go Straight
+drive(3, 99.9, 100)
+
+# Turn Right
+drive(0.45, 100, 0)
+drive(1, 0, 0)
+drive(0.45, 100, 0)
+
+# try:       
+#     while True:
+#         duty_right = 40
+#         duty_left = 37    
+#         goStraight(0.5, duty_left, duty_right)
     
-finally:
-    GPIO.cleanup()
+# finally:
+#     GPIO.cleanup()

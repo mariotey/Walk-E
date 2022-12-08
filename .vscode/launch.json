@@ -26,8 +26,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP":"Walk-E/main_flask.py",
-                "FLASK_DEBUG": "1"
+                "FLASK_APP":"Walk-E/main_flask.py"
             },
             "args": [
                 "run",

@@ -16,7 +16,7 @@
             "name": "Python: MediaPipe",
             "type": "python",
             "request": "launch",
-            "program": "c:/Users/Tey Ming Chuan/OneDrive - National University of Singapore/Desktop/BN4101/Walk-E/Walk-E/main_mediapipe.py",
+            "program": "./code_python/main_mediapipe.py",
             "console": "integratedTerminal",
             "justMyCode": true
         },

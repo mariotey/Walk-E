@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils_3d@0.2/landmark_grid.css" crossorigin="anonymous">
-  <link rel="icon" href="favicon.ico">
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6/control_utils.css" crossorigin="anonymous">
-
-  <link rel="stylesheet" href="../static/css/test.css">
+  <link rel="stylesheet" href="../static/css/main.css">
+  <link rel="stylesheet" href="../static/css/submit.css">
+   <!-- <link rel="icon" href="favicon.ico"> -->
 
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils_3d@0.2/control_utils_3d.js" crossorigin="anonymous"></script>
@@ -14,29 +14,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3/drawing_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.4/pose.js" crossorigin="anonymous"></script>
 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 </head>
-<body>
-<body>
-  <style>
-    .square-box {
-      width: 33%;
-      height: 0;
-      padding-top: 33%;
-      position: absolute;
-      right: 20px;
-      top: 20px;
-    }
 
-    .landmark-grid-container {
-      height: 75%;
-      width: 75%;
-      position: absolute;
-      top:0;
-      right:0;
-      background-color: #99999999;
-    }
-  </style>
-  
+<body>  
   <div class="container">
     <video class="input_video"></video>
     <div style = "display: flex; justify-content: center;">
@@ -44,20 +25,58 @@
     </div>
     <div class="loading">
       <div class="spinner"></div>
-      <div class="message">Loading</div>
+      <div class="message">Loading...</div>
     </div>
   </div>
   
   <div class="control-panel"></div>
   
   <div class='square-box'>
-    <div class="landmark-grid-container">
-    </div>
+    <div class="landmark-grid-container"></div>
   </div>
 
+  <div class="control-panel">
+    <div class="btn_container">
+      <div id = "calibrate" class="control-panel-entry control-panel-toggle negative" onclick="get_calibrate()">Calibrate</div>
+      <button id = "stats" class="control-panel-entry control-panel-toggle stats" onclick = "cal_stats()">Statistics</button>
+    </div>
+  </div>
+  
 </body>
 
-<script type="module" src="../static/js/test.js"></script>
+<script type="module" src="../static/js/main.js"></script>
+<script>
+  function get_calibrate(){
+    calibrate_btn = document.getElementById("calibrate");
+
+    if (calibrate_btn.className == "control-panel-entry control-panel-toggle negative") {
+      calibrate_btn.className = "control-panel-entry control-panel-toggle positive";
+      calibrate_btn.innerHTML = "Calibrate";
+    }
+    else{
+      calibrate_btn.className = "control-panel-entry control-panel-toggle negative";
+      calibrate_btn.innerHTML = "Stop Calibration";
+    }
+  };
+
+  function cal_stats(){
+    ajax_data = {
+      data: JSON.stringify("Hello World")
+    };
+    
+    $.ajax({
+      url: '/Statistics',
+      type: "POST",
+      data: ajax_data,
+      success: function(result){
+        console.log("Successful");
+      },
+      error: function(request, error){
+        console.log("Error:" + error);
+      }
+    });
+  }
+</script>
 
 </html>
 

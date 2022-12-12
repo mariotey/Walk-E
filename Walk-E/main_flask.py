@@ -1,11 +1,16 @@
-import cv2
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, request
 
-video = cv2.VideoCapture(0)
 app = Flask(__name__)
             
 @app.route('/')
 def home():
+    return render_template("main.html")
+
+@app.route('/Statistics', methods=["GET", "POST"])
+def statistics():
+    request_data = request.form
+    msg = request_data["data"]
+    
     return render_template("main.html")
 
 if __name__ == "__main__":

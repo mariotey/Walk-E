@@ -1,11 +1,35 @@
 import create_controls from "./create_controls.js";
-import mp_overlay from "./mediapipe_func.js";
+import create_grid from "./create_grid.js";
+import { grid_plot,canvas_plot } from "./create_plot.js";
+// import mp_overlay from "./mediapipe_func.js";
+
+const grid = create_grid();
+const spinner = document.querySelector('.loading');
+const canvasElement = document.getElementsByClassName('output_canvas')[0];
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Turn off animated spinner after CSS Transition is complete
-const spinner = document.querySelector('.loading');
 spinner.ontransitionend = () => {
     spinner.style.display = 'none';
 };
+
+function mp_overlay(pose, fpsControl, activeEffect){
+    function mediapipe_overlay(results) {
+        // Hide the spinner.
+        document.body.classList.add('loaded');
+    
+        // Update the frame rate.
+        fpsControl.tick();
+    
+        canvas_plot(results, canvasElement, activeEffect);
+        grid_plot(results, grid);        
+    }
+    
+    pose.onResults(mediapipe_overlay);
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
 
 // To be added into control panel, can call tick() each time the graph runs.
 const fpsControl = new window.FPS();

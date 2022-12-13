@@ -72,7 +72,7 @@ export function canvas_plot(results, canvasElement, activeEffect){
         calibrate_list["worldLandmark"].push(results.poseWorldLandmarks);
         
         var time = (new Date().getTime())/1000; 
-        console.log(time);
+        // console.log(time);
         calibrate_list["time"].push(time);
     };
 
@@ -81,7 +81,7 @@ export function canvas_plot(results, canvasElement, activeEffect){
         joint_list["worldLandmark"].push(results.poseWorldLandmarks);
 
         var time = (new Date().getTime())/1000; 
-        console.log(time);
+        // console.log(time);
         joint_list["time"].push(time);
     };
 

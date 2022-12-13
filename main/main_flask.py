@@ -24,6 +24,7 @@ def recalibrate():
     redis_client.hset("calibration_data", "pose_lm", request_data["poseLandmark"])
     redis_client.hset("calibration_data", "world_lm", request_data["worldLandmark"])
     redis_client.hset("calibration_data", "time", request_data["time"])
+    # redis_client.hset("calibration_data", "video_image", request_data["video_image"])
 
     return render_template("main.html")
 

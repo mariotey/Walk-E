@@ -1,121 +1,15 @@
 import numpy as np
-import cv2
 import mediapipe as mp
 import walkE_math
 import walkE_plot
-import time 
-from scipy.signal import savgol_filter
 from sklearn.metrics import mean_squared_error as mse
 
-FONT_STYLE = cv2.FONT_HERSHEY_SIMPLEX
-FONT_SCALE = 0.5
-LINE_THICK = 1
-LINE_TYPE = cv2.LINE_AA
-
 MIN_CHUNKSIZE = 3
-MIN_STRIDETIME = 2
 POINTS_SPACE = 20
-
 MAX_MSE = 100
 MAX_ITR = 10
-WINLEN_PER = 1
-
-WEBCAM_RES = [640, 480]
 
 mp_pose = mp.solutions.pose  # Pose Estimation Model
-
-#################################################################################################
-
-def arraySortedOrNot(arr):
- 
-    # Calculating length
-    n = len(arr)
- 
-    # Array has one or no element or the
-    # rest are already checked and approved.
-    if n == 1 or n == 0:
-        return True
- 
-    # Recursion applied till last element
-    return arr[0] <= arr[1] and arraySortedOrNot(arr[1:])
-
-#################################################################################################
-
-def get_lm(json, world_lm, start_time):
-    def format_lm(bodypart, world_landmarks):
-        body_part = mp_pose.PoseLandmark[bodypart].value
-
-        data_json = {
-            "x": world_landmarks[body_part].x,
-            "y": world_landmarks[body_part].y,
-            "z": world_landmarks[body_part].z
-        }
-        
-        print(bodypart, ":", data_json["x"], ",",
-                            data_json["y"], ",",
-                            data_json["z"], "\n")
-
-        return data_json
-        
-    # Extract landmarks
-    json["ref_heel"].append(format_lm("LEFT_HEEL", world_lm))  # Heel Reference
-    json["shoulder"].append(format_lm("LEFT_SHOULDER", world_lm))  # Shoulder Info
-    json["hip"].append(format_lm("LEFT_HIP", world_lm))  # Hip Info
-    json["knee"].append(format_lm("LEFT_KNEE", world_lm))  # Knee Info
-    json["ankle"].append(format_lm("LEFT_ANKLE", world_lm))  # Ankle Info
-    json["toe"].append(format_lm("LEFT_FOOT_INDEX", world_lm))  # Toe Info
-    json["time"].append(time.time() - start_time)  # Time Info
-
-#################################################################################################
-
-def calibrate_flex(joint_data, first, sec, third):
-    flex_data = {
-        "flex_data": [],
-        "time": []
-    }
-
-    for data_point in range(len(joint_data[first])):
-        flex_list, time_list = [], []
-        
-        first_pt = joint_data[first][data_point]
-        sec_pt = joint_data[sec][data_point]
-        third_pt = joint_data[third][data_point]
-
-        flex_list.append(180 - walkE_math.cal_threeD_angle(first_pt, sec_pt, third_pt))
-        time_list.append(joint_data["time"][data_point])
-
-        flex_data["flex_data"].append(flex_list)
-        flex_data["time"].append(time_list)
-
-    return flex_data
-
-def calibrate(calibrate_data):        
-    ref_list = []
-    for elem in calibrate_data["ref_heel"]:
-        ref_list.append(elem["y"])
-
-    heelX_list = [data_point["x"] for data_point in calibrate_data["ref_heel"]]
-    heelY_list = [data_point["y"] for data_point in calibrate_data["ref_heel"]]
-    heelZ_list = [data_point["z"] for data_point in calibrate_data["ref_heel"]]
-    
-    hipflex_data = calibrate_flex(calibrate_data, "shoulder", "hip", "knee")
-    kneeflex_data = calibrate_flex(calibrate_data, "hip", "knee", "ankle")
-    ankleflex_data = calibrate_flex(calibrate_data, "knee", "ref_heel", "toe")
-
-    walkE_plot.calibrate(ref_list, heelX_list, heelY_list, heelZ_list, 
-                        hipflex_data, kneeflex_data, ankleflex_data,
-                        calibrate_data["time"])
-
-    offset_json = {
-        "cut_off": np.mean(heelY_list),
-        "hipflex": np.mean(hipflex_data["flex_data"]),
-        "kneeflex": np.mean(kneeflex_data["flex_data"]),
-        "ankleflex": np.mean(ankleflex_data["flex_data"])
-    }
-
-    print("Complete")
-
-    return offset_json
 
 #################################################################################################
 
@@ -262,33 +156,6 @@ def get_gait(heel_baseline, raw_joint):
     return gait_joint   
 
 #################################################################################################
-def digi_filter(y):
-    """
-    Applies Savitzky-Golay filter
-    """
-    win_len = int(len(y) * WINLEN_PER)
-
-    if win_len % 2 == 1:
-        win_len = win_len
-    else:
-        win_len = win_len - 1
-
-    dof, mean_square = 0, MAX_MSE
-
-    for dof_itera in range(1, MAX_ITR):
-        try:
-            filtered_y = list(savgol_filter(y, win_len, dof_itera))
-            
-            msq = mse(y, filtered_y) 
-
-            if msq < mean_square:
-                mean_square = msq
-                dof = dof_itera
-
-        except:
-            pass
-
-    return list(savgol_filter(y, win_len, dof))
 
 def poly_fit(x,y):
     
@@ -327,19 +194,6 @@ def get_heel(gait_data, waveform, axis):
     new_x, new_y = poly_fit(x, y)
     
     return new_x, new_y, y
-
-# def get_flex(gait_data, waveform, first, secnd, third):
-#     x, y = [], []
-
-#     for index in range(len(gait_data[first][waveform])):
-#         first_pt = gait_data[first][waveform][index]
-#         secnd_pt = gait_data[secnd][waveform][index]
-#         third_pt = gait_data[third][waveform][index]
-
-#         x.append(gait_data["gait_cycle"][waveform][index])
-#         y.append(180 - walkE_math.cal_threeD_angle(first_pt, secnd_pt, third_pt)) 
-    
-#     return x, digi_filter(y), y
 
 def get_flex(gait_data, waveform, first, secnd, third):
     x, y = [], []

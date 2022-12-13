@@ -2,8 +2,9 @@ from flask import Flask, render_template, request
 import json
 import redis
 
-import gaitAnalysis as ga
-import process_request as pro
+import gait_calibrate
+import gait_statistics
+import format_data
 
 app = Flask(__name__)
 
@@ -40,17 +41,17 @@ def get_stats():
     joint_time = json.loads(request_data["time"])
     
     # Retrieve calibration data from server 
-    calibrate_pose_lm = json.loads(redis_client.hget("calibration_data", "pose_lm").decode("utf-8"))
+    # calibrate_pose_lm = json.loads(redis_client.hget("calibration_data", "pose_lm").decode("utf-8"))
     calibrate_world_lm = json.loads(redis_client.hget("calibration_data", "world_lm").decode("utf-8"))
     calibrate_time = json.loads(redis_client.hget("calibration_data", "time").decode("utf-8"))
     
-    joint_data = pro.format_data(joint_world_lm, joint_time)
-    calibrate_data = pro.format_data(calibrate_world_lm, calibrate_time)
+    joint_data = format_data.request_lm(joint_world_lm, joint_time)
+    calibrate_data = format_data.request_lm(calibrate_world_lm, calibrate_time)
     
     # Calculation of Gait Statistics
-    offsetdata = ga.calibrate(calibrate_data)
-    gait_data = ga.get_gait(offsetdata["cut_off"], joint_data)
-    stats_data = ga.stats(joint_data, gait_data, offsetdata)
+    offsetdata = gait_calibrate.calibrate(calibrate_data)
+    gait_data = gait_statistics.get_gait(offsetdata["cut_off"], joint_data)
+    stats_data = gait_statistics.stats(joint_data, gait_data, offsetdata)
 
     # Cache Statistics and Video Recording into Server with timestamp as key
 

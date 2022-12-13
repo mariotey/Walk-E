@@ -1,7 +1,7 @@
 import mediapipe as mp
 mp_pose = mp.solutions.pose
 
-def format_data(world_lm, time):
+def request_lm(world_lm, time):
     new_data = {
         "ref_heel": [],
         "shoulder": [],

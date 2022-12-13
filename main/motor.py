@@ -47,26 +47,18 @@ def drive(delay, duty_left, duty_right):
     print("Left Motor:", duty_left, ", Right Motor:", duty_right)
 
 # Go Straight
-drive(3, 99.9, 100)
+drive(10, 99.9, 100)
 
 # Turn Left
-drive(0.55, 0, 100)
-drive(1, 0, 0)
-drive(0.55, 0, 100)
+# drive(0.55, 0, 100)
+# drive(1, 0, 0)
+# drive(0.55, 0, 100)
 
 # Go Straight
-drive(3, 99.9, 100)
+# drive(3, 99.9, 100)
 
 # Turn Right
-drive(0.45, 100, 0)
-drive(1, 0, 0)
-drive(0.45, 100, 0)
+# drive(0.45, 100, 0)
+# drive(1, 0, 0)
+# drive(0.45, 100, 0)
 
-# try:       
-#     while True:
-#         duty_right = 40
-#         duty_left = 37    
-#         goStraight(0.5, duty_left, duty_right)
-    
-# finally:
-#     GPIO.cleanup()

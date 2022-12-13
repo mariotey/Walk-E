@@ -17,7 +17,7 @@ export function grid_plot(results, grid) {
     }
 }
 
-export function canvas_plot(results, canvasElement, activeEffect, start_time){
+export function canvas_plot(results, canvasElement, activeEffect){
     const canvasCtx = canvasElement.getContext('2d');
     
     // Draw the overlays.
@@ -69,14 +69,14 @@ export function canvas_plot(results, canvasElement, activeEffect, start_time){
         // console.log(results.poseLandmarks);
         calibrate_list["poseLandmark"].push(results.poseLandmarks);
         calibrate_list["worldLandmark"].push(results.poseWorldLandmarks);
-        calibrate_list["time"].push((new Date().getTime())/1000 - start_time);
+        calibrate_list["time"].push((new Date().getTime())/1000);
         // console.log(time);
     };
 
     if (stats_flag == true) {        
         joint_list["poseLandmark"].push(results.poseLandmarks);
         joint_list["worldLandmark"].push(results.poseWorldLandmarks);
-        joint_list["time"].push((new Date().getTime())/1000 - start_time);
+        joint_list["time"].push((new Date().getTime())/1000);
         // console.log(time);
     };
 

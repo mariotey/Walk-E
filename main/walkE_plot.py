@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-import gaitAnalysis as ga
+import gait_statistics
 import numpy as np
 
 HEEL_DOF = 5
@@ -152,7 +152,7 @@ def stats(raw_data, gait_data):
                         c=["#808080"]*len(waveform["y"]),
                         s=[2]*len(waveform["y"]))
         
-        poly_x, poly_y = ga.best_fit(waveform, HEEL_DOF)
+        poly_x, poly_y = gait_statistics.best_fit(waveform, HEEL_DOF)
         axs[0, 2].plot(poly_x, poly_y)
 
     axs[0, 2].set(xlabel = "Gait Cycle (%)", ylabel = "y-coordinate of Heel",
@@ -173,7 +173,7 @@ def stats(raw_data, gait_data):
     #                 c=["#FF0000"]*len(waveform["y"]),
     #                 s=[2]*len(waveform["y"]))
 
-    poly_heelX_x, poly_heelX_y = ga.best_fit(heelX_list, HEEL_DOF)
+    poly_heelX_x, poly_heelX_y = gait_statistics.best_fit(heelX_list, HEEL_DOF)
     axs[1, 0].plot(poly_heelX_x, poly_heelX_y, "r")
 
     axs[1, 0].set(xlabel="Gait Cycle (%)", ylabel = "x-coordinate of Heel",
@@ -194,7 +194,7 @@ def stats(raw_data, gait_data):
     #                 c=["#FF0000"]*len(waveform["y"]),
     #                 s=[2]*len(waveform["y"]))
 
-    poly_heelY_x, poly_heelY_y = ga.best_fit(heelY_list, HEEL_DOF)
+    poly_heelY_x, poly_heelY_y = gait_statistics.best_fit(heelY_list, HEEL_DOF)
     axs[1, 1].plot(poly_heelY_x, poly_heelY_y, "r")
     
     axs[1, 1].set(xlabel="Gait Cycle (%)", ylabel = "y-coordinate of Heel",
@@ -215,7 +215,7 @@ def stats(raw_data, gait_data):
     #                 c=["#FF0000"]*len(waveform["y"]),
     #                 s=[2]*len(waveform["y"]))
 
-    poly_heelZ_x, poly_heelZ_y = ga.best_fit(heelZ_list, HEEL_DOF)
+    poly_heelZ_x, poly_heelZ_y = gait_statistics.best_fit(heelZ_list, HEEL_DOF)
     axs[1, 2].plot(poly_heelZ_x, poly_heelZ_y, "r")
     
     axs[1, 2].set(xlabel="Gait Cycle (%)", ylabel = "z-coordinate of Heel",
@@ -236,7 +236,7 @@ def stats(raw_data, gait_data):
     #                 c=["#FF0000"]*len(waveform["y"]),
     #                 s=[2]*len(waveform["y"]))
 
-    poly_hipflex_x, poly_hipflex_y = ga.best_fit(hipflex_list, HIPFLEX_DOF)
+    poly_hipflex_x, poly_hipflex_y = gait_statistics.best_fit(hipflex_list, HIPFLEX_DOF)
     axs[2, 0].plot(poly_hipflex_x, poly_hipflex_y, "r")
 
     axs[2, 0].set(xlabel="Gait Cycle (%)", ylabel = "Hip Flex (Degree)",
@@ -257,7 +257,7 @@ def stats(raw_data, gait_data):
     #                 c=["#FF0000"]*len(waveform["y"]),
     #                 s=[2]*len(waveform["y"]))
 
-    poly_kneeflex_x, poly_kneeflex_y = ga.best_fit(kneeflex_list, KNEEFLEX_DOF)
+    poly_kneeflex_x, poly_kneeflex_y = gait_statistics.best_fit(kneeflex_list, KNEEFLEX_DOF)
     axs[2, 1].plot(poly_kneeflex_x, poly_kneeflex_y, "r")
 
     axs[2, 1].set(xlabel="Gait Cycle (%)", ylabel = "Knee Flex (Degree)",
@@ -278,7 +278,7 @@ def stats(raw_data, gait_data):
     #                 c=["#FF0000"]*len(waveform["y"]),
     #                 s=[2]*len(waveform["y"]))
 
-    poly_ankleflex_x, poly_ankleflex_y = ga.best_fit(ankleflex_list, ANKLEFLEX_DOF)
+    poly_ankleflex_x, poly_ankleflex_y = gait_statistics.best_fit(ankleflex_list, ANKLEFLEX_DOF)
     axs[2, 2].plot(poly_ankleflex_x, poly_ankleflex_y, "r")
 
     axs[2, 2].set(xlabel="Gait Cycle (%)", ylabel = "Ankle Flex (Degree)",

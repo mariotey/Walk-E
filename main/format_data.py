@@ -11,6 +11,8 @@ def request_lm(world_lm, time):
         "toe": [],
         "time": []
     }
+
+    ref_time = time[0]
     
     for idx, images in enumerate(world_lm):
         new_data["ref_heel"].append(images[mp_pose.PoseLandmark["LEFT_HEEL"].value])
@@ -19,6 +21,6 @@ def request_lm(world_lm, time):
         new_data["knee"].append(images[mp_pose.PoseLandmark["LEFT_KNEE"].value])
         new_data["ankle"].append(images[mp_pose.PoseLandmark["LEFT_ANKLE"].value])
         new_data["toe"].append(images[mp_pose.PoseLandmark["LEFT_FOOT_INDEX"].value])
-        new_data["time"].append(time[idx])
+        new_data["time"].append(time[idx] - ref_time)
     
     return new_data

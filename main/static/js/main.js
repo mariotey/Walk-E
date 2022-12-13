@@ -15,8 +15,6 @@ spinner.ontransitionend = () => {
 };
 
 function mp_overlay(pose, fpsControl, activeEffect){
-    var start_time = (new Date().getTime())/1000; 
-
     function mediapipe_overlay(results) {
         // Hide the spinner.
         document.body.classList.add('loaded');
@@ -24,7 +22,7 @@ function mp_overlay(pose, fpsControl, activeEffect){
         // Update the frame rate.
         fpsControl.tick();
     
-        canvas_plot(results, canvasElement, activeEffect, start_time);
+        canvas_plot(results, canvasElement, activeEffect);
         grid_plot(results, grid);        
     }
     

@@ -17,8 +17,7 @@ export function grid_plot(results, grid) {
     }
 }
 
-export function canvas_plot(results, canvasElement, activeEffect){
-    
+export function canvas_plot(results, canvasElement, activeEffect, start_time){
     const canvasCtx = canvasElement.getContext('2d');
     
     // Draw the overlays.
@@ -70,19 +69,15 @@ export function canvas_plot(results, canvasElement, activeEffect){
         // console.log(results.poseLandmarks);
         calibrate_list["poseLandmark"].push(results.poseLandmarks);
         calibrate_list["worldLandmark"].push(results.poseWorldLandmarks);
-        
-        var time = (new Date().getTime())/1000; 
+        calibrate_list["time"].push((new Date().getTime())/1000 - start_time);
         // console.log(time);
-        calibrate_list["time"].push(time);
     };
 
     if (stats_flag == true) {        
         joint_list["poseLandmark"].push(results.poseLandmarks);
         joint_list["worldLandmark"].push(results.poseWorldLandmarks);
-
-        var time = (new Date().getTime())/1000; 
+        joint_list["time"].push((new Date().getTime())/1000 - start_time);
         // console.log(time);
-        joint_list["time"].push(time);
     };
 
     // Restores the most recently saved canvas state by popping the top entry in the drawing state stack

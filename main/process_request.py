@@ -1,17 +1,17 @@
 import mediapipe as mp
 mp_pose = mp.solutions.pose
 
-new_data = {
-    "ref_heel": [],
-    "shoulder": [],
-    "hip": [],
-    "knee": [],
-    "ankle": [],
-    "toe": [],
-    "time": []
-}
-
 def format_data(world_lm, time):
+    new_data = {
+        "ref_heel": [],
+        "shoulder": [],
+        "hip": [],
+        "knee": [],
+        "ankle": [],
+        "toe": [],
+        "time": []
+    }
+    
     for idx, images in enumerate(world_lm):
         new_data["ref_heel"].append(images[mp_pose.PoseLandmark["LEFT_HEEL"].value])
         new_data["shoulder"].append(images[mp_pose.PoseLandmark["LEFT_SHOULDER"].value])

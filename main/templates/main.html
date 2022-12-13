@@ -24,11 +24,13 @@
     let calibrate_list = {
       "poseLandmark": [],
       "worldLandmark":[],
+      "time":[],
     }
 
     let joint_list = {
       "poseLandmark": [],
       "worldLandmark":[],
+      "time":[],
     }
 
   </script>
@@ -66,7 +68,7 @@
 <script>
   calibrate_btn = document.getElementById("calibrate");
   stats_btn = document.getElementById("stats");
-  
+
   function get_calibrate(){        
     if (calibrate_btn.className == "control-panel-entry control-panel-toggle negative") {
       stats_btn.disabled = false;
@@ -82,6 +84,7 @@
       ajax_data = {
         poseLandmark: JSON.stringify(calibrate_list["poseLandmark"]),
         worldLandmark: JSON.stringify(calibrate_list["worldLandmark"]),
+        time: JSON.stringify(calibrate_list["time"]),
       };
 
       console.log(ajax_data);
@@ -126,6 +129,7 @@
       ajax_data = {
         poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
         worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
+        time: JSON.stringify(joint_list["time"]),
       };
 
       console.log(ajax_data);

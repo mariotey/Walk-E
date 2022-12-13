@@ -65,7 +65,7 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
         # Recolour Image back to BGR for openCV to process, Make Detection
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         
-        image_path = os.getcwd() + "\Walk-E\static\img\Black.png"
+        image_path = os.getcwd() + "\main\static\img\Black.png"
         noimage = cv2.cvtColor(cv2.imread(image_path), cv2.COLOR_RGB2BGR)
 
         # Draw Pose Estimation landmarks                                       

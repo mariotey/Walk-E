@@ -68,14 +68,21 @@ export function canvas_plot(results, canvasElement, activeEffect){
 
     if (cali_flag == true) {
         // console.log(results.poseLandmarks);
-        
         calibrate_list["poseLandmark"].push(results.poseLandmarks);
         calibrate_list["worldLandmark"].push(results.poseWorldLandmarks);
+        
+        var time = (new Date().getTime())/1000; 
+        console.log(time);
+        calibrate_list["time"].push(time);
     };
 
     if (stats_flag == true) {        
         joint_list["poseLandmark"].push(results.poseLandmarks);
         joint_list["worldLandmark"].push(results.poseWorldLandmarks);
+
+        var time = (new Date().getTime())/1000; 
+        console.log(time);
+        joint_list["time"].push(time);
     };
 
     // Restores the most recently saved canvas state by popping the top entry in the drawing state stack

@@ -39,6 +39,10 @@ def get_stats():
     joint_pose_lm = json.loads(request_data["poseLandmark"])
     joint_world_lm = json.loads(request_data["worldLandmark"])
     joint_time = json.loads(request_data["time"])
+
+    redis_client.hset("testjoint_data", "pose_lm", request_data["poseLandmark"])
+    redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
+    redis_client.hset("testjoint_data", "time", request_data["time"])
     
     # Retrieve calibration data from server 
     # calibrate_pose_lm = json.loads(redis_client.hget("calibration_data", "pose_lm").decode("utf-8"))
@@ -56,6 +60,23 @@ def get_stats():
     # Cache Statistics and Video Recording into Server with timestamp as key
 
     return render_template("main.html")
+
+#################################################################################################
+
+@app.route('/PlotStats', methods=["GET", "POST"])
+def plot_stats():
+    redis_client = redis.Redis(host="localhost", port=6379)
+
+    joint_world_lm = json.loads(redis_client.hget("calibration_data", "world_lm").decode("utf-8"))
+    joint_time = json.loads(redis_client.hget("calibration_data", "time").decode("utf-8"))
+
+    calibrate_world_lm = json.loads(redis_client.hget("calibration_data", "world_lm").decode("utf-8"))
+    calibrate_time = json.loads(redis_client.hget("calibration_data", "time").decode("utf-8"))
+
+    joint_data = format_data.request_lm(joint_world_lm, joint_time)
+    calibrate_data = format_data.request_lm(calibrate_world_lm, calibrate_time)
+
+    return render_template("statistics.html")
 
 #################################################################################################
 

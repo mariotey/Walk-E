@@ -100,6 +100,12 @@
           console.log("Error:" + error);
         }
       });
+
+      calibrate_list = {
+        "poseLandmark": [],
+        "worldLandmark":[],
+        "time":[],
+      }
     }
     else{
       stats_btn.disabled = true;
@@ -145,6 +151,12 @@
           console.log("Error:" + error);
         }
       });
+
+      joint_list = {
+        "poseLandmark": [],
+        "worldLandmark":[],
+        "time":[],
+      }
     }
     else{
       calibrate_btn.disabled = true;

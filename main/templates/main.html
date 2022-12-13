@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils_3d@0.2/landmark_grid.css" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6/control_utils.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="../static/css/main.css">
+  <link rel="stylesheet" href="../static/css/submit.css">
+   <!-- <link rel="icon" href="favicon.ico"> -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils_3d@0.2/control_utils_3d.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6/control_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.4/pose.js" crossorigin="anonymous"></script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+
+  <script>
+    // Global Variables
+    let cali_flag = false;
+    let stats_flag = false;
+
+    let calibrate_list = {
+      "poseLandmark": [],
+      "worldLandmark":[],
+    }
+
+    let joint_list = {
+      "poseLandmark": [],
+      "worldLandmark":[],
+    }
+
+  </script>
+
+</head>
+
+<body>  
+  <div class="container">
+    <video class="input_video"></video>
+    <div style = "display: flex; justify-content: center;">
+        <canvas class="output_canvas" width="1280px" height="720px"></canvas>
+    </div>
+    <div class="loading">
+      <div class="spinner"></div>
+      <div class="message">Loading...</div>
+    </div>
+  </div>
+  
+  <div class="control-panel"></div>
+  
+  <div class='square-box'>
+    <div class="landmark-grid-container"></div>
+  </div>
+
+  <div class="control-panel">
+    <div class="btn_container">
+      <button id = "calibrate" class="control-panel-entry control-panel-toggle positive" onclick="get_calibrate()">Calibrate</button>
+      <button id = "stats" class="control-panel-entry control-panel-toggle positive" onclick = "cal_stats()">Start</button>
+    </div>
+  </div>
+</body>
+
+<script type="module" src="../static/js/main.js"></script>
+
+<script>
+  calibrate_btn = document.getElementById("calibrate");
+  stats_btn = document.getElementById("stats");
+  
+  function get_calibrate(){        
+    if (calibrate_btn.className == "control-panel-entry control-panel-toggle negative") {
+      stats_btn.disabled = false;
+      calibrate_btn.innerHTML = "Calibrate";
+
+      calibrate_btn.className = "control-panel-entry control-panel-toggle positive";     
+      stats_btn.className = "control-panel-entry control-panel-toggle positive";
+
+      cali_flag = false;
+      
+      console.log("Calibration is stopped.");
+
+      ajax_data = {
+        poseLandmark: JSON.stringify(calibrate_list["poseLandmark"]),
+        worldLandmark: JSON.stringify(calibrate_list["worldLandmark"]),
+      };
+
+      console.log(ajax_data);
+
+      $.ajax({
+        url: '/Recalibrate',
+        type: "POST",
+        data: ajax_data,
+        success: function(result){
+          console.log("Successfully Recalibrated.");
+        },
+        error: function(request, error){
+          console.log("Error:" + error);
+        }
+      });
+    }
+    else{
+      stats_btn.disabled = true;
+      calibrate_btn.innerHTML = "Stop Calibration";
+
+      calibrate_btn.className = "control-panel-entry control-panel-toggle negative";
+      stats_btn.className = "control-panel-entry control-panel-toggle disable";
+
+      cali_flag = true;
+
+      console.log("Recalibrating...");      
+    }
+  };
+
+  function cal_stats(){
+    if (stats_btn.className == "control-panel-entry control-panel-toggle negative") {
+      calibrate_btn.disabled = false;
+      stats_btn.innerHTML = "Start";
+
+      calibrate_btn.className = "control-panel-entry control-panel-toggle positive";      
+      stats_btn.className = "control-panel-entry control-panel-toggle positive";
+
+      stats_flag = false;
+      
+      console.log("Walk-E Stopped.");
+
+      ajax_data = {
+        poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
+        worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
+      };
+
+      console.log(ajax_data);
+
+      $.ajax({
+        url: '/GetStats',
+        type: "POST",
+        data: ajax_data,
+        success: function(result){
+          console.log("Successfully Calculated Stats.");
+        },
+        error: function(request, error){
+          console.log("Error:" + error);
+        }
+      });
+    }
+    else{
+      calibrate_btn.disabled = true;
+      stats_btn.innerHTML = "Stop";
+
+      calibrate_btn.className = "control-panel-entry control-panel-toggle disable";    
+      stats_btn.className = "control-panel-entry control-panel-toggle negative";
+
+      stats_flag = true;
+
+      console.log("Walk-E Starts.");      
+    }
+  };
+</script>
+
+</html>
+

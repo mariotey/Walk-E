@@ -151,7 +151,9 @@ def get_gait(heel_baseline, raw_joint):
     
     ##############################################################################################
     
-    walkE_plot.get_gait(raw_joint, sine_joint, gait_joint)
+    # walkE_plot.get_gait(raw_joint, sine_joint, gait_joint)
+
+    print("Data Slicing Complete")
 
     return gait_joint   
 
@@ -279,6 +281,7 @@ def stats(raw_data, gait_data, offset):
         #########################################################################################
 
     stats = {
+        "rawData": {"x": raw_data["time"], "y":[elem["y"] for elem in raw_data["ref_heel"]]},
         "rawGaitCycle": gaitCycle_list,
         "superGaitCycle": superGaitCycle_list,
         "heelX": heelX_list, 
@@ -288,18 +291,10 @@ def stats(raw_data, gait_data, offset):
         "kneeflex": kneeflex_list,
         "ankleflex": ankleflex_list
     }
-
-    raw = {
-        "rawData": {"x": raw_data["time"], "y":[elem["y"] for elem in raw_data["ref_heel"]]},
-        "heelX": oldHeelX_list,
-        "heelY": oldHeelY_list,
-        "heelZ": oldHeelZ_list,
-        "hipflex": oldHipFlex_list,
-        "kneeflex": oldKneeFlex_list,
-        "ankleflex": oldAnkleFlex_list
-    }
     
-    walkE_plot.stats(raw, stats)
+    # walkE_plot.stats(stats)
+
+    print("Stats Calculation Complete")
 
     return stats
 

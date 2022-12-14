@@ -11,7 +11,7 @@
 </head>
 
 <body>  
-    <div class = "container">
+    <div>
         <div class = "plot">
             <canvas id = "raw_data"></canvas>
         </div>
@@ -33,79 +33,18 @@
     </div>
 </body>
 
-<script>
-    const data_value = [65, 59, 80, 81, 56, 55, 40];
-    const showLegend = true;
-    
-    // Setup block
-    const labels = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun"
-    ];
+<script src="../static/js/plot_stats.js"></script>
+<script>   
+    var stats = {{stats_Info | tojson}};
+    console.log(stats);
 
-    const data = {
-        labels: labels,
-        datasets: [{
-            label: 'My First Dataset',
-            data: data_value,
-            fill: false,
-            backgroundColor: 'rgb(75, 192, 192)',
-            borderColor: 'rgb(75, 192, 192)',
-            tension: 0.1
-        },
-        {
-            label: 'My Second Dataset',
-            data: [61, 52, 80, 92, 56, 23, 31],
-            fill: false,
-            backgroundColor: 'rgb(255, 255, 0)',
-            borderColor: 'rgb(255, 255, 0)',
-            tension: 0.1
-        },
-        ]
-    };
-
-    // Config block
-    const config = {
-        type: 'line',
-        data: data,
-        options: {
-            plugins: {
-                legend: {
-                    display: showLegend
-                }
-            }
-        }
-    };
-
-    // Rendering block
-    var myChart = new Chart(
-        document.getElementById("raw_data"),
-        config
-    );
-    var myChart = new Chart(
-        document.getElementById("segregate_data"),
-        config
-    );
-    var myChart = new Chart(
-        document.getElementById("scatter_data"),
-        config
-    );
-    var myChart = new Chart(
-        document.getElementById("hip_flex"),
-        config
-    );
-    var myChart = new Chart(
-        document.getElementById("knee_flex"),
-        config
-    );
-    var myChart = new Chart(
-        document.getElementById("ankle_flex"),
-        config
-    );    
+    // Rendering Plots
+    raw_data(stats, document.getElementById("raw_data"));
+    segre_data(stats, document.getElementById("segregate_data"));
+    supergait_data(stats, document.getElementById("scatter_data"));
+    hipflex_data(stats, document.getElementById("hip_flex"));
+    kneeflex_data(stats, document.getElementById("knee_flex"));
+    ankleflex_data(stats, document.getElementById("ankle_flex"));  
 
 </script>
 

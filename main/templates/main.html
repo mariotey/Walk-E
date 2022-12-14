@@ -146,6 +146,10 @@
         data: ajax_data,
         success: function(result){
           console.log("Successfully Calculated Stats.");
+         
+          let a_elem = document.createElement("a");
+          a_elem.href = "/PlotStats";
+          a_elem.click();
         },
         error: function(request, error){
           console.log("Error:" + error);

@@ -40,6 +40,7 @@ def get_stats():
     joint_world_lm = json.loads(request_data["worldLandmark"])
     joint_time = json.loads(request_data["time"])
 
+    # Cache joint_data into server
     redis_client.hset("testjoint_data", "pose_lm", request_data["poseLandmark"])
     redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
     redis_client.hset("testjoint_data", "time", request_data["time"])
@@ -58,6 +59,7 @@ def get_stats():
     stats_data = gait_statistics.stats(joint_data, gait_data, offsetdata)
 
     # Cache Statistics and Video Recording into Server with timestamp as key
+    redis_client.hset("testjoint_data", "stats", json.dumps(stats_data).encode("utf-8"))
 
     return render_template("main.html")
 
@@ -67,18 +69,15 @@ def get_stats():
 def plot_stats():
     redis_client = redis.Redis(host="localhost", port=6379)
 
-    joint_world_lm = json.loads(redis_client.hget("calibration_data", "world_lm").decode("utf-8"))
-    joint_time = json.loads(redis_client.hget("calibration_data", "time").decode("utf-8"))
+    # Retrieve stats data from server
+    stats_data = json.loads(redis_client.hget("testjoint_data", "stats").decode("utf-8"))
 
-    calibrate_world_lm = json.loads(redis_client.hget("calibration_data", "world_lm").decode("utf-8"))
-    calibrate_time = json.loads(redis_client.hget("calibration_data", "time").decode("utf-8"))
+    # joint_data = format_data.request_lm(joint_world_lm, joint_time)
+    # calibrate_data = format_data.request_lm(calibrate_world_lm, calibrate_time)
 
-    joint_data = format_data.request_lm(joint_world_lm, joint_time)
-    calibrate_data = format_data.request_lm(calibrate_world_lm, calibrate_time)
-
-    return render_template("statistics.html")
+    return render_template("statistics.html", stats_Info = stats_data)
 
 #################################################################################################
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=False)
+    app.run(debug=False)

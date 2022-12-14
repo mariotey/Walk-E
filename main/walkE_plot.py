@@ -128,12 +128,12 @@ def get_gait(raw_data, joint_data, new_jointdata):
 
 #################################################################################################
 
-def stats(raw_data, gait_data):
+def stats(gait_data):
     fig, axs = plt.subplots(3, 3, constrained_layout = True)
 
     #############################################################################################
 
-    axs[0, 0].plot(raw_data["rawData"]["x"], raw_data["rawData"]["y"])
+    axs[0, 0].plot(gait_data["rawData"]["x"], gait_data["rawData"]["y"])
     axs[0, 0].set(xlabel = "time (sec)", ylabel = "y-coordinate of heel",
                 title = "Raw Data of Heel")
    

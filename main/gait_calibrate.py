@@ -38,9 +38,9 @@ def calibrate(calibrate_data):
     kneeflex_data = calibrate_flex(calibrate_data, "hip", "knee", "ankle")
     ankleflex_data = calibrate_flex(calibrate_data, "knee", "ref_heel", "toe")
 
-    walkE_plot.calibrate(ref_list, heelX_list, heelY_list, heelZ_list, 
-                        hipflex_data, kneeflex_data, ankleflex_data,
-                        calibrate_data["time"])
+    # walkE_plot.calibrate(ref_list, heelX_list, heelY_list, heelZ_list, 
+    #                     hipflex_data, kneeflex_data, ankleflex_data,
+    #                     calibrate_data["time"])
 
     offset_json = {
         "cut_off": np.mean(heelY_list),
@@ -49,7 +49,7 @@ def calibrate(calibrate_data):
         "ankleflex": np.mean(ankleflex_data["flex_data"])
     }
 
-    print("Complete")
+    print("Calibration Complete")
 
     return offset_json
 

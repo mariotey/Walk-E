@@ -34,9 +34,14 @@ function mp_overlay(pose, fpsControl, activeEffect){
 // To be added into control panel, can call tick() each time the graph runs.
 const fpsControl = new window.FPS();
 
+console.log("Window Version", window.VERSION,"\n")
+console.log(file,"\n")
+
 const pose = new window.Pose({
     locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose@${window.VERSION}/${file}`;
+
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.1/holistic.js`;
+        // return `https://cdn.jsdelivr.net/npm/@mediapipe/pose@${window.VERSION}/${file}`;
     }
 });
 

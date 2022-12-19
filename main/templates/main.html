@@ -41,7 +41,7 @@
   <div class="container">
     <video class="input_video"></video>
     <div style = "display: flex; justify-content: center;">
-        <canvas class="output_canvas" width="1280px" height="720px"></canvas>
+        <canvas class="output_canvas"></canvas>
     </div>
     <div class="loading">
       <div class="spinner"></div>
@@ -58,7 +58,8 @@
   <div class="control-panel">
     <div class="btn_container">
       <button id = "calibrate" class="control-panel-entry control-panel-toggle positive" onclick="get_calibrate()">Calibrate</button>
-      <button id = "stats" class="control-panel-entry control-panel-toggle positive" onclick = "cal_stats()">Start</button>
+      <button id = "walkEMove" class="control-panel-entry control-panel-toggle positive" onclick = "walkE_move()">Start</button>
+      <button id = "stats" class="control-panel-entry control-panel-toggle positive" onclick = "get_stats()">Stats</button>
     </div>
   </div>
 </body>
@@ -67,19 +68,22 @@
 
 <script>
   calibrate_btn = document.getElementById("calibrate");
+  walkE_btn = document.getElementById("walkEMove");
   stats_btn = document.getElementById("stats");
 
   function get_calibrate(){        
     if (calibrate_btn.className == "control-panel-entry control-panel-toggle negative") {
+      walkE_btn.disabled = false;
       stats_btn.disabled = false;
       calibrate_btn.innerHTML = "Calibrate";
 
       calibrate_btn.className = "control-panel-entry control-panel-toggle positive";     
+      walkE_btn.className = "control-panel-entry control-panel-toggle positive";
       stats_btn.className = "control-panel-entry control-panel-toggle positive";
 
       cali_flag = false;
       
-      console.log("Calibration is stopped.");
+      console.log("Calibration is stopped.\n");
 
       ajax_data = {
         poseLandmark: JSON.stringify(calibrate_list["poseLandmark"]),
@@ -108,10 +112,12 @@
       }
     }
     else{
+      walkE_btn.disabled = true;
       stats_btn.disabled = true;
       calibrate_btn.innerHTML = "Stop Calibration";
 
       calibrate_btn.className = "control-panel-entry control-panel-toggle negative";
+      walkE_btn.className = "control-panel-entry control-panel-toggle disable";
       stats_btn.className = "control-panel-entry control-panel-toggle disable";
 
       cali_flag = true;
@@ -120,19 +126,76 @@
     }
   };
 
-  function cal_stats(){
-    if (stats_btn.className == "control-panel-entry control-panel-toggle negative") {
+  function walkE_move(){
+    if (walkE_btn.className == "control-panel-entry control-panel-toggle negative") {
       calibrate_btn.disabled = false;
-      stats_btn.innerHTML = "Start";
+      stats_btn.disabled = false;
+      walkE_btn.innerHTML = "Start";
 
-      calibrate_btn.className = "control-panel-entry control-panel-toggle positive";      
-      stats_btn.className = "control-panel-entry control-panel-toggle positive";
+      calibrate_btn.className = "control-panel-entry control-panel-toggle positive";     
+      walkE_btn.className = "control-panel-entry control-panel-toggle positive";
+      stats_btn.className = "control-panel-entry control-panel-toggle positive";   
 
       stats_flag = false;
       
-      console.log("Walk-E Stopped.");
+      console.log("Walk-E Stopped.\n");
+      console.log(joint_list);
 
-      ajax_data = {
+      // ajax_data = {
+      //   poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
+      //   worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
+      //   time: JSON.stringify(joint_list["time"]),
+      // };
+
+      // console.log(ajax_data);
+
+      // $.ajax({
+      //   url: '/GetStats',
+      //   type: "POST",
+      //   data: ajax_data,
+      //   success: function(result){
+      //     console.log("Successfully Calculated Stats.");
+         
+      //     let a_elem = document.createElement("a");
+      //     a_elem.href = "/PlotStats";
+      //     a_elem.click();
+      //   },
+      //   error: function(request, error){
+      //     console.log("Error:" + error);
+      //   }
+      // });
+
+      // joint_list = {
+      //   "poseLandmark": [],
+      //   "worldLandmark":[],
+      //   "time":[],
+      // }
+    }
+    else{
+      calibrate_btn.disabled = true;
+      stats_btn.disabled = true;
+      walkE_btn.innerHTML = "Stop";
+
+      calibrate_btn.className = "control-panel-entry control-panel-toggle disable";    
+      walkE_btn.className = "control-panel-entry control-panel-toggle negative";
+      stats_btn.className = "control-panel-entry control-panel-toggle disable";   
+
+      stats_flag = true;
+
+      console.log("Walk-E Starts.");      
+    }
+  };
+
+  function get_stats(){
+    calibrate_btn.disabled = true;
+    walkE_btn.disabled = true;
+    stats_btn.innerHTML = "Processing...";
+
+    calibrate_btn.className = "control-panel-entry control-panel-toggle disable";    
+    walkE_btn.className = "control-panel-entry control-panel-toggle disable";    
+    stats_btn.className = "control-panel-entry control-panel-toggle negative";
+
+    ajax_data = {
         poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
         worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
         time: JSON.stringify(joint_list["time"]),
@@ -155,25 +218,8 @@
           console.log("Error:" + error);
         }
       });
-
-      joint_list = {
-        "poseLandmark": [],
-        "worldLandmark":[],
-        "time":[],
-      }
-    }
-    else{
-      calibrate_btn.disabled = true;
-      stats_btn.innerHTML = "Stop";
-
-      calibrate_btn.className = "control-panel-entry control-panel-toggle disable";    
-      stats_btn.className = "control-panel-entry control-panel-toggle negative";
-
-      stats_flag = true;
-
-      console.log("Walk-E Starts.");      
-    }
   };
+
 </script>
 
 </html>

@@ -280,8 +280,6 @@ function kneeflex_data(stats, elem){
         });
     };
 
-    console.log(dataset);
-
     const kneeflex_data = {
         datasets: dataset
     };
@@ -347,8 +345,6 @@ function ankleflex_data(stats, elem){
             showLine: true
         });
     };
-
-    console.log(dataset);
 
     const ankleflex_data = {
         datasets: dataset

@@ -11,7 +11,7 @@
 </head>
 
 <body>  
-    <div>
+    <div class = "cotainer">
         <div class = "plot">
             <canvas id = "raw_data"></canvas>
         </div>
@@ -22,13 +22,28 @@
             <canvas id = "scatter_data"></canvas>
         </div>
         <div class = "plot">
-            <canvas id = "hip_flex"></canvas>
+            <div class = flex_plot>
+                <canvas id = "hip_flex"></canvas>
+            </div>
+            <div class = flex_plot>
+                <canvas id = "hip_best"></canvas>
+            </div>
         </div>
         <div class = "plot">
-            <canvas id = "knee_flex"></canvas>
+            <div class = flex_plot>
+                <canvas id = "knee_flex"></canvas>
+            </div>
+            <div class = flex_plot>
+                <canvas id = "knee_best"></canvas>
+            </div>
         </div>
         <div class = "plot">
-            <canvas id = "ankle_flex"></canvas>
+            <div class = flex_plot>
+                <canvas id = "ankle_flex"></canvas>
+            </div>
+            <div class = flex_plot>
+                <canvas id = "ankle_best"></canvas>
+            </div>
         </div>
     </div>
 </body>
@@ -42,9 +57,12 @@
     raw_data(stats, document.getElementById("raw_data"));
     segre_data(stats, document.getElementById("segregate_data"));
     supergait_data(stats, document.getElementById("scatter_data"));
-    hipflex_data(stats, document.getElementById("hip_flex"));
-    kneeflex_data(stats, document.getElementById("knee_flex"));
-    ankleflex_data(stats, document.getElementById("ankle_flex"));  
+    hipflex_data(stats, document.getElementById("hip_flex"), document.getElementById("hip_best"));
+    kneeflex_data(stats, document.getElementById("knee_flex"), document.getElementById("knee_best"));
+    ankleflex_data(stats, document.getElementById("ankle_flex"), document.getElementById("ankle_best"));  
+
+    // Render Best Fit Plots
+    
 
 </script>
 

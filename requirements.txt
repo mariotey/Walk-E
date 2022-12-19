@@ -1,0 +1,4 @@
+redis
+scikit-learn
+mediapipe
+cv2

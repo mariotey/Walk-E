@@ -1,13 +1,19 @@
 import numpy as np
 import mediapipe as mp
 import walkE_math
-import walkE_plot
 from sklearn.metrics import mean_squared_error as mse
+
+#################################################################################################
 
 MIN_CHUNKSIZE = 3
 POINTS_SPACE = 20
 MAX_MSE = 100
 MAX_ITR = 10
+
+HEEL_DOF = 5
+HIPFLEX_DOF = 4
+KNEEFLEX_DOF = 7
+ANKLEFLEX_DOF = 7
 
 mp_pose = mp.solutions.pose  # Pose Estimation Model
 
@@ -221,7 +227,7 @@ def best_fit(json, dof):
     x.sort()
     new_y = [poly(data) for data in x]
     
-    return x, new_y
+    return {"x": x, "y": new_y}
 
 #################################################################################################
 
@@ -233,6 +239,7 @@ def stats(raw_data, gait_data, offset):
     oldHeelX_list, oldHeelY_list, oldHeelZ_list = [], [], []
     
     hipflex_list, kneeflex_list, ankleflex_list = [], [], []
+    besthip_list, bestknee_list, bestankle_list = { "x": [], "y": [] }, { "x": [], "y": [] }, { "x": [], "y": [] }
     oldHipFlex_list, oldKneeFlex_list, oldAnkleFlex_list = [], [], []
 
     for wave in range(len(gait_data["ref_heel"])):
@@ -274,6 +281,13 @@ def stats(raw_data, gait_data, offset):
         kneeflex_list.append({"x": kneeflex_x, "y": list(np.array(kneeflex_y) - offset["kneeflex"])})
         ankleflex_list.append({"x": ankleflex_x, "y": list(np.array(ankleflex_y) - offset["ankleflex"])})
 
+        besthip_list["x"] += hipflex_x
+        besthip_list["y"] += list(np.array(hipflex_y) - offset["hipflex"])
+        bestknee_list["x"] += kneeflex_x
+        bestknee_list["y"] += list(np.array(kneeflex_y) - offset["kneeflex"])
+        bestankle_list["x"] += ankleflex_x
+        bestankle_list["y"] += list(np.array(ankleflex_y) - offset["ankleflex"])
+        
         oldHipFlex_list.append({"x": hipflex_x, "y": list(np.array(old_hipflex_y) - offset["hipflex"])})
         oldKneeFlex_list.append({"x": kneeflex_x, "y": list(np.array(old_kneeflex_y) - offset["kneeflex"])})
         oldAnkleFlex_list.append({"x": ankleflex_x, "y": list(np.array(old_ankleflex_y) - offset["ankleflex"])})
@@ -289,7 +303,10 @@ def stats(raw_data, gait_data, offset):
         "heelZ": heelZ_list, 
         "hipflex": hipflex_list,
         "kneeflex": kneeflex_list,
-        "ankleflex": ankleflex_list
+        "ankleflex": ankleflex_list,
+        "besthip": best_fit(besthip_list, HIPFLEX_DOF),
+        "bestknee": best_fit(bestknee_list, KNEEFLEX_DOF),
+        "bestankle": best_fit(bestankle_list, ANKLEFLEX_DOF)
     }
     
     # walkE_plot.stats(stats)

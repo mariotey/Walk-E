@@ -190,13 +190,16 @@ function supergait_data(stats, elem){
     );
 };
 
-function hipflex_data(stats, elem){
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+function hipflex_data(stats, elem, best_elem){
     // Setup block
     var dataset = [];
+    var bestfit_data = [];
 
     for (i=0; i < stats["hipflex"].length; i++){
         
-        gait_data = [];
+        var gait_data = [];
 
         for (x=0; x < stats["hipflex"][i]["x"].length; x++){
             gait_data.push({
@@ -214,8 +217,25 @@ function hipflex_data(stats, elem){
         });
     };
 
+    for (x=0; x < stats["besthip"]["x"].length; x++){       
+        bestfit_data.push({
+            x: stats["besthip"]["x"][x], 
+            y: stats["besthip"]["y"][x]
+        });
+    }  
+
     const hipflex_data = {
         datasets: dataset
+    };
+
+    const hipflex_best = {
+        datasets: [{
+            data: bestfit_data,
+            tension: 0.25,
+            borderWidth: 1,
+            radius: 1,
+            showLine: true
+        }]
     };
 
     // Config block
@@ -243,22 +263,59 @@ function hipflex_data(stats, elem){
                     text: "Hip Flex" 
                 },
                 legend: {
-                    display: false
+                    display: false,
                 },
             }
         }
     };
 
+    const hipflex_bestfit_config = {
+        type: 'scatter',
+        data: hipflex_best,
+        options: {
+            scales:{
+                x:{ 
+                    title:{
+                        display: true,
+                        text: "Gait Cycle (%)" 
+                    },
+                },
+                y:{ 
+                    title:{
+                        display: true,
+                        text: "Hip Flex (Degree)"  
+                    },
+                }                
+            },
+            plugins: {
+                title:{
+                    display: true,
+                    text: "Best Fit Curve of Hip Flex" 
+                },
+                legend: {
+                    display: false,
+                },
+            }
+        }
+    };
+
+    
     // Rendering block
     var chart = new Chart(
         elem,
         hipflex_data_config
     );
+
+    var best_chart = new Chart(
+        best_elem,
+        hipflex_bestfit_config
+    );
 };
 
-function kneeflex_data(stats, elem){
+function kneeflex_data(stats, elem, best_elem){
     // Setup block
     var dataset = [];
+    var bestfit_data = [];
 
     for (i=0; i < stats["kneeflex"].length; i++){
         
@@ -280,8 +337,25 @@ function kneeflex_data(stats, elem){
         });
     };
 
+    for (x=0; x < stats["bestknee"]["x"].length; x++){       
+        bestfit_data.push({
+            x: stats["bestknee"]["x"][x], 
+            y: stats["bestknee"]["y"][x]
+        });
+    }  
+
     const kneeflex_data = {
         datasets: dataset
+    };
+
+    const kneeflex_best = {
+        datasets: [{
+            data: bestfit_data,
+            tension: 0.25,
+            borderWidth: 1,
+            radius: 1,
+            showLine: true
+        }]
     };
 
     // Config block
@@ -315,16 +389,52 @@ function kneeflex_data(stats, elem){
         }
     };
 
+    const kneeflex_bestfit_config = {
+        type: 'scatter',
+        data: kneeflex_best,
+        options: {
+            scales:{
+                x:{ 
+                    title:{
+                        display: true,
+                        text: "Gait Cycle (%)" 
+                    },
+                },
+                y:{ 
+                    title:{
+                        display: true,
+                        text: "Knee Flex (Degree)"  
+                    },
+                }                
+            },
+            plugins: {
+                title:{
+                    display: true,
+                    text: "Best Fit Curve of Knee Flex" 
+                },
+                legend: {
+                    display: false,
+                },
+            }
+        }
+    };
+
     // Rendering block
     var chart = new Chart(
         elem,
         kneeflex_data_config
     );
+
+    var best_chart = new Chart(
+        best_elem,
+        kneeflex_bestfit_config
+    );
 };
 
-function ankleflex_data(stats, elem){
+function ankleflex_data(stats, elem, best_elem){
     // Setup block
     var dataset = [];
+    var bestfit_data = [];
 
     for (i=0; i < stats["ankleflex"].length; i++){
         
@@ -346,8 +456,25 @@ function ankleflex_data(stats, elem){
         });
     };
 
+    for (x=0; x < stats["bestankle"]["x"].length; x++){       
+        bestfit_data.push({
+            x: stats["bestankle"]["x"][x], 
+            y: stats["bestankle"]["y"][x]
+        });
+    }  
+
     const ankleflex_data = {
         datasets: dataset
+    };
+
+    const ankleflex_best = {
+        datasets: [{
+            data: bestfit_data,
+            tension: 0.25,
+            borderWidth: 1,
+            radius: 1,
+            showLine: true
+        }]
     };
 
     // Config block
@@ -381,9 +508,44 @@ function ankleflex_data(stats, elem){
         }
     };
 
+    const ankleflex_bestfit_config = {
+        type: 'scatter',
+        data: ankleflex_best,
+        options: {
+            scales:{
+                x:{ 
+                    title:{
+                        display: true,
+                        text: "Gait Cycle (%)" 
+                    },
+                },
+                y:{ 
+                    title:{
+                        display: true,
+                        text: "Ankle Flex (Degree)"  
+                    },
+                }                
+            },
+            plugins: {
+                title:{
+                    display: true,
+                    text: "Best Fit Curve of Ankle Flex" 
+                },
+                legend: {
+                    display: false,
+                },
+            }
+        }
+    };
+
     // Rendering block
     var chart = new Chart(
         elem,
         ankleflex_data_config
+    );
+
+    var best_chart = new Chart(
+        best_elem,
+        ankleflex_bestfit_config
     );
 };

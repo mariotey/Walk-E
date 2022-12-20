@@ -35,12 +35,11 @@ function mp_overlay(pose, fpsControl, activeEffect){
 const fpsControl = new window.FPS();
 
 console.log("Window Version", window.VERSION,"\n")
-console.log(file,"\n")
 
 const pose = new window.Pose({
     locateFile: (file) => {
-
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.1/holistic.js`;
+        console.log(file,"\n")
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
         // return `https://cdn.jsdelivr.net/npm/@mediapipe/pose@${window.VERSION}/${file}`;
     }
 });

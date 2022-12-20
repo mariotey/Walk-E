@@ -1,7 +1,7 @@
 import cv2
 from flask import Flask, Response
 
-video = cv2.VideoCapture(1)
+video = cv2.VideoCapture(0)
 app = Flask('__name__')
 
 def video_stream():

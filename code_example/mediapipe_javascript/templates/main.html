@@ -76,7 +76,7 @@
 
     const camera = new Camera(videoElement, {
         onFrame: async () => {
-            await pose.send({ image: videoElement });
+            await this.selfieSegmentation.send({ image: videoElement });
         },
         width: 1280,
         height: 720

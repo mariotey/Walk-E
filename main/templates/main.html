@@ -118,15 +118,15 @@
             type: "POST",
             data: {data: JSON.stringify(stats_flag)},
             success: function (result) {
-                calibrate_btn.disabled = false;
-                stats_btn.disabled = false;
-                walkE_btn.innerHTML = "Start";
+                // calibrate_btn.disabled = false;
+                // stats_btn.disabled = false;
+                // walkE_btn.innerHTML = "Start";
 
-                calibrate_btn.className = "control-panel-entry control-panel-toggle positive";
-                walkE_btn.className = "control-panel-entry control-panel-toggle positive";
-                stats_btn.className = "control-panel-entry control-panel-toggle positive";
+                // calibrate_btn.className = "control-panel-entry control-panel-toggle positive";
+                // walkE_btn.className = "control-panel-entry control-panel-toggle positive";
+                // stats_btn.className = "control-panel-entry control-panel-toggle positive";
 
-                stats_flag = false;             
+                // stats_flag = false;             
             },
             error: function (request, error) {
                 console.log("Error:" + error);

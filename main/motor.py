@@ -46,8 +46,15 @@ def drive(delay, duty_left, duty_right):
 
     print("Left Motor:", duty_left, ", Right Motor:", duty_right)
 
+def stop():
+    GPIO.output(IN1, 0)
+    GPIO.output(IN3, 0)
+
+    GPIO.output(IN2, 0)
+    GPIO.output(IN4, 0)
+
 # Go Straight
-drive(10, 99.9, 100)
+# drive(10, 99.9, 100)
 
 # Turn Left
 # drive(0.55, 0, 100)

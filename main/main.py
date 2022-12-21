@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 from flask import Flask, render_template, Response, stream_with_context, request
 import time
+import motor
 
 # Drawing utilities for visualizing poses
 mp_drawing = mp.solutions.drawing_utils
@@ -71,9 +72,10 @@ def start():
     request_data = request.form
 
     if request_data["data"] == 'true':
-        time.sleep(5)
+        motor.drive(10, 99.9, 100)
         print("Walk-E has moved.")
     else:
+        motor.stop()
         print("Walk-E stopped.")
 
     return render_template('main.html')

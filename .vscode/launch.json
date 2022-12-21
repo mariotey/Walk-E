@@ -26,7 +26,22 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP":"main/main_flask.py"
+                "FLASK_APP":"./code_javascript/main_flask.py"
+            },
+            "args": [
+                "run",
+                "--no-debugger",
+                // "--port=5002"
+            ],
+            "jinja": true
+        },
+        {
+            "name": "Python: Main",
+            "type": "python",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP":"main/main.py"
             },
             "args": [
                 "run",
@@ -35,5 +50,6 @@
             ],
             "jinja": true
         }
+
     ]
 }

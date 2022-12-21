@@ -1,0 +1,32 @@
+.plot_container {
+    display: flex;
+    position: relative;
+    
+    top: 100px;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.background {
+    display: flex;
+    text-align: center;  
+}
+
+.plot_space {
+    display: inline-block;
+    position: relative;
+    
+    /* width: 1000px; */
+    height: 794px;
+}
+
+.plot {
+    display: flex;
+    justify-content: center;
+}
+
+.flex_plot {
+  width:100%;
+  height: 100%;
+}

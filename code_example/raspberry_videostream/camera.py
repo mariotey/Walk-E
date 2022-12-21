@@ -18,7 +18,7 @@ def video_stream():
             frame = buffer.tobytes()
 
         # "return" will only return one image
-        yield (b' --frame\r\n' b'Content-type: imgae/jpeg\r\n\r\n' + frame +b'\r\n')
+        yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 @app.route('/')

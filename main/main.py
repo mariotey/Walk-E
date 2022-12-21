@@ -72,10 +72,10 @@ def start():
     request_data = request.form
 
     if request_data["data"] == 'true':
-        motor.drive(10, 99.9, 100)
+        # motor.drive(10, 99.9, 100)
         print("Walk-E has moved.")
     else:
-        motor.stop()
+        # motor.stop()
         print("Walk-E stopped.")
 
     return render_template('main.html')

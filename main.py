@@ -1,86 +1,174 @@
 import cv2
 import mediapipe as mp
-from flask import Flask, render_template, Response, stream_with_context, request
+from flask import Flask, render_template, Response, request, stream_template
 import time
-import motor
+import json
+import gaitAnalysis as ga
+# import motor
 
 # Drawing utilities for visualizing poses
 mp_drawing = mp.solutions.drawing_utils
 # Pose Estimation Model
 mp_pose = mp.solutions.pose 
 
+app = Flask(__name__)
 camera = cv2.VideoCapture(0)
-app = Flask("__name__")
+
+joint_data = {
+    "ref_heel": [],
+    "shoulder": [],
+    "hip": [],
+    "knee": [],
+    "ankle": [],
+    "toe": [],
+    "time": []
+}
+
+calibrate_data = {
+    "ref_heel": [],
+    "shoulder": [],
+    "hip": [],
+    "knee": [],
+    "ankle": [],
+    "toe": [],
+    "time": []
+}
+
+render_data = {
+    "ref_heel": [],
+    "shoulder": [],
+    "hip": [],
+    "knee": [],
+    "ankle": [],
+    "toe": [],
+    "time": []
+}
+
+# Setting up Pose Estimation Model
+pose =  mp_pose.Pose(min_detection_confidence=0.5,
+                min_tracking_confidence=0.5,
+                enable_segmentation=False,
+                smooth_segmentation=True,
+                smooth_landmarks=True,
+                static_image_mode=False)
+
+#################################################################################################
+
+def mediapipe_draw(frame):
+    # Pass image feed to Pose Estimation model for processing
+    results = pose.process(frame)
+    
+    # Draw Pose Estimation landmarks                                       
+    mp_drawing.draw_landmarks(frame,
+                            results.pose_landmarks,
+                            mp_pose.POSE_CONNECTIONS,
+                            mp_drawing.DrawingSpec(color=(245, 66, 230),
+                                                    thickness=0,
+                                                    circle_radius=0),
+                            mp_drawing.DrawingSpec(color=(245, 66, 230),
+                                                    thickness=2,
+                                                    circle_radius=0)
+                            )   
+    return frame, results
+
+def get_landmark(frame):
+    # Pass image feed to Pose Estimation model for processing
+    results = pose.process(frame)
+
+    try:
+        camera_lm = results.pose_landmarks.landmark
+        world_lm = results.pose_world_landmarks.landmark
+
+        return camera_lm, world_lm
+        
+    except AttributeError:
+        # print("Nothing / Errors detected")
+        pass  # Pass if there is no detection or error  
+
+#################################################################################################
 
 def video_stream():    
     while True:
-        # Setting up Pose Estimation Model
-        with mp_pose.Pose(min_detection_confidence=0.5,
-                        min_tracking_confidence=0.5,
-                        enable_segmentation=False,
-                        smooth_segmentation=True,
-                        smooth_landmarks=True,
-                        static_image_mode=False) as pose:
-        
-            # Read camera frame
-            ret, frame = camera.read()
-            if not ret:
-                ret, buffer = cv2.imencode('.jpeg', frame)
-            else:
-                # Recolour Image feed (from openCV) from BGR to RGB
-                image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # Read camera frame
+        ret, frame = camera.read()
 
-                # Save memory by setting writeable attribute as false; improves performance
-                image.flags.writeable = False
+        if not ret:
+            break
+        else:
+            frame, results = mediapipe_draw(frame)
 
-                # Pass recoloured image feed to Pose Estimation model for processing
-                results = pose.process(image)
-                image.flags.writeable = True
+        ret, buffer = cv2.imencode('.jpeg', frame)    
+        frame = buffer.tobytes()
 
-                # Recolour Image back to BGR for openCV to process, Make Detection
-                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-                
-                # Draw Pose Estimation landmarks                                       
-                mp_drawing.draw_landmarks(image,
-                                        results.pose_landmarks,
-                                        mp_pose.POSE_CONNECTIONS,
-                                        mp_drawing.DrawingSpec(color=(245, 66, 230),
-                                                                thickness=0,
-                                                                circle_radius=0),
-                                        mp_drawing.DrawingSpec(color=(245, 66, 230),
-                                                                thickness=2,
-                                                                circle_radius=0)
-                                        )
+        # "return" will only return one image
+        yield (b'--frame\r\n' 
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-                ret, buffer = cv2.imencode('.jpeg', image)
-                
-            frame = buffer.tobytes()
-            # "return" will only return one image
-            yield (b'--frame\r\n' 
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+def landmark_stream(template_name, **context):    
+    app.update_template_context(context)
+    t = app.jinja_env.get_template(template_name)
+    rv = t.stream(context)
+    return rv
+
+#################################################################################################
 
 @app.route('/')
 def index():
-    return render_template('main.html')
+    def landmark_stream():
+        start_time = time.time()
 
+        while True:
+            # Read camera frame
+            ret, frame = camera.read()
+
+            if not ret:
+                break
+            else:
+                frame, results = mediapipe_draw(frame)
+                camera_lm, world_lm = get_landmark(frame)
+
+                ga.get_lm(render_data, world_lm, start_time)
+
+                yield_data = json.dumps(render_data)
+                yield yield_data
+
+    return Response(stream_template('scatterplot.html', data=landmark_stream()))
+    
 @app.route('/video')
 def video():
-    return Response(video_stream(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    res_obg = Response(video_stream(), 
+                mimetype='multipart/x-mixed-replace; boundary=frame')
+    return res_obg
+
+#################################################################################################
 
 @app.route('/move', methods=["POST", "GET"])
 def start():
     request_data = request.form
 
     if request_data["data"] == 'true':
-        motor.drive(10, 99.9, 100)
+        # motor.drive(10, 99.9, 100)
         print("Walk-E has moved.")
     else:
-        motor.stop()
+        # motor.stop()
         print("Walk-E stopped.")
 
     return render_template('main.html')
 
-app.run(port='5000', debug=False)
+#################################################################################################
 
+if __name__ == "__main__":
+    app.run(port='5000', debug=False)
 
-                    
+# def landmark_stream():
+#         while True:
+#             # Read camera frame
+#             ret, frame = camera.read()
+
+#             if not ret:
+#                 break
+#             else:
+#                 frame, results = mediapipe_draw(frame)
+#                 camera_lm, world_lm = get_landmark(frame)
+
+#                 yield '{"camera_lm": [' + camera_lm + '], "world_lm": [' + world_lm + ']}'                    

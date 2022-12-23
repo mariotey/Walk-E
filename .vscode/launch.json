@@ -41,7 +41,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP":"main/main.py"
+                "FLASK_APP":"main.py"
             },
             "args": [
                 "run",

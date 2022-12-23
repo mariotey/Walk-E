@@ -29,7 +29,17 @@
     </div>
 </body>
 
+<!-- Streaming of Mediapipe Landmarks -->
+{% for item in data %}
+<script>   
+    var data_string = ({{ item | tojson}}).replace("\'", "");
+    var data_json = JSON.parse(data_string);
+    console.log(data_json);
+</script>
+{% endfor %}
+
 <script>
+
     calibrate_btn = document.getElementById("calibrate");
     walkE_btn = document.getElementById("walkEMove");
     stats_btn = document.getElementById("stats");

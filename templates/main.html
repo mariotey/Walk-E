@@ -14,31 +14,79 @@
 </head>
 
 <body>
-    <div class="container">
-        <div style = "display: flex; justify-content: center;">
-            <img src = "{{ url_for('video') }}" style = "position: fixed;"/>
+    <div class = "container">>
+        <div style = "display: flex; justify-content: center; width: 100%; height: 675px">
+            <img id = "img_src" src = "{{ url_for('video') }}" style = "position: fixed;"/>
         </div>
-    </div>
 
-    <div class="control-panel">
-        <div class="btn_container">
-          <button id = "calibrate" class="control-panel-entry control-panel-toggle positive" onclick="get_calibrate()">Calibrate</button>
-          <button id = "walkEMove" class="control-panel-entry control-panel-toggle positive" onclick = "walkE_move()">Start</button>
-          <button id = "stats" class="control-panel-entry control-panel-toggle positive" onclick = "get_stats()">Stats</button>
+        <div class="control-panel">
+            <div class="btn_container">
+            <button id = "calibrate" class="control-panel-entry control-panel-toggle positive" onclick="get_calibrate()">Calibrate</button>
+            <button id = "walkEMove" class="control-panel-entry control-panel-toggle positive" onclick = "walkE_move()">Start</button>
+            <button id = "stats" class="control-panel-entry control-panel-toggle positive" onclick = "get_stats()">Stats</button>
+            </div>
         </div>
-    </div>
+
+        <p>This is the latest output: <span id="latest"></span></p>
+        <p>This is all the output:</p>
+        <ul id="output"></ul>
+    </div>    
 </body>
 
-<!-- Streaming of Mediapipe Landmarks -->
-{% for item in data %}
-<script>   
-    var data_string = ({{ item | tojson}}).replace("\'", "");
-    var data_json = JSON.parse(data_string);
-    console.log(data_json);
-</script>
-{% endfor %}
-
 <script>
+    var latest = document.getElementById('latest');
+    var output = document.getElementById('output');
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '{{ url_for('stream') }}');
+    xhr.send();
+    var position = 0;
+
+    function handleNewData() {
+        // the response text include the entire response so far
+        // split the messages, then take the messages that haven't been handled yet
+        // position tracks how many messages have been handled
+        // messages end with a newline, so split will always show one extra empty message at the end
+        console.log(xhr);
+
+        var messages = xhr.responseText.split('\n');
+        console.log(messages);
+
+        messages.slice(position, -1).forEach(function(value) {
+            latest.textContent = value;  // update the latest value in place
+            // build and append a new item to a list to log all output
+            var item = document.createElement('li');
+            item.textContent = value;
+            output.appendChild(item);
+        });
+
+        position = messages.length - 1;
+    }
+
+    var timer;
+    timer = setInterval(function() {
+        // check the response for new data
+        handleNewData();
+        // stop checking once the response has ended
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+            clearInterval(timer);
+            latest.textContent = 'Done';
+        }
+    }, 1000);
+</script>
+
+<script>    
+    // async function get_landmarks() {
+    //     while (true){
+    //         fetch("/landmark")
+    //         .then(response => response.json())
+    //         .then(data => data["Hello"].replace("\'", ""))
+    //         .then(modified_data => JSON.parse(modified_data))
+    //         .then(result => console.log(result));
+    //     }
+    // };
+
+    // get_landmarks();
 
     calibrate_btn = document.getElementById("calibrate");
     walkE_btn = document.getElementById("walkEMove");

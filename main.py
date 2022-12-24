@@ -1,7 +1,8 @@
 import cv2
 import mediapipe as mp
-from flask import Flask, render_template, Response, request, stream_template
-import time
+from flask import Flask, render_template, Response, request, stream_with_context
+from time import sleep
+from math import sqrt
 import json
 import gaitAnalysis as ga
 # import motor
@@ -14,36 +15,20 @@ mp_pose = mp.solutions.pose
 app = Flask(__name__)
 camera = cv2.VideoCapture(0)
 
-joint_data = {
-    "ref_heel": [],
-    "shoulder": [],
-    "hip": [],
-    "knee": [],
-    "ankle": [],
-    "toe": [],
-    "time": []
+pose_data = {
+    "nose": [],
+    "left_eye_inner": [],
+    "left_eye": [],
+    "left_eye_outer": [],
+    "right_eye_inner": [],
+    "right_eye": [],
+    "right_eye_outer": [],
+    "left_ear": [],
+    "right_ear": [],
+    "mouth_left": [],
+    "mouth_right": [],
+    "left_shoulder": [{"x": 23, "y": 50, "z": 60}]
 }
-
-calibrate_data = {
-    "ref_heel": [],
-    "shoulder": [],
-    "hip": [],
-    "knee": [],
-    "ankle": [],
-    "toe": [],
-    "time": []
-}
-
-render_data = {
-    "ref_heel": [],
-    "shoulder": [],
-    "hip": [],
-    "knee": [],
-    "ankle": [],
-    "toe": [],
-    "time": []
-}
-
 # Setting up Pose Estimation Model
 pose =  mp_pose.Pose(min_detection_confidence=0.5,
                 min_tracking_confidence=0.5,
@@ -104,41 +89,43 @@ def video_stream():
         yield (b'--frame\r\n' 
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-def landmark_stream(template_name, **context):    
-    app.update_template_context(context)
-    t = app.jinja_env.get_template(template_name)
-    rv = t.stream(context)
-    return rv
+def landmark_stream():    
+    while True:
+        # Read camera frame
+        ret, frame = camera.read()
 
+        if not ret:
+            break
+        else:
+            frame, results = mediapipe_draw(frame)
+            camera_lm, world_lm = get_landmark(frame)
+
+            # return {"camera": json.dumps(camera_lm).encode('utf-8'),
+            #         "world": json.dumps(world_lm).encode('utf-8')}
+
+            yield json.dumps(pose_data) + "\n"
+            
 #################################################################################################
 
 @app.route('/')
-def index():
-    def landmark_stream():
-        start_time = time.time()
-
-        while True:
-            # Read camera frame
-            ret, frame = camera.read()
-
-            if not ret:
-                break
-            else:
-                frame, results = mediapipe_draw(frame)
-                camera_lm, world_lm = get_landmark(frame)
-
-                ga.get_lm(render_data, world_lm, start_time)
-
-                yield_data = json.dumps(render_data)
-                yield yield_data
-
-    return Response(stream_template('scatterplot.html', data=landmark_stream()))
+def index():   
+    return render_template("main.html")
+    # return Response(stream_template('scatterplot.html', data=landmark_stream()))
     
 @app.route('/video')
 def video():
-    res_obg = Response(video_stream(), 
+    return Response(video_stream(), 
                 mimetype='multipart/x-mixed-replace; boundary=frame')
-    return res_obg
+
+@app.route('/landmark')
+def landmark():
+    return Response(stream_with_context(landmark_stream()))
+    # return Response(landmark_stream(),
+    #             mimetype="application/json;")
+
+@app.route("/stream", methods=["POST", "GET"])
+def stream():           
+    return Response(landmark_stream(),  mimetype="text/plain")
 
 #################################################################################################
 
@@ -158,17 +145,5 @@ def start():
 #################################################################################################
 
 if __name__ == "__main__":
-    app.run(port='5000', debug=False)
-
-# def landmark_stream():
-#         while True:
-#             # Read camera frame
-#             ret, frame = camera.read()
-
-#             if not ret:
-#                 break
-#             else:
-#                 frame, results = mediapipe_draw(frame)
-#                 camera_lm, world_lm = get_landmark(frame)
-
-#                 yield '{"camera_lm": [' + camera_lm + '], "world_lm": [' + world_lm + ']}'                    
+    app.run(port='5000', debug=True)
+             

@@ -1,2 +1,4 @@
 sudo kill -9 $(sudo lsof -t -i:80)
 sudo kill -9 $(sudo lsof -t -i:5000)
+
+sudo python3 main.py

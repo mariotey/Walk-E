@@ -39,7 +39,7 @@ def get_lm(json, world_lm, start_time):
         return data_json
         
     # Extract landmarks
-    json["ref_heel"].append(format_lm("LEFT_HEEL", world_lm))  # Heel Reference
+    json["left_heel"].append(format_lm("LEFT_HEEL", world_lm))
     json["shoulder"].append(format_lm("LEFT_SHOULDER", world_lm))  # Shoulder Info
     json["hip"].append(format_lm("LEFT_HIP", world_lm))  # Hip Info
     json["knee"].append(format_lm("LEFT_KNEE", world_lm))  # Knee Info

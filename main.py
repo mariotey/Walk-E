@@ -5,15 +5,16 @@ from time import sleep
 from math import sqrt
 import json
 import gaitAnalysis as ga
-# import motor
+import motor
 
 # Drawing utilities for visualizing poses
 mp_drawing = mp.solutions.drawing_utils
 # Pose Estimation Model
 mp_pose = mp.solutions.pose 
 
-app = Flask(__name__)
 camera = cv2.VideoCapture(0)
+
+app = Flask(__name__)
 
 pose_data = {
     "nose": [],
@@ -29,6 +30,7 @@ pose_data = {
     "mouth_right": [],
     "left_shoulder": [{"x": 23, "y": 50, "z": 60}]
 }
+
 # Setting up Pose Estimation Model
 pose =  mp_pose.Pose(min_detection_confidence=0.5,
                 min_tracking_confidence=0.5,
@@ -81,30 +83,14 @@ def video_stream():
             break
         else:
             frame, results = mediapipe_draw(frame)
+            # camera_lm, world_lm = get_landmark(frame)
 
-        ret, buffer = cv2.imencode('.jpeg', frame)    
-        frame = buffer.tobytes()
+            ret, buffer = cv2.imencode('.jpeg', frame)    
+            frame = buffer.tobytes()
 
         # "return" will only return one image
-        yield (b'--frame\r\n' 
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-def landmark_stream():    
-    while True:
-        # Read camera frame
-        ret, frame = camera.read()
-
-        if not ret:
-            break
-        else:
-            frame, results = mediapipe_draw(frame)
-            camera_lm, world_lm = get_landmark(frame)
-
-            # return {"camera": json.dumps(camera_lm).encode('utf-8'),
-            #         "world": json.dumps(world_lm).encode('utf-8')}
-
-            yield json.dumps(pose_data) + "\n"
-            
+        yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    
 #################################################################################################
 
 @app.route('/')
@@ -117,15 +103,13 @@ def video():
     return Response(video_stream(), 
                 mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/landmark')
-def landmark():
-    return Response(stream_with_context(landmark_stream()))
-    # return Response(landmark_stream(),
-    #             mimetype="application/json;")
+@app.route("/streamdata")
+def streamdata():           
+    def generate():
+        yield json.dumps(pose_data) + "\n"
+        sleep(0.5)
 
-@app.route("/stream", methods=["POST", "GET"])
-def stream():           
-    return Response(landmark_stream(),  mimetype="text/plain")
+    return Response(generate(),  mimetype="application/json")
 
 #################################################################################################
 
@@ -134,10 +118,10 @@ def start():
     request_data = request.form
 
     if request_data["data"] == 'true':
-        # motor.drive(10, 99.9, 100)
+        motor.drive(10, 99.9, 100)
         print("Walk-E has moved.")
     else:
-        # motor.stop()
+        motor.stop()
         print("Walk-E stopped.")
 
     return render_template('main.html')
@@ -145,5 +129,5 @@ def start():
 #################################################################################################
 
 if __name__ == "__main__":
-    app.run(port='5000', debug=True)
+    app.run(port='5000', debug=False)
              

@@ -1,11 +1,12 @@
 import cv2
 import mediapipe as mp
-from flask import Flask, render_template, Response, request, stream_with_context
+from flask import Flask, render_template, Response, request
 from time import sleep
-from math import sqrt
 import json
+
 import gaitAnalysis as ga
 import motor
+import pose_coord
 
 # Drawing utilities for visualizing poses
 mp_drawing = mp.solutions.drawing_utils
@@ -16,20 +17,7 @@ camera = cv2.VideoCapture(0)
 
 app = Flask(__name__)
 
-pose_data = {
-    "nose": [],
-    "left_eye_inner": [],
-    "left_eye": [],
-    "left_eye_outer": [],
-    "right_eye_inner": [],
-    "right_eye": [],
-    "right_eye_outer": [],
-    "left_ear": [],
-    "right_ear": [],
-    "mouth_left": [],
-    "mouth_right": [],
-    "left_shoulder": [{"x": 23, "y": 50, "z": 60}]
-}
+pose_data = {}
 
 # Setting up Pose Estimation Model
 pose =  mp_pose.Pose(min_detection_confidence=0.5,
@@ -42,31 +30,36 @@ pose =  mp_pose.Pose(min_detection_confidence=0.5,
 #################################################################################################
 
 def mediapipe_draw(frame):
-    # Pass image feed to Pose Estimation model for processing
-    results = pose.process(frame)
-    
-    # Draw Pose Estimation landmarks                                       
-    mp_drawing.draw_landmarks(frame,
-                            results.pose_landmarks,
-                            mp_pose.POSE_CONNECTIONS,
-                            mp_drawing.DrawingSpec(color=(245, 66, 230),
-                                                    thickness=0,
-                                                    circle_radius=0),
-                            mp_drawing.DrawingSpec(color=(245, 66, 230),
-                                                    thickness=2,
-                                                    circle_radius=0)
-                            )   
-    return frame, results
+    try:
+        # Pass image feed to Pose Estimation model for processing
+        results = pose.process(frame)
+        
+        # Draw Pose Estimation landmarks                                       
+        mp_drawing.draw_landmarks(frame,
+                                results.pose_landmarks,
+                                mp_pose.POSE_CONNECTIONS,
+                                mp_drawing.DrawingSpec(color=(245, 66, 230),
+                                                        thickness=0,
+                                                        circle_radius=0),
+                                mp_drawing.DrawingSpec(color=(245, 66, 230),
+                                                        thickness=2,
+                                                        circle_radius=0)
+                                )   
+    except AttributeError:
+        # print("Nothing / Errors detected")
+        pass  # Pass if there is no detection or error  
+
+    return frame
 
 def get_landmark(frame):
     # Pass image feed to Pose Estimation model for processing
     results = pose.process(frame)
 
     try:
-        camera_lm = results.pose_landmarks.landmark
+        # camera_lm = results.pose_landmarks.landmark
         world_lm = results.pose_world_landmarks.landmark
-
-        return camera_lm, world_lm
+        
+        return pose_coord.append_lm(world_lm)
         
     except AttributeError:
         # print("Nothing / Errors detected")
@@ -82,8 +75,7 @@ def video_stream():
         if not ret:
             break
         else:
-            frame, results = mediapipe_draw(frame)
-            # camera_lm, world_lm = get_landmark(frame)
+            frame = mediapipe_draw(frame)
 
             ret, buffer = cv2.imencode('.jpeg', frame)    
             frame = buffer.tobytes()
@@ -106,10 +98,19 @@ def video():
 @app.route("/streamdata")
 def streamdata():           
     def generate():
-        yield json.dumps(pose_data) + "\n"
-        sleep(0.5)
+        while True:
+            # Read camera frame
+            ret, frame = camera.read()
 
-    return Response(generate(),  mimetype="application/json")
+            if not ret:
+                break
+            else:
+                pose_data = get_landmark(frame)
+
+                yield json.dumps(pose_data) + "\n"
+                sleep(1)
+
+    return app.response_class(generate(),  mimetype="application/json")
 
 #################################################################################################
 

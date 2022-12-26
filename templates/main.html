@@ -38,24 +38,11 @@
 <script src = "/static/js/streamdata.js"></script>
 
 <script>
-  var latest = document.getElementById('latest');
-  var output = document.getElementById('output');
-  var timer;
-
   var xhr = new XMLHttpRequest();
   xhr.open('GET', "{{ url_for('streamdata') }}");
   xhr.send();
-  var position = 0;
-
-  timer = setInterval(function () {
-      // check the response for new data
-      handleNewData();
-      // stop checking once the response has ended
-      if (xhr.readyState == XMLHttpRequest.DONE) {
-          clearInterval(timer);
-          latest.textContent = 'Done';
-      }
-  }, 1000);
+  
+  stream_data(xhr);
 
 </script>
 

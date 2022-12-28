@@ -46,7 +46,7 @@ def get_stats():
     else:
         print("Walk-E stopped.")
 
-    redis_client.hset("walkEStats", "stats", request_data["stats"])
+    redis_client.set("walkEStats", request_data["stats"])
 
     return render_template("main.html")
 

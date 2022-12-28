@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request
 import json
 import redis
-import sys
 
 import gait_calibrate
 import gait_statistics
@@ -35,8 +34,6 @@ def recalibrate():
 def get_stats():
     request_data = request.form
     redis_client = redis.Redis(host="localhost", port=6379)
-    # redis_p = redis_client.pubsub()
-    # redis_p.subscribe("dev")
 
     # Cache joint_data into server
     redis_client.hset("testjoint_data", "pose_lm", request_data["poseLandmark"])
@@ -45,8 +42,11 @@ def get_stats():
 
     if request_data["stats"] == 'true':
         print("Walk-E has moved.")
+        
     else:
         print("Walk-E stopped.")
+
+    redis_client.hset("walkEStats", "stats", request_data["stats"])
 
     return render_template("main.html")
 

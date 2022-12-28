@@ -2,3 +2,4 @@ redis
 scikit-learn
 mediapipe
 cv2
+numpy

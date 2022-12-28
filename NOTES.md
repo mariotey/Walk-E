@@ -20,3 +20,6 @@ How to Clone Repository
 1. git init @ repository
 2. navigate to Profile -> Settings -> Developer settings -> Generate New Token
 3. git clone https://<personal_access_token>@github.com/<github_account_username>/<github_repository>.git 
+
+How to use ad hoc certificates with Flask
+1. install additional dependency in virtual environment (pip install pyopenssl)

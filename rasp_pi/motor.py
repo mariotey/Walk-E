@@ -42,9 +42,8 @@ def drive(delay, duty_left, duty_right):
     pwm_right.ChangeDutyCycle(duty_right)
     pwm_left.ChangeDutyCycle(duty_left)
 
-    sleep(delay)
-
     print("Left Motor:", duty_left, ", Right Motor:", duty_right)
+    sleep(delay)  
 
 def stop():
     GPIO.output(IN1, 0)
@@ -53,8 +52,10 @@ def stop():
     GPIO.output(IN2, 0)
     GPIO.output(IN4, 0)
 
+    print("Stopped")
+
 # Go Straight
-# drive(10, 99.9, 100)
+drive(10, 99.9, 100)
 
 # Turn Left
 # drive(0.55, 0, 100)
@@ -68,4 +69,6 @@ def stop():
 # drive(0.45, 100, 0)
 # drive(1, 0, 0)
 # drive(0.45, 100, 0)
+
+print("Complete")
 

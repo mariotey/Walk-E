@@ -5,6 +5,7 @@ import redis
 import gait_calibrate
 import gait_statistics
 import format_data
+import motor
 
 app = Flask(__name__)
 
@@ -36,14 +37,16 @@ def get_stats():
     redis_client = redis.Redis(host="localhost", port=6379)
 
     # Cache joint_data into server
-    redis_client.hset("testjoint_data", "pose_lm", request_data["poseLandmark"])
-    redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
-    redis_client.hset("testjoint_data", "time", request_data["time"])
+    # redis_client.hset("testjoint_data", "pose_lm", request_data["poseLandmark"])
+    # redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
+    # redis_client.hset("testjoint_data", "time", request_data["time"])
 
     if request_data["stats"] == 'true':
+        motor.drive(10, 99.9, 100)
         print("Walk-E has moved.")
         
     else:
+        motor.stop()
         print("Walk-E stopped.")
 
     redis_client.set("walkEStats", request_data["stats"])

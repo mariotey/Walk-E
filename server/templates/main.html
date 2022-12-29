@@ -20,6 +20,7 @@
     // Global Variables
     let cali_flag = false;
     let stats_flag = false;
+    let move_flag = true;
 
     let calibrate_list = {
       "poseLandmark": [],
@@ -56,6 +57,7 @@
 
   <div class="control-panel">
     <div class="btn_container">
+      <button id = "walkEEnable" class="control-panel-entry control-panel-toggle positive" onclick="enable()">Walk-E Enabled</button>
       <button id = "calibrate" class="control-panel-entry control-panel-toggle positive" onclick="get_calibrate()">Calibrate</button>
       <button id = "walkEMove" class="control-panel-entry control-panel-toggle positive" onclick = "walkE_move()">Start</button>
       <button id = "stats" class="control-panel-entry control-panel-toggle positive" onclick = "get_stats()">Stats</button>
@@ -69,6 +71,7 @@
   calibrate_btn = document.getElementById("calibrate");
   walkE_btn = document.getElementById("walkEMove");
   stats_btn = document.getElementById("stats");
+  enable_btn = document.getElementById("walkEEnable");
 
   function get_calibrate(){        
     if (calibrate_btn.className == "control-panel-entry control-panel-toggle negative") {
@@ -150,6 +153,7 @@
     }
 
     ajax_data = {
+      enable: JSON.stringify(move_flag),
       stats: JSON.stringify(stats_flag),
       poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
       worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
@@ -207,7 +211,25 @@
       });
   };
 
+  function enable(){
+    if (enable_btn.className == "control-panel-entry control-panel-toggle negative") {
+      enable_btn.innerHTML = "Walk-E Enabled";
+      enable_btn.className = "control-panel-entry control-panel-toggle positive";     
+
+      move_flag = true;
+    }
+    else{
+      enable_btn.innerHTML = "Walk-E Disabled";
+      enable_btn.className = "control-panel-entry control-panel-toggle negative";
+
+      move_flag = false;
+    }
+
+    console.log("walkE enable:" + String(move_flag));
+  };
+
 </script>
+
 
 </html>
 

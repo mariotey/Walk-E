@@ -72,22 +72,6 @@ body {
   top: 0;
 }
 
-/* .logo {
-  bottom: 10px;
-  right: 20px;
-}
-.logo .title {
-  color: white;
-  font-size: 28px;
-}
-.logo .subtitle {
-  position: relative;
-  color: white;
-  font-size: 10px;
-  left: -30px;
-  top: 20px;
-} */
-
 .control-panel {
   position: absolute;
   left: 10px;

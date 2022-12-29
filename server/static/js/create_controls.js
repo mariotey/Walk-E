@@ -21,7 +21,7 @@ export default function create_controls(pose, fpsControl, activeEffect) {
     })
 
     .add([
-        new controls.StaticText({ title: 'Walk-E' }),
+        // new controls.StaticText({ title: 'Walk-E' }),
         fpsControl,
         new controls.SourcePicker({
             // Resets because this model gives better results when reset between source changes.

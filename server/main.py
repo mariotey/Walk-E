@@ -7,7 +7,7 @@ import redis
 import gait_calibrate
 import gait_statistics
 import format_data
-import motor
+# import motor
 import dist
 
 # Drawing utilities for visualizing poses
@@ -24,11 +24,9 @@ pose = mp_pose.Pose(min_detection_confidence=0.5,
                     static_image_mode=False)
 
 # Get Realtime Webcam Feed
-cap = cv2.VideoCapture(0) 
+cap = cv2.VideoCapture(1) 
 
 app = Flask(__name__)
-
-move_stats = True
 
 #################################################################################################
 
@@ -53,45 +51,42 @@ def recalibrate():
 #################################################################################################
 
 @app.route('/GetStats', methods=["GET", "POST"])
-def get_stats():
-    request_data = request.form 
+def get_stats():  
+    request_data = request.form   
 
-    if request_data["stats"] == 'true':
+    global move_stats
+    
+    if request_data["stats"] == "true": 
         move_stats = True
     else:
         move_stats = False
 
     # Logic for Proximity Detection
-    while cap.isOpened() and request_data["stats"] == "true": 
-        ret, frame = cap.read()  
-
+    while move_stats: 
+        ret, frame = cap.read()
         results = pose.process(frame)
 
         try:
             camera_lm = results.pose_landmarks.landmark
             dist.detect(frame, camera_lm)
-            motor.drive(100, 100)
-
-        except AttributeError:
-            print("Nothing / Errors detected")
-            # pass  # Pass if there is no detection or error   
-        
-        # cv2.imshow("Mediapipe Feed", image)  # Render image result on screen
+            print("Walk-E moves")
+            # motor.drive(100, 100)
             
-    if request_data["stats"] != "true":
-        # Cache joint_data into server
-        redis_client = redis.Redis(host="localhost", port=6379)
-        redis_client.hset("testjoint_data", "pose_lm", request_data["poseLandmark"])
-        redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
-        redis_client.hset("testjoint_data", "time", request_data["time"])
-        print("Cached into Redis.\n")
+        except AttributeError:
+            # print("Nothing / Errors detected")
+            pass  # Pass if there is no detection or error   
 
-        # Releases camera and destroy all cv2 windows
-        cap.release()
-        # cv2.destroyAllWindows()
-        motor.stop()
+    # Releases camera and destroy all cv2 windows
+    # cap.release()
+    # motor.stop()
+    print("Walk-E stops")
 
-
+    # Cache joint_data into server
+    redis_client = redis.Redis(host="localhost", port=6379)
+    redis_client.hset("testjoint_data", "pose_lm", request_data["poseLandmark"])
+    redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
+    redis_client.hset("testjoint_data", "time", request_data["time"])
+        
     print(request_data["stats"],move_stats)
 
     return render_template("main.html")

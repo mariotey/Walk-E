@@ -87,7 +87,7 @@ def get_stats():
     redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
     redis_client.hset("testjoint_data", "time", request_data["time"])
         
-    print(request_data["stats"],move_stats)
+    # print(request_data["stats"],move_stats)
 
     return render_template("main.html")
     

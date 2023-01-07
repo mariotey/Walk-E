@@ -32,7 +32,7 @@ pwm_left = GPIO.PWM(EN2, 1000)
 pwm_right.start(0)
 pwm_left.start(0)
 
-def drive(delay, duty_left, duty_right):
+def drive(duty_left, duty_right):
     GPIO.output(IN1, 0)
     GPIO.output(IN3, 0)
 
@@ -42,8 +42,7 @@ def drive(delay, duty_left, duty_right):
     pwm_right.ChangeDutyCycle(duty_right)
     pwm_left.ChangeDutyCycle(duty_left)
 
-    print("Left Motor:", duty_left, ", Right Motor:", duty_right)
-    sleep(delay)  
+    print("Walk-E is moving. (", duty_left, ",", duty_right, ")\n")
 
 def stop():
     GPIO.output(IN1, 0)
@@ -51,6 +50,8 @@ def stop():
 
     GPIO.output(IN2, 0)
     GPIO.output(IN4, 0)
+
+    print("Walk-E has stopped\n")
 
 # Go Straight
 # drive(10, 99.9, 100)

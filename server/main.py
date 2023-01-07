@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request
+import mediapipe as mp
+import cv2
 import json
 import redis
 
@@ -6,8 +8,27 @@ import gait_calibrate
 import gait_statistics
 import format_data
 import motor
+import dist
+
+# Drawing utilities for visualizing poses
+mp_drawing = mp.solutions.drawing_utils
+
+# Pose Estimation Model
+mp_pose = mp.solutions.pose  
+
+pose = mp_pose.Pose(min_detection_confidence=0.5,
+                    min_tracking_confidence=0.5,
+                    enable_segmentation=True,
+                    smooth_segmentation=True,
+                    smooth_landmarks=True,
+                    static_image_mode=False)
+
+# Get Realtime Webcam Feed
+cap = cv2.VideoCapture(0) 
 
 app = Flask(__name__)
+
+move_stats = True
 
 #################################################################################################
 
@@ -33,26 +54,48 @@ def recalibrate():
 
 @app.route('/GetStats', methods=["GET", "POST"])
 def get_stats():
-    request_data = request.form
-    redis_client = redis.Redis(host="localhost", port=6379)
+    request_data = request.form 
 
-    # Cache joint_data into server
-    # redis_client.hset("testjoint_data", "pose_lm", request_data["poseLandmark"])
-    # redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
-    # redis_client.hset("testjoint_data", "time", request_data["time"])
-
-    if request_data["enable"] == 'true':
-        if request_data["stats"] == 'true':
-            motor.drive(10, 99.9, 100)
-            print("Walk-E has moved.")
-            
-        else:
-            motor.stop()
-            print("Walk-E stopped.")
+    if request_data["stats"] == 'true':
+        move_stats = True
     else:
-        print("Walk-E is not enabled")
+        move_stats = False
+
+    # Logic for Proximity Detection
+    while cap.isOpened() and request_data["stats"] == "true": 
+        ret, frame = cap.read()  
+
+        results = pose.process(frame)
+
+        try:
+            camera_lm = results.pose_landmarks.landmark
+            dist.detect(frame, camera_lm)
+            motor.drive(100, 100)
+
+        except AttributeError:
+            print("Nothing / Errors detected")
+            # pass  # Pass if there is no detection or error   
+        
+        # cv2.imshow("Mediapipe Feed", image)  # Render image result on screen
+            
+    if request_data["stats"] != "true":
+        # Cache joint_data into server
+        redis_client = redis.Redis(host="localhost", port=6379)
+        redis_client.hset("testjoint_data", "pose_lm", request_data["poseLandmark"])
+        redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
+        redis_client.hset("testjoint_data", "time", request_data["time"])
+        print("Cached into Redis.\n")
+
+        # Releases camera and destroy all cv2 windows
+        cap.release()
+        # cv2.destroyAllWindows()
+        motor.stop()
+
+
+    print(request_data["stats"],move_stats)
 
     return render_template("main.html")
+    
 
 #################################################################################################
 

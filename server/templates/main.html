@@ -57,7 +57,7 @@
 
   <div class="control-panel">
     <div class="btn_container">
-      <button id = "walkEEnable" class="control-panel-entry control-panel-toggle positive" onclick="enable()">Walk-E Enabled</button>
+      <!-- <button id = "walkEEnable" class="control-panel-entry control-panel-toggle positive" onclick="enable()">Walk-E Enabled</button> -->
       <button id = "calibrate" class="control-panel-entry control-panel-toggle positive" onclick="get_calibrate()">Calibrate</button>
       <button id = "walkEMove" class="control-panel-entry control-panel-toggle positive" onclick = "walkE_move()">Start</button>
       <button id = "stats" class="control-panel-entry control-panel-toggle positive" onclick = "get_stats()">Stats</button>
@@ -129,6 +129,8 @@
   };
 
   function walkE_move(){
+    let xhr;
+    
     if (walkE_btn.className == "control-panel-entry control-panel-toggle negative") {
       calibrate_btn.disabled = false;
       stats_btn.disabled = false;
@@ -139,6 +141,31 @@
       stats_btn.className = "control-panel-entry control-panel-toggle positive";   
 
       stats_flag = false;
+
+      xhr.abort()
+
+      ajax_data = {
+        stats: JSON.stringify(stats_flag),
+        poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
+        worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
+        time: JSON.stringify(joint_list["time"]),
+      };
+      
+      $.ajax({
+        url: '/GetStats',
+        type: "POST",
+        data: ajax_data,
+        success: function(result){
+          console.log("Successfully Calculated Stats.");
+          console.log(ajax_data);
+
+          joint_list = {
+            "poseLandmark": [],
+            "worldLandmark":[],
+            "time":[],
+          }
+        }
+      });
     }
     else{
       calibrate_btn.disabled = true;
@@ -149,32 +176,17 @@
       walkE_btn.className = "control-panel-entry control-panel-toggle negative";
       stats_btn.className = "control-panel-entry control-panel-toggle disable";   
 
-      stats_flag = true;   
-    }
-
-    ajax_data = {
-      enable: JSON.stringify(move_flag),
-      stats: JSON.stringify(stats_flag),
-      poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
-      worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
-      time: JSON.stringify(joint_list["time"]),
-    };
-
-    $.ajax({
+      stats_flag = true;
+      
+      xhr = $.ajax({
       url: '/GetStats',
       type: "POST",
-      data: ajax_data,
+      data: {stats: JSON.stringify(stats_flag)},
       success: function(result){
-        console.log("Successfully Calculated Stats.");
-        console.log(ajax_data);
-
-        joint_list = {
-          "poseLandmark": [],
-          "worldLandmark":[],
-          "time":[],
+          console.log("Success")
         }
-      }
-    });
+      });
+    }
   };
 
   function get_stats(){

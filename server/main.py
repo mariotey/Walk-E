@@ -88,17 +88,12 @@ def get_stats():
             # print("Nothing / Errors detected")
             pass  # Pass if there is no detection or error   
 
-<<<<<<< HEAD
     # Releases camera and destroy all cv2 windows
     # cap.release()
     # motor.stop()
     print("Walk-E stops")
         
     # print(request_data["stats"],move_stats)
-=======
-    motor.stop()
-    # print("Walk-E stops")
->>>>>>> b5954c4cbfc4c6978e2958ce705329c58d4b0f33
 
     return render_template("main.html")
 

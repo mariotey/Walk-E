@@ -7,7 +7,7 @@ import redis
 import gait_calibrate
 import gait_statistics
 import format_data
-# import motor
+import motor
 import dist
 
 # Drawing utilities for visualizing poses
@@ -24,7 +24,7 @@ pose = mp_pose.Pose(min_detection_confidence=0.5,
                     static_image_mode=False)
 
 # Get Realtime Webcam Feed
-cap = cv2.VideoCapture(1) 
+cap = cv2.VideoCapture(0) 
 
 app = Flask(__name__)
 
@@ -67,6 +67,12 @@ def get_stats():
         redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
         redis_client.hset("testjoint_data", "time", request_data["time"])
 
+        # Cache joint_data into server
+        redis_client = redis.Redis(host="localhost", port=6379)
+        redis_client.hset("testjoint_data", "pose_lm", request_data["poseLandmark"])
+        redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
+        redis_client.hset("testjoint_data", "time", request_data["time"])
+
     # Logic for Proximity Detection
     while move_stats: 
         ret, frame = cap.read()
@@ -75,22 +81,26 @@ def get_stats():
         try:
             camera_lm = results.pose_landmarks.landmark
             dist.detect(frame, camera_lm)
-            print("Walk-E moves")
-            # motor.drive(100, 100)
+            # print("Walk-E moves")
+            motor.drive(30, 30)
             
         except AttributeError:
             # print("Nothing / Errors detected")
             pass  # Pass if there is no detection or error   
 
+<<<<<<< HEAD
     # Releases camera and destroy all cv2 windows
     # cap.release()
     # motor.stop()
     print("Walk-E stops")
         
     # print(request_data["stats"],move_stats)
+=======
+    motor.stop()
+    # print("Walk-E stops")
+>>>>>>> b5954c4cbfc4c6978e2958ce705329c58d4b0f33
 
     return render_template("main.html")
-    
 
 #################################################################################################
 
@@ -116,9 +126,6 @@ def plot_stats():
     offsetdata = gait_calibrate.calibrate(calibrate_data)
     gait_data = gait_statistics.get_gait(offsetdata["cut_off"], joint_data)
     stats_data = gait_statistics.stats(joint_data, gait_data, offsetdata)
-
-    # Cache Statistics and Video Recording into Server with timestamp as key
-    # redis_client.hset("testjoint_data", "stats", json.dumps(stats_data).encode("utf-8"))
 
     return render_template("statistics.html", stats_Info = stats_data)
 

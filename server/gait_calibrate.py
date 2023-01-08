@@ -35,7 +35,7 @@ def calibrate(calibrate_data):
     
     hipflex_data = calibrate_flex(calibrate_data, "shoulder", "hip", "knee")
     kneeflex_data = calibrate_flex(calibrate_data, "hip", "knee", "ankle")
-    ankleflex_data = calibrate_flex(calibrate_data, "knee", "ref_heel", "toe")
+    ankleflex_data = calibrate_flex(calibrate_data, "knee", "ankle", "toe")
 
     # walkE_plot.calibrate(ref_list, heelX_list, heelY_list, heelZ_list, 
     #                     hipflex_data, kneeflex_data, ankleflex_data,

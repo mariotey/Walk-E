@@ -60,6 +60,12 @@ def get_stats():
         move_stats = True
     else:
         move_stats = False
+        
+        # Cache joint_data into server
+        redis_client = redis.Redis(host="localhost", port=6379)
+        redis_client.hset("testjoint_data", "pose_lm", request_data["poseLandmark"])
+        redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
+        redis_client.hset("testjoint_data", "time", request_data["time"])
 
     # Logic for Proximity Detection
     while move_stats: 
@@ -80,12 +86,6 @@ def get_stats():
     # cap.release()
     # motor.stop()
     print("Walk-E stops")
-
-    # Cache joint_data into server
-    redis_client = redis.Redis(host="localhost", port=6379)
-    redis_client.hset("testjoint_data", "pose_lm", request_data["poseLandmark"])
-    redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
-    redis_client.hset("testjoint_data", "time", request_data["time"])
         
     # print(request_data["stats"],move_stats)
 

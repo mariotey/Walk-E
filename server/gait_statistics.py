@@ -285,9 +285,9 @@ def stats(raw_data, gait_data, offset):
         bestankle_list["x"] += ankleflex_x
         bestankle_list["y"] += list(np.array(ankleflex_y) - offset["ankleflex"])
         
-        oldHipFlex_list.append({"x": hipflex_x, "y": list(np.array(old_hipflex_y) - offset["hipflex"])})
-        oldKneeFlex_list.append({"x": kneeflex_x, "y": list(np.array(old_kneeflex_y) - offset["kneeflex"])})
-        oldAnkleFlex_list.append({"x": ankleflex_x, "y": list(np.array(old_ankleflex_y) - offset["ankleflex"])})
+        # oldHipFlex_list.append({"x": hipflex_x, "y": list(np.array(old_hipflex_y) - offset["hipflex"])})
+        # oldKneeFlex_list.append({"x": kneeflex_x, "y": list(np.array(old_kneeflex_y) - offset["kneeflex"])})
+        # oldAnkleFlex_list.append({"x": ankleflex_x, "y": list(np.array(old_ankleflex_y) - offset["ankleflex"])})
         
         #########################################################################################
 

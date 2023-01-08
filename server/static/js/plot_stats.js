@@ -238,6 +238,19 @@ function hipflex_data(stats, elem, best_elem){
         }]
     };
 
+    const horizontalDottedLine = {
+        id: 'horizontalDottedLine',
+        beforeDatasetsDraw(chart, args, options){
+            const { ctx , chartArea: { top, right, bottom, left, width, height},
+                scales: {x,y}} = chart;
+            ctx.save();
+
+            ctx.strokeStyle = 'grey';
+            ctx.setLineDash([10, 10]);
+            ctx.strokeRect(left, y.getPixelForValue(0), width, 0);
+            ctx.restore();
+        }
+    }
     // Config block
     const hipflex_data_config = {
         type: 'scatter',
@@ -266,7 +279,8 @@ function hipflex_data(stats, elem, best_elem){
                     display: false,
                 },
             }
-        }
+        },
+        plugins: [horizontalDottedLine]
     };
 
     const hipflex_bestfit_config = {
@@ -296,7 +310,8 @@ function hipflex_data(stats, elem, best_elem){
                     display: false,
                 },
             }
-        }
+        },
+        plugins: [horizontalDottedLine]
     };
 
     
@@ -358,6 +373,20 @@ function kneeflex_data(stats, elem, best_elem){
         }]
     };
 
+    const horizontalDottedLine = {
+        id: 'horizontalDottedLine',
+        beforeDatasetsDraw(chart, args, options){
+            const { ctx , chartArea: { top, right, bottom, left, width, height},
+                scales: {x,y}} = chart;
+            ctx.save();
+
+            ctx.strokeStyle = 'grey';
+            ctx.setLineDash([10, 10]);
+            ctx.strokeRect(left, y.getPixelForValue(0), width, 0);
+            ctx.restore();
+        }
+    }
+
     // Config block
     const kneeflex_data_config = {
         type: 'scatter',
@@ -386,7 +415,8 @@ function kneeflex_data(stats, elem, best_elem){
                     display: false
                 },
             }
-        }
+        },
+        plugins: [horizontalDottedLine]
     };
 
     const kneeflex_bestfit_config = {
@@ -416,7 +446,8 @@ function kneeflex_data(stats, elem, best_elem){
                     display: false,
                 },
             }
-        }
+        },
+        plugins: [horizontalDottedLine]
     };
 
     // Rendering block
@@ -477,6 +508,20 @@ function ankleflex_data(stats, elem, best_elem){
         }]
     };
 
+    const horizontalDottedLine = {
+        id: 'horizontalDottedLine',
+        beforeDatasetsDraw(chart, args, options){
+            const { ctx , chartArea: { top, right, bottom, left, width, height},
+                scales: {x,y}} = chart;
+            ctx.save();
+
+            ctx.strokeStyle = 'grey';
+            ctx.setLineDash([10, 10]);
+            ctx.strokeRect(left, y.getPixelForValue(0), width, 0);
+            ctx.restore();
+        }
+    }
+
     // Config block
     const ankleflex_data_config = {
         type: 'scatter',
@@ -505,7 +550,8 @@ function ankleflex_data(stats, elem, best_elem){
                     display: false
                 },
             }
-        }
+        },
+        plugins: [horizontalDottedLine]
     };
 
     const ankleflex_bestfit_config = {
@@ -535,7 +581,8 @@ function ankleflex_data(stats, elem, best_elem){
                     display: false,
                 },
             }
-        }
+        },
+        plugins: [horizontalDottedLine]
     };
 
     // Rendering block

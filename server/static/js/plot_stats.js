@@ -246,7 +246,7 @@ function hipflex_data(stats, elem, best_elem){
             ctx.save();
 
             ctx.strokeStyle = 'grey';
-            ctx.setLineDash([10, 10]);
+            ctx.setLineDash([5, 10]);
             ctx.strokeRect(left, y.getPixelForValue(0), width, 0);
             ctx.restore();
         }
@@ -381,7 +381,7 @@ function kneeflex_data(stats, elem, best_elem){
             ctx.save();
 
             ctx.strokeStyle = 'grey';
-            ctx.setLineDash([10, 10]);
+            ctx.setLineDash([5, 10]);
             ctx.strokeRect(left, y.getPixelForValue(0), width, 0);
             ctx.restore();
         }
@@ -516,7 +516,7 @@ function ankleflex_data(stats, elem, best_elem){
             ctx.save();
 
             ctx.strokeStyle = 'grey';
-            ctx.setLineDash([10, 10]);
+            ctx.setLineDash([5, 10]);
             ctx.strokeRect(left, y.getPixelForValue(0), width, 0);
             ctx.restore();
         }

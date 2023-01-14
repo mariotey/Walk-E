@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" >
 <head>
-    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 
@@ -11,12 +11,14 @@
 </head>
 
 <body>  
-    <div class = "cotainer">
+    <div class = "container">
         <div class = "plot">
-            <canvas id = "raw_data"></canvas>
-        </div>
-        <div class = "plot">
-            <canvas id = "segregate_data"></canvas>
+            <div class = flex_plot>
+                <canvas id = "raw_data"></canvas>
+            </div>
+            <div class = flex_plot>
+                <canvas id = "segregate_data"></canvas>
+            </div>
         </div>
         <div class = "plot">
             <canvas id = "scatter_data"></canvas>

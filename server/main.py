@@ -7,7 +7,7 @@ import redis
 import gait_calibrate
 import gait_statistics
 import format_data
-import motor
+# import motor
 import dist
 
 # Drawing utilities for visualizing poses
@@ -82,14 +82,12 @@ def get_stats():
             camera_lm = results.pose_landmarks.landmark
             dist.detect(frame, camera_lm)
             # print("Walk-E moves")
-            motor.drive(30, 30)
+            # motor.drive(30, 30)
             
         except AttributeError:
             # print("Nothing / Errors detected")
             pass  # Pass if there is no detection or error   
 
-    # Releases camera and destroy all cv2 windows
-    # cap.release()
     # motor.stop()
     print("Walk-E stops")
         

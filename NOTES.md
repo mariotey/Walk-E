@@ -1,14 +1,4 @@
-How to Kill VSCode remote services
-1. Press ctrl + shift + p
-2. Type " Remote-SSH: kill VS Code Server on Host..."
-3. Select Host
-4. Press enter 
-
-How to Kill Flask server
-1. Navigate to mctey@raspberrypi/
-2. Type "bash terminateFlask.ssh"
-
-How to Create Local Repository and push to Github
+## How to Create Local Repository and push to Github ##
 1. git init @ respository
 2. git add .
 3. git commit -m "Initial Commit"
@@ -16,10 +6,31 @@ How to Create Local Repository and push to Github
 5. git push origin master
 6. git push --set-upstream origin master
 
-How to Clone Repository
+## How to Clone Repository ##
 1. git init @ repository
 2. navigate to Profile -> Settings -> Developer settings -> Generate New Token
 3. git clone https://<personal_access_token>@github.com/<github_account_username>/<github_repository>.git 
 
-How to use ad hoc certificates with Flask
+## How to setup Redis Server ##
+1. ls -al
+2. sudo apt-add-repository ppa:redislabs/redis
+3. sudo apt-get update
+4. sudo apt-get install redis-server
+5. redis-server --version
+6. redis-server
+7. sudo service redis-server start
+8. redis-cli --> ping --> lolwut
+9. sudo service redis-server stop, sudo service redis-server restart
+
+## How to Kill VSCode remote services ##
+1. Press ctrl + shift + p
+2. Type " Remote-SSH: kill VS Code Server on Host..."
+3. Select Host
+4. Press enter 
+
+## How to Kill Flask server ##
+1. Navigate to mctey@raspberrypi/
+2. Type "bash terminateFlask.ssh"
+
+## How to use ad hoc certificates with Flask ##
 1. install additional dependency in virtual environment (pip install pyopenssl)

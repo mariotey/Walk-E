@@ -8,6 +8,10 @@ Elderly patients who underwent physical strengthening/pre-rehabilitative exercis
 ### Dependencies ###
 - MediaPipe
 - Flask
+- opencv-python
+- redis
+- scipy
+- scikit-learn
 
 ### Installing ###
 - Project is still incomplete

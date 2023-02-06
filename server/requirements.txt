@@ -1,0 +1,6 @@
+Flask
+mediapipe
+scikit-learn
+scipy
+opencv-python
+redis

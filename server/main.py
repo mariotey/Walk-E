@@ -24,7 +24,7 @@ pose = mp_pose.Pose(min_detection_confidence=0.5,
                     static_image_mode=False)
 
 # Get Realtime Webcam Feed
-cap = cv2.VideoCapture(0) 
+# cap = cv2.VideoCapture(0) 
 
 app = Flask(__name__)
 
@@ -74,25 +74,23 @@ def get_stats():
         redis_client.hset("testjoint_data", "time", request_data["time"])
 
     # Logic for Proximity Detection
-    while move_stats: 
-        ret, frame = cap.read()
-        results = pose.process(frame)
+    # while move_stats: 
+    #     ret, frame = cap.read()
+    #     results = pose.process(frame)
 
-        try:
-            camera_lm = results.pose_landmarks.landmark
-            dist.detect(frame, camera_lm)
-            # print("Walk-E moves")
-            # motor.drive(30, 30)
+    #     try:
+    #         camera_lm = results.pose_landmarks.landmark
+    #         dist.detect(frame, camera_lm)
+    #         print("Walk-E moves")
+    #         motor.drive(30, 30)
             
-        except AttributeError:
-            # print("Nothing / Errors detected")
-            pass  # Pass if there is no detection or error   
+    #     except AttributeError:
+    #         # print("Nothing / Errors detected")
+    #         pass  # Pass if there is no detection or error   
 
-    # motor.stop()
-    print("Walk-E stops")
-        
-    # print(request_data["stats"],move_stats)
-
+    # # motor.stop()
+    # print("Walk-E stops")
+    
     return render_template("main.html")
 
 #################################################################################################

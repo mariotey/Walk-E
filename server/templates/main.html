@@ -3,10 +3,11 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils_3d@0.2/landmark_grid.css" crossorigin="anonymous">
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6/control_utils.css" crossorigin="anonymous">
+  <!-- <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6/control_utils.css" crossorigin="anonymous"> -->
+  <link rel="stylesheet" href="../static/css/mod_control_utils.css">
   <link rel="stylesheet" href="../static/css/main.css">
   <link rel="stylesheet" href="../static/css/submit.css">
-   <!-- <link rel="icon" href="favicon.ico"> -->
+  <link rel="icon" href="favicon.ico">
 
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils_3d@0.2/control_utils_3d.js" crossorigin="anonymous"></script>
@@ -49,18 +50,18 @@
     </div>
   </div>
   
-  <div class="control-panel"></div>
+  <div id="control_panel"></div>
   
   <div class='square-box'>
     <div class="landmark-grid-container"></div>
   </div>
 
-  <div class="control-panel">
+  <div id="btn_panel">
     <div class="btn_container">
-      <!-- <button id = "walkEEnable" class="control-panel-entry control-panel-toggle positive" onclick="enable()">Walk-E Enabled</button> -->
-      <button id = "calibrate" class="control-panel-entry control-panel-toggle positive" onclick="get_calibrate()">Calibrate</button>
-      <button id = "walkEMove" class="control-panel-entry control-panel-toggle positive" onclick = "walkE_move()">Start</button>
-      <button id = "stats" class="control-panel-entry control-panel-toggle positive" onclick = "get_stats()">Stats</button>
+      <!-- <button id = "walkEEnable" class=" control-panel-toggle positive" onclick="enable()">Walk-E Enabled</button> -->
+      <button id = "calibrate" class="control-panel-toggle positive" onclick="get_calibrate()">Calibrate</button>
+      <button id = "walkEMove" class="control-panel-toggle positive" onclick = "walkE_move()">Start</button>
+      <button id = "stats" class=" control-panel-toggle positive" onclick = "get_stats()">Stats</button>
     </div>
   </div>
 </body>
@@ -74,14 +75,14 @@
   enable_btn = document.getElementById("walkEEnable");
 
   function get_calibrate(){        
-    if (calibrate_btn.className == "control-panel-entry control-panel-toggle negative") {
+    if (calibrate_btn.className == "control-panel-toggle negative") {
       walkE_btn.disabled = false;
       stats_btn.disabled = false;
       calibrate_btn.innerHTML = "Calibrate";
 
-      calibrate_btn.className = "control-panel-entry control-panel-toggle positive";     
-      walkE_btn.className = "control-panel-entry control-panel-toggle positive";
-      stats_btn.className = "control-panel-entry control-panel-toggle positive";
+      calibrate_btn.className = "control-panel-toggle positive";     
+      walkE_btn.className = "control-panel-toggle positive";
+      stats_btn.className = "control-panel-toggle positive";
 
       cali_flag = false;
       
@@ -118,9 +119,9 @@
       stats_btn.disabled = true;
       calibrate_btn.innerHTML = "Stop Calibration";
 
-      calibrate_btn.className = "control-panel-entry control-panel-toggle negative";
-      walkE_btn.className = "control-panel-entry control-panel-toggle disable";
-      stats_btn.className = "control-panel-entry control-panel-toggle disable";
+      calibrate_btn.className = "control-panel-toggle negative";
+      walkE_btn.className = "control-panel-toggle disable";
+      stats_btn.className = "control-panel-toggle disable";
 
       cali_flag = true;
 
@@ -129,15 +130,14 @@
   };
 
   function walkE_move(){
-    
-    if (walkE_btn.className == "control-panel-entry control-panel-toggle negative") {
+    if (walkE_btn.className == "control-panel-toggle negative") {
       calibrate_btn.disabled = false;
       stats_btn.disabled = false;
       walkE_btn.innerHTML = "Start";
 
-      calibrate_btn.className = "control-panel-entry control-panel-toggle positive";     
-      walkE_btn.className = "control-panel-entry control-panel-toggle positive";
-      stats_btn.className = "control-panel-entry control-panel-toggle positive";   
+      calibrate_btn.className = "control-panel-toggle positive";     
+      walkE_btn.className = "control-panel-toggle positive";
+      stats_btn.className = "control-panel-toggle positive";   
 
       stats_flag = false;
     }
@@ -146,9 +146,9 @@
       stats_btn.disabled = true;
       walkE_btn.innerHTML = "Stop";
 
-      calibrate_btn.className = "control-panel-entry control-panel-toggle disable";    
-      walkE_btn.className = "control-panel-entry control-panel-toggle negative";
-      stats_btn.className = "control-panel-entry control-panel-toggle disable";   
+      calibrate_btn.className = "control-panel-toggle disable";    
+      walkE_btn.className = "control-panel-toggle negative";
+      stats_btn.className = "control-panel-toggle disable";   
 
       stats_flag = true;
     }
@@ -182,9 +182,9 @@
     walkE_btn.disabled = true;
     stats_btn.innerHTML = "Processing...";
 
-    calibrate_btn.className = "control-panel-entry control-panel-toggle disable";    
-    walkE_btn.className = "control-panel-entry control-panel-toggle disable";    
-    stats_btn.className = "control-panel-entry control-panel-toggle negative";
+    calibrate_btn.className = "control-panel-toggle disable";    
+    walkE_btn.className = "control-panel-toggle disable";    
+    stats_btn.className = "control-panel-toggle negative";
 
     ajax_data = {
         poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
@@ -212,15 +212,15 @@
   };
 
   function enable(){
-    if (enable_btn.className == "control-panel-entry control-panel-toggle negative") {
+    if (enable_btn.className == "control-panel-toggle negative") {
       enable_btn.innerHTML = "Walk-E Enabled";
-      enable_btn.className = "control-panel-entry control-panel-toggle positive";     
+      enable_btn.className = "control-panel-toggle positive";     
 
       move_flag = true;
     }
     else{
       enable_btn.innerHTML = "Walk-E Disabled";
-      enable_btn.className = "control-panel-entry control-panel-toggle negative";
+      enable_btn.className = "control-panel-toggle negative";
 
       move_flag = false;
     }

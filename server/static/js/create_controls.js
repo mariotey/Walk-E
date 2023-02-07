@@ -7,7 +7,7 @@ const canvasElement = document.getElementsByClassName('output_canvas')[0];
 export default function create_controls(pose, fpsControl, activeEffect) {
     // Present a control panel for manipulating solution options.
     new controls
-    .ControlPanel(document.getElementsByClassName('control-panel')[0], {
+    .ControlPanel(document.getElementById('control_panel'), {
         selfieMode: false,
         modelComplexity: 1,
         smoothLandmarks: true,

@@ -1,13 +1,13 @@
 .btn_container{
     position: relative;
     left: 10px;
-    top: 480px;
+    top: 560px;
 }
 
 .positive{
     background-color: #398c39;
     color: white;
-    width: 250px;
+    width: 225px;
     border: 2px solid #fff;
     border-radius: 15px;
     box-shadow: 1px 1px 10px #000000a0;
@@ -26,7 +26,7 @@
 .negative{
     background-color: #f92c2c;
     color: white;
-    width: 250px;
+    width: 225px;
     border: 2px solid #fff;
     border-radius: 15px;
     box-shadow: 1px 1px 10px #000000a0;
@@ -45,7 +45,7 @@
 .disable{
     background-color: #8d8d8d;
     color: white;
-    width: 250px;
+    width: 225px;
     border: 2px solid #fff;
     border-radius: 15px;
     box-shadow: 1px 1px 10px #000000a0;

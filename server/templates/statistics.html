@@ -16,36 +16,48 @@
             <div class = flex_plot>
                 <canvas id = "raw_data"></canvas>
             </div>
-            <div class = flex_plot>
+            <div class = "flex_plot">
                 <canvas id = "segregate_data"></canvas>
             </div>
         </div>
 
         <div class = "plot">
-            <canvas id = "scatter_data"></canvas>
-            <!-- Statistics -->
+            <div class = "flex_plot">
+                <canvas id = "scatter_data"></canvas>
+            </div>
+            <div class = "flex_plot">
+                <div class = "statistics">
+                    <strong>Statistics</strong>
+                    <ul id = "statistics">
+                        <li id="cadence"></li>
+                        <li id="speed"></li>
+                        <li id="distance"></li>
+                        <li id="stride_len"></li>
+                    </ul>
+                </div>
+            </div>
         </div>     
         
         <div class = "plot">
-            <div class = flex_plot>
+            <div class = "flex_plot">
                 <canvas id = "hip_flex"></canvas>
             </div>
-            <div class = flex_plot>
+            <div class = "flex_plot">
                 <canvas id = "knee_flex"></canvas>
             </div>
-            <div class = flex_plot>
+            <div class = "flex_plot">
                 <canvas id = "ankle_flex"></canvas>
             </div>
         </div>
 
         <div class = "plot">
-            <div class = flex_plot>
+            <div class = "flex_plot">
                 <canvas id = "hip_best"></canvas>
             </div>
-            <div class = flex_plot>
+            <div class = "flex_plot">
                 <canvas id = "knee_best"></canvas>
             </div>
-            <div class = flex_plot>
+            <div class = "flex_plot">
                 <canvas id = "ankle_best"></canvas>
             </div>
         </div>
@@ -65,9 +77,12 @@
     kneeflex_data(stats, document.getElementById("knee_flex"), document.getElementById("knee_best"));
     ankleflex_data(stats, document.getElementById("ankle_flex"), document.getElementById("ankle_best"));  
 
-    // Render Best Fit Plots
-    
-
+    // Render Statistics
+    document.getElementById("cadence").innerHTML = "Cadence: " + String(stats.heelY.length * 2);
+    document.getElementById("speed").innerHTML = "Speed: -";
+    document.getElementById("distance").innerHTML = "Estimated Distance: -";
+    document.getElementById("stride_len").innerHTML = "Estimated Stride Length: -";
+ 
 </script>
 
 </html>

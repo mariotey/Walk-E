@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request
 import mediapipe as mp
-import cv2
 import json
 import redis
 
@@ -8,7 +7,7 @@ import gait_calibrate
 import gait_statistics
 import format_data
 # import motor
-import dist
+# import dist
 
 # Drawing utilities for visualizing poses
 mp_drawing = mp.solutions.drawing_utils
@@ -88,7 +87,7 @@ def get_stats():
     #         # print("Nothing / Errors detected")
     #         pass  # Pass if there is no detection or error   
 
-    # # motor.stop()
+    # motor.stop()
     # print("Walk-E stops")
     
     return render_template("main.html")
@@ -100,7 +99,6 @@ def plot_stats():
     redis_client = redis.Redis(host="localhost", port=6379)
 
     # Retrieve calibration data from server 
-    # calibrate_pose_lm = json.loads(redis_client.hget("calibration_data", "pose_lm").decode("utf-8"))
     calibrate_world_lm = json.loads(redis_client.hget("calibration_data", "world_lm").decode("utf-8"))
     calibrate_time = json.loads(redis_client.hget("calibration_data", "time").decode("utf-8"))
     calibrate_data = format_data.request_lm(calibrate_world_lm, calibrate_time)

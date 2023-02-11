@@ -2,6 +2,8 @@ from flask import Flask, render_template, request
 import mediapipe as mp
 import json
 import redis
+import RPi.GPIO as GPIO
+import time
 
 import gait_calibrate
 import gait_statistics
@@ -55,7 +57,9 @@ def get_stats():
     request_data = request.form   
 
     global move_stats
-    
+
+    stateCount, stateLast = op_encode.setup()
+
     if request_data["stats"] == "true": 
         move_stats = True
     else:
@@ -79,12 +83,12 @@ def get_stats():
     #     results = pose.process(frame)
 
         try:
-            print("Walk-E moves")
-    #         camera_lm = results.pose_landmarks.landmark
+            # print("Walk-E moves")
+            # camera_lm = results.pose_landmarks.landmark
 
-    #         dist.detect(frame, camera_lm)
-
-    #         motor.drive(30, 30)
+            # dist.detect(frame, camera_lm)
+            stateCount, stateLast = op_encode.get_stateChange(stateCount, stateLast)
+            # motor.drive(30, 30)
             
         except AttributeError:
             # print("Nothing / Errors detected")
@@ -92,6 +96,9 @@ def get_stats():
 
     # # motor.stop()
     print("Walk-E stops")
+
+    if stateCount != 0:
+        print("StateCount:", stateCount,"\n")
     
     return render_template("main.html")
 

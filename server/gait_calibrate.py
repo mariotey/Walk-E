@@ -36,7 +36,7 @@ def calibrate_plane(joint_data, first, sec):
         first_pt = joint_data[first][data_point]
         sec_pt = joint_data[sec][data_point]
 
-        flex_list.append(-(walkE_math.cal_twopt_angle(first_pt, sec_pt)))
+        flex_list.append(walkE_math.cal_twopt_angle(first_pt, sec_pt))
         time_list.append(joint_data["time"][data_point])
 
         angle_data["angle_data"].append(flex_list)

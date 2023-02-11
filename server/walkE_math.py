@@ -1,4 +1,8 @@
 import numpy as np
+from sklearn.metrics import mean_squared_error as mse
+
+MAX_MSE = 100
+MAX_ITR = 10
 
 def cal_twoD_angle(first, sec, third):
     u = np.array([first[0] - sec[0], first[1] - sec[1]])
@@ -69,3 +73,39 @@ def normalize_gait(time_list):
     
     return new_list
 
+def poly_fit(x,y):
+    
+    mse_dof, mean_square =  0, MAX_MSE
+
+    def poly_func(x,y,dof):
+        curve = np.polyfit(x, y, dof)
+        poly = np.poly1d(curve)
+
+        new_x = x
+        new_x.sort()
+
+        return new_x, [poly(data) for data in new_x], dof
+
+    for dof_itera in range(1, MAX_ITR):
+        try:
+            msq = mse(y, poly_func(x,y,dof_itera)[1]) 
+
+            if msq < mean_square:
+                mean_square = msq
+                mse_dof = dof_itera
+
+        except:
+            pass
+    
+    return poly_func(x,y,mse_dof)
+
+def best_fit(json, dof):
+    x, y = json["x"], json["y"]
+    
+    curve = np.polyfit(x, y, dof)
+    poly = np.poly1d(curve)
+
+    x.sort()
+    new_y = [poly(data) for data in x]
+    
+    return {"x": x, "y": new_y}

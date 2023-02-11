@@ -1,15 +1,10 @@
 import numpy as np
 import walkE_math
-from sklearn.metrics import mean_squared_error as mse
 
 #################################################################################################
 
 MIN_CHUNKSIZE = 3
 POINTS_SPACE = 20
-MAX_MSE = 100
-MAX_ITR = 10
-
-#################################################################################################
 
 gait_list = [
     "ref_heel",
@@ -22,6 +17,8 @@ gait_list = [
     "toe",
     "time"
 ]
+
+#################################################################################################
 
 def add_points(joint_data, unit_space):
     new_jointdata = {item: [] for item in gait_list}
@@ -124,43 +121,6 @@ def get_gait(heel_baseline, raw_joint):
 
 #################################################################################################
 
-def poly_fit(x,y):
-    
-    mse_dof, mean_square =  0, MAX_MSE
-
-    def poly_func(x,y,dof):
-        curve = np.polyfit(x, y, dof)
-        poly = np.poly1d(curve)
-
-        new_x = x
-        new_x.sort()
-
-        return new_x, [poly(data) for data in new_x], dof
-
-    for dof_itera in range(1, MAX_ITR):
-        try:
-            msq = mse(y, poly_func(x,y,dof_itera)[1]) 
-
-            if msq < mean_square:
-                mean_square = msq
-                mse_dof = dof_itera
-
-        except:
-            pass
-    
-    return poly_func(x,y,mse_dof)
-
-def best_fit(json, dof):
-    x, y = json["x"], json["y"]
-    
-    curve = np.polyfit(x, y, dof)
-    poly = np.poly1d(curve)
-
-    x.sort()
-    new_y = [poly(data) for data in x]
-    
-    return {"x": x, "y": new_y}
-
 def get_heel(gait_data, waveform, axis):
     x, y = [], []
 
@@ -169,7 +129,7 @@ def get_heel(gait_data, waveform, axis):
     y += [gait_data["ref_heel"][waveform][index][axis]
                 for index in range(len(gait_data["ref_heel"][waveform]))]
     
-    return poly_fit(x, y)
+    return walkE_math.poly_fit(x, y)
 
 def get_flex(gait_data, waveform, first, secnd, third):
     x, y = [], []
@@ -182,7 +142,7 @@ def get_flex(gait_data, waveform, first, secnd, third):
         x.append(gait_data["gait_cycle"][waveform][index])
         y.append(180 - walkE_math.cal_threeD_angle(first_pt, secnd_pt, third_pt)) 
 
-    return poly_fit(x,y)
+    return walkE_math.poly_fit(x,y)
 
 def get_angle(gait_data, waveform, first, secnd):
     x, y = [], []
@@ -194,7 +154,7 @@ def get_angle(gait_data, waveform, first, secnd):
         x.append(gait_data["gait_cycle"][waveform][index])
         y.append((walkE_math.cal_twopt_angle(first_pt, secnd_pt)))
         
-    return poly_fit(x,y)
+    return walkE_math.poly_fit(x,y)
 
 #################################################################################################
 
@@ -291,11 +251,11 @@ def stats(raw_data, gait_data, offset):
         "hipflex": hipflex_list,
         "kneeflex": kneeflex_list,
         "ankleflex": ankleflex_list,
-        "bestshoulder": best_fit(bestshoulder_list, shoulder_dof),
-        "besthip": best_fit(bestpelvic_list, hip_dof),
-        "besthip": best_fit(besthip_list, hipflex_dof),
-        "bestknee": best_fit(bestknee_list, kneeflex_dof),
-        "bestankle": best_fit(bestankle_list, ankleflex_dof),
+        "bestshoulder": walkE_math.best_fit(bestshoulder_list, shoulder_dof),
+        "besthip": walkE_math.best_fit(bestpelvic_list, hip_dof),
+        "besthip": walkE_math.best_fit(besthip_list, hipflex_dof),
+        "bestknee": walkE_math.best_fit(bestknee_list, kneeflex_dof),
+        "bestankle": walkE_math.best_fit(bestankle_list, ankleflex_dof),
         "cadence": get_cadence(gait_data),
         "speed": "-",
         "dist": "-",
@@ -307,5 +267,4 @@ def stats(raw_data, gait_data, offset):
     return stats
 
 #################################################################################################
-
 #  .\venv\Scripts\python.exe -m pylint .\Walk-E\gaitAnalysis.py

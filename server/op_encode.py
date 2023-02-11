@@ -4,7 +4,8 @@ import time
 DIST_PER_STEP = 0.2075/15 # 1 full rotation = 0.2075m, 15 state changes
 
 # Declare GPIO port
-SENSOR_ONE = 11
+SENSOR_ONE = 11 #GPIO 17
+SENSOR_TWO = 36 #GPIO 16
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)

@@ -39,6 +39,14 @@ def cal_threeD_angle(first, sec, third):
 
     return result
 
+def cal_twopt_angle(first, sec):
+    first_pt = np.array([first["x"], first["y"]])
+    middle_pt = np.array([(first["x"]+sec["x"])/2, (first["y"]+sec["y"])/2])
+    
+    angle = cal_twoD_angle(first_pt, middle_pt, np.array([first_pt[0], middle_pt[1]]))
+
+    return angle
+
 def cal_twoD_dist(first, sec):
     result = result = np.sqrt(((first[0] - sec[0])**2 + (first[1] - sec[1])**2))
     return result

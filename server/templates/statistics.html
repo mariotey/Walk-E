@@ -37,6 +37,24 @@
                 </div>
             </div>
         </div>     
+
+        <div class = "plot">
+            <div class = "flex_plot">
+                <canvas id = "shoulder_angle"></canvas>
+            </div>
+            <div class = "flex_plot">
+                <canvas id = "hip_angle"></canvas>
+            </div>
+        </div>
+
+        <div class = "plot">
+            <div class = "flex_plot">
+                <canvas id = "shoulder_angle_best"></canvas>
+            </div>
+            <div class = "flex_plot">
+                <canvas id = "hip_angle_best"></canvas>
+            </div>
+        </div>
         
         <div class = "plot">
             <div class = "flex_plot">
@@ -61,27 +79,23 @@
                 <canvas id = "ankle_best"></canvas>
             </div>
         </div>
+
     </div>
 </body>
 
 <script src="../static/js/plot_stats.js"></script>
 <script>   
     var stats = {{stats_Info | tojson}};
-    console.log(stats);
 
-    // Rendering Plots
-    raw_data(stats, document.getElementById("raw_data"));
-    segre_data(stats, document.getElementById("segregate_data"));
-    supergait_data(stats, document.getElementById("scatter_data"));
-    hipflex_data(stats, document.getElementById("hip_flex"), document.getElementById("hip_best"));
-    kneeflex_data(stats, document.getElementById("knee_flex"), document.getElementById("knee_best"));
-    ankleflex_data(stats, document.getElementById("ankle_flex"), document.getElementById("ankle_best"));  
+     // Rendering Plots
+    Array.from(document.getElementsByTagName("canvas")).forEach((canvas_elem) => {
+        norm_plot(stats, canvas_elem);
+    });
 
     // Render Statistics
-    document.getElementById("cadence").innerHTML = "Cadence: " + stats["cadence"] + " steps/min";
-    document.getElementById("speed").innerHTML = "Speed: " + stats["speed"] + " m/sec";
-    document.getElementById("distance").innerHTML = "Estimated Distance: " + stats["dist"] + " m";
-    document.getElementById("stride_len").innerHTML = "Estimated Stride Length: " + stats["stride_len"] + " m";
+    Array.from(document.getElementsByTagName("li")).forEach((li_elem) => {
+        stats_plot(stats, li_elem);
+    });
  
 </script>
 

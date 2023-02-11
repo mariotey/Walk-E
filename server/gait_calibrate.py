@@ -24,18 +24,39 @@ def calibrate_flex(joint_data, first, sec, third):
 
     return flex_data
 
+def calibrate_plane(joint_data, first, sec):
+    angle_data = {
+        "angle_data": [],
+        "time": []
+    }
+
+    for data_point in range(len(joint_data[first])):
+        flex_list, time_list = [], []
+        
+        first_pt = joint_data[first][data_point]
+        sec_pt = joint_data[sec][data_point]
+
+        flex_list.append(-(walkE_math.cal_twopt_angle(first_pt, sec_pt)))
+        time_list.append(joint_data["time"][data_point])
+
+        angle_data["angle_data"].append(flex_list)
+        angle_data["time"].append(time_list)
+
+    return angle_data
+
 def calibrate(calibrate_data):        
     ref_list = []
     for elem in calibrate_data["ref_heel"]:
         ref_list.append(elem["y"])
 
-    heelX_list = [data_point["x"] for data_point in calibrate_data["ref_heel"]]
     heelY_list = [data_point["y"] for data_point in calibrate_data["ref_heel"]]
-    heelZ_list = [data_point["z"] for data_point in calibrate_data["ref_heel"]]
     
     hipflex_data = calibrate_flex(calibrate_data, "left_shoulder", "left_hip", "knee")
     kneeflex_data = calibrate_flex(calibrate_data, "left_hip", "knee", "ankle")
     ankleflex_data = calibrate_flex(calibrate_data, "knee", "ankle", "toe")
+
+    shoulder_data = calibrate_plane(calibrate_data, "left_shoulder", "right_shoulder")
+    hip_data = calibrate_plane(calibrate_data, "left_hip", "right_hip")
 
     # walkE_plot.calibrate(ref_list, heelX_list, heelY_list, heelZ_list, 
     #                     hipflex_data, kneeflex_data, ankleflex_data,
@@ -43,6 +64,8 @@ def calibrate(calibrate_data):
 
     offset_json = {
         "cut_off": np.mean(heelY_list),
+        "shoulder": np.mean(shoulder_data["angle_data"]),
+        "hip": np.mean(hip_data["angle_data"]),
         "hipflex": np.mean(hipflex_data["flex_data"]),
         "kneeflex": np.mean(kneeflex_data["flex_data"]),
         "ankleflex": np.mean(ankleflex_data["flex_data"])

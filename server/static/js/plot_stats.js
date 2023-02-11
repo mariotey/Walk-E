@@ -1,48 +1,193 @@
+const elem_dict = {
+    // Graphical Plot Elements
+    "raw_data": {
+        "statskey": "rawData",
+        "title": "Raw Data of Heel",
+        "x_axis": "time (sec)",
+        "y_axis": "y-coordinate of Heel"
+    },
+    "segregate_data": {
+        "statskey": "rawGaitCycle",
+        "title": "Segregation of Gait Cycle",
+        "x_axis": "time (sec)",
+        "y_axis": "y-coordinate of Heel"
+    },
+    "scatter_data": {
+        "statskey": "superGaitCycle",
+        "title": "Scatterplot of Identified Gait Cycles",
+        "x_axis": "Gait Cycle (%)",
+        "y_axis": "y-coordinate of Heel"
+    },
+    "shoulder_angle":{
+        "statskey": "shoulder",
+        "title": "Shoulder",
+        "x_axis": "Gait Cycle (%)",
+        "y_axis": "Shoulder Angle (Degree)"
+    },
+    "shoulder_angle_best":{
+        "statskey": "bestshoulder",
+        "title": "Best Fit Curve of Shoulder Angle",
+        "x_axis": "Gait Cycle (%)",
+        "y_axis": "Shoulder Angle (Degree)"
+    },
+    "hip_angle": {
+        "statskey": "hip_obliq",
+        "title": "Hip" ,
+        "x_axis": "Gait Cycle (%)",
+        "y_axis": "Hip Angle (Degree)"  
+    },
+    "hip_angle_best":{
+        "statskey": "besthip",
+        "title": "Best Fit Curve of Hip Angle",
+        "x_axis": "Gait Cycle (%)",
+        "y_axis": "Hip Angle (Degree)"  
+    },
+    "hip_flex":{
+        "statskey": "hipflex",
+        "title": "Hip Flex" ,
+        "x_axis": "Gait Cycle (%)" ,
+        "y_axis": "Hip Flex (Degree)" 
+    },
+    "hip_best":{
+        "statskey": "besthip",
+        "title": "Best Fit Curve of Hip Flex" ,
+        "x_axis": "Gait Cycle (%)" ,
+        "y_axis": "Hip Flex (Degree)" 
+    },
+    "knee_flex":{
+        "statskey": "kneeflex",
+        "title": "Knee Flex" ,
+        "x_axis": "Gait Cycle (%)",
+        "y_axis": "Knee Flex (Degree)"  
+    },
+    "knee_best":{
+        "statskey": "bestknee",
+        "title": "Best Fit Curve of Knee Flex" ,
+        "x_axis": "Gait Cycle (%)",
+        "y_axis": "Knee Flex (Degree)"  
+    },
+    "ankle_flex":{
+        "statskey": "ankleflex",
+        "title": "Ankle Flex" ,
+        "x_axis": "Gait Cycle (%)",
+        "y_axis": "Knee Flex (Degree)"  
+    },
+    "ankle_best":{
+        "statskey": "bestankle",
+        "title": "Best Fit Curve of Ankle Flex",
+        "x_axis": "Gait Cycle (%)",
+        "y_axis": "Knee Flex (Degree)"  
+    },
+    
+    // Statistics Plot Elements
+    "cadence":{
+        "statskey":"cadence",
+        "header": "Cadence",
+        "units": "steps/min"
+    },
+    "speed":{
+        "statskey":"speed",
+        "header": "Speed",
+        "units": "m/sec"
+    },
+    "distance":{
+        "statskey":"dist",
+        "header": "Estimated Distance",
+        "units": "m"
+    },
+    "stride_len":{
+        "statskey":"stride_len",
+        "header": "Estimated Stride Length",
+        "units": "m"
+    },
+}
 
-function raw_data(stats, elem){
-    // Setup block
-    var dataset = [];
+const horizontalDottedLine = {
+    id: 'horizontalDottedLine',
+    beforeDatasetsDraw(chart, args, options){
+        const { ctx , chartArea: { top, right, bottom, left, width, height},
+            scales: {x,y}} = chart;
+        ctx.save();
 
-    for (i=0; i < stats["rawData"]["x"].length; i++){
-        dataset.push({
-            x: stats["rawData"]["x"][i], 
-            y: stats["rawData"]["y"][i]
-        });
+        ctx.strokeStyle = 'grey';
+        ctx.setLineDash([5, 10]);
+        ctx.strokeRect(left, y.getPixelForValue(0), width, 0);
+        ctx.restore();
+    }
+}
+
+function norm_plot(stats, elem){
+    config = elem_dict[elem.id];
+    dataset = [];
+
+    console.log(config);
+
+    if (elem.id == "raw_data" || elem.id == "shoulder_angle_best" || elem.id == "hip_angle_best" || elem.id == "hip_best" || elem.id == "knee_best" || elem.id == "ankle_best") {
+        for (i=0; i < stats[config["statskey"]]["x"].length; i++){
+            dataset.push({
+                x: stats[config["statskey"]]["x"][i], 
+                y: stats[config["statskey"]]["y"][i]
+            });
+        };
+
+        data = {
+            datasets: [{
+                data: dataset,
+                tension: 0.25,
+                borderWidth: 1,
+                radius: 1,
+                showLine: true
+            }]
+        };
+    }
+    else {
+        for (i=0; i < stats[config["statskey"]].length; i++){
+            gait_data = [];
+
+            for (x=0; x < stats[config["statskey"]][i]["x"].length; x++){
+                gait_data.push({
+                    x: stats[config["statskey"]][i]["x"][x], 
+                    y: stats[config["statskey"]][i]["y"][x]
+                });
+            }
+
+            dataset.push({
+                data: gait_data,
+                tension: 0.25,
+                borderWidth: 1,
+                radius: 1,
+                showLine: true
+            });
+        };
+
+        data = {
+            datasets: dataset
+        };
     };
-
-    const raw_data = {
-        datasets: [{
-            data: dataset,
-            tension: 0.25,
-            borderWidth: 1,
-            radius: 1,
-            showLine: true
-        }]
-    };
-
+    
     // Config block
-    const raw_data_config = {
+    data_config = {
         type: 'scatter',
-        data: raw_data,
+        data: data,
         options: {
             scales:{
                 x:{ 
                     title:{
                         display: true,
-                        text: "time (sec)"  
+                        text: config["x_axis"] 
                     },
                 },
                 y:{ 
                     title:{
                         display: true,
-                        text: "y-coordinate of Heel"  
+                        text: config["y_axis"] 
                     },
                 }                
             },
             plugins: {
                 title:{
                   display: true,
-                  text: "Raw Data of Heel"  
+                  text: config["title"] 
                 },
                 legend: {
                     display: false
@@ -51,548 +196,20 @@ function raw_data(stats, elem){
         }
     };
 
-    // Rendering block
-    var chart = new Chart(
-        elem,
-        raw_data_config
-    );
-};
-
-function segre_data(stats, elem){
-    // Setup block
-    var dataset = [];
-
-    for (i=0; i < stats["rawGaitCycle"].length; i++){
-        
-        gait_data = [];
-
-        for (x=0; x < stats["rawGaitCycle"][i]["x"].length; x++){
-            gait_data.push({
-                x: stats["rawGaitCycle"][i]["x"][x], 
-                y: stats["rawGaitCycle"][i]["y"][x]
-            });
-        }
-
-        dataset.push({
-            data: gait_data,
-            tension: 0.25,
-            borderWidth: 1,
-            radius: 1,
-            showLine: true
-        });
-    };
-
-    const segre_data = {
-        datasets: dataset
-    };
-
-    // Config block
-    const segre_data_config = {
-        type: 'scatter',
-        data: segre_data,
-        options: {
-            scales:{
-                x:{ 
-                    title:{
-                        display: true,
-                        text: "time (sec)"  
-                    },
-                },
-                y:{ 
-                    title:{
-                        display: true,
-                        text: "y-coordinate of Heel"  
-                    },
-                }                
-            },
-            plugins: {
-                title:{
-                    display: true,
-                    text: "Segregation of Gait Cycle"  
-                },
-                legend: {
-                    display: false
-                },
-            }
-        }
-    };
-
-    // Rendering block
-    var chart = new Chart(
-        elem,
-        segre_data_config
-    );
-};
-
-function supergait_data(stats, elem){
-    // Setup block
-    var dataset = [];
-
-    for (i=0; i < stats["superGaitCycle"].length; i++){
-        
-        gait_data = [];
-
-        for (x=0; x < stats["superGaitCycle"][i]["x"].length; x++){
-            gait_data.push({
-                x: stats["superGaitCycle"][i]["x"][x], 
-                y: stats["superGaitCycle"][i]["y"][x]
-            });
-        }
-
-        dataset.push({
-            data: gait_data,
-            tension: 0.25,
-            borderWidth: 1,
-            radius: 1,
-            showLine: true
-        });
-    };
-
-    const supergait_data = {
-        datasets: dataset
-    };
-
-    // Config block
-    const supergait_data_config = {
-        type: 'scatter',
-        data: supergait_data,
-        options: {
-            scales:{
-                x:{ 
-                    title:{
-                        display: true,
-                        text: "Gait Cycle (%)" 
-                    },
-                },
-                y:{ 
-                    title:{
-                        display: true,
-                        text: "y-coordinate of Heel"  
-                    },
-                }                
-            },
-            plugins: {
-                title:{
-                    display: true,
-                    text: "Scatterplot of Identified Gait Cycles" 
-                },
-                legend: {
-                    display: false
-                },
-            }
-        }
-    };
-
-    // Rendering block
-    var chart = new Chart(
-        elem,
-        supergait_data_config
-    );
-};
-
-/////////////////////////////////////////////////////////////////////////////////////////////////
-
-function hipflex_data(stats, elem, best_elem){
-    // Setup block
-    var dataset = [];
-    var bestfit_data = [];
-
-    for (i=0; i < stats["hipflex"].length; i++){
-        
-        var gait_data = [];
-
-        for (x=0; x < stats["hipflex"][i]["x"].length; x++){
-            gait_data.push({
-                x: stats["hipflex"][i]["x"][x], 
-                y: stats["hipflex"][i]["y"][x]
-            });
-        }
-
-        dataset.push({
-            data: gait_data,
-            tension: 0.25,
-            borderWidth: 1,
-            radius: 1,
-            showLine: true
-        });
-    };
-
-    for (x=0; x < stats["besthip"]["x"].length; x++){       
-        bestfit_data.push({
-            x: stats["besthip"]["x"][x], 
-            y: stats["besthip"]["y"][x]
-        });
-    }  
-
-    const hipflex_data = {
-        datasets: dataset
-    };
-
-    const hipflex_best = {
-        datasets: [{
-            data: bestfit_data,
-            tension: 0.25,
-            borderWidth: 1,
-            radius: 1,
-            showLine: true
-        }]
-    };
-
-    const horizontalDottedLine = {
-        id: 'horizontalDottedLine',
-        beforeDatasetsDraw(chart, args, options){
-            const { ctx , chartArea: { top, right, bottom, left, width, height},
-                scales: {x,y}} = chart;
-            ctx.save();
-
-            ctx.strokeStyle = 'grey';
-            ctx.setLineDash([5, 10]);
-            ctx.strokeRect(left, y.getPixelForValue(0), width, 0);
-            ctx.restore();
-        }
+    if (elem.id != "raw_data" || elem.id != "segregate_data" || elem.id != "scatter_data"){
+        data_config["plugins"] = [horizontalDottedLine];
     }
-    // Config block
-    const hipflex_data_config = {
-        type: 'scatter',
-        data: hipflex_data,
-        options: {
-            scales:{
-                x:{ 
-                    title:{
-                        display: true,
-                        text: "Gait Cycle (%)" 
-                    },
-                },
-                y:{ 
-                    title:{
-                        display: true,
-                        text: "Hip Flex (Degree)"  
-                    },
-                }                
-            },
-            plugins: {
-                title:{
-                    display: true,
-                    text: "Hip Flex" 
-                },
-                legend: {
-                    display: false,
-                },
-            }
-        },
-        plugins: [horizontalDottedLine]
-    };
-
-    const hipflex_bestfit_config = {
-        type: 'scatter',
-        data: hipflex_best,
-        options: {
-            scales:{
-                x:{ 
-                    title:{
-                        display: true,
-                        text: "Gait Cycle (%)" 
-                    },
-                },
-                y:{ 
-                    title:{
-                        display: true,
-                        text: "Hip Flex (Degree)"  
-                    },
-                }                
-            },
-            plugins: {
-                title:{
-                    display: true,
-                    text: "Best Fit Curve of Hip Flex" 
-                },
-                legend: {
-                    display: false,
-                },
-            }
-        },
-        plugins: [horizontalDottedLine]
-    };
-
-    
-    // Rendering block
-    var chart = new Chart(
-        elem,
-        hipflex_data_config
-    );
-
-    var best_chart = new Chart(
-        best_elem,
-        hipflex_bestfit_config
-    );
-};
-
-function kneeflex_data(stats, elem, best_elem){
-    // Setup block
-    var dataset = [];
-    var bestfit_data = [];
-
-    for (i=0; i < stats["kneeflex"].length; i++){
-        
-        gait_data = [];
-
-        for (x=0; x < stats["kneeflex"][i]["x"].length; x++){
-            gait_data.push({
-                x: stats["kneeflex"][i]["x"][x], 
-                y: stats["kneeflex"][i]["y"][x]
-            });
-        }
-
-        dataset.push({
-            data: gait_data,
-            tension: 0.25,
-            borderWidth: 1,
-            radius: 1,
-            showLine: true
-        });
-    };
-
-    for (x=0; x < stats["bestknee"]["x"].length; x++){       
-        bestfit_data.push({
-            x: stats["bestknee"]["x"][x], 
-            y: stats["bestknee"]["y"][x]
-        });
-    }  
-
-    const kneeflex_data = {
-        datasets: dataset
-    };
-
-    const kneeflex_best = {
-        datasets: [{
-            data: bestfit_data,
-            tension: 0.25,
-            borderWidth: 1,
-            radius: 1,
-            showLine: true
-        }]
-    };
-
-    const horizontalDottedLine = {
-        id: 'horizontalDottedLine',
-        beforeDatasetsDraw(chart, args, options){
-            const { ctx , chartArea: { top, right, bottom, left, width, height},
-                scales: {x,y}} = chart;
-            ctx.save();
-
-            ctx.strokeStyle = 'grey';
-            ctx.setLineDash([5, 10]);
-            ctx.strokeRect(left, y.getPixelForValue(0), width, 0);
-            ctx.restore();
-        }
-    }
-
-    // Config block
-    const kneeflex_data_config = {
-        type: 'scatter',
-        data: kneeflex_data,
-        options: {
-            scales:{
-                x:{ 
-                    title:{
-                        display: true,
-                        text: "Gait Cycle (%)" 
-                    },
-                },
-                y:{ 
-                    title:{
-                        display: true,
-                        text: "Knee Flex (Degree)"  
-                    },
-                }                
-            },
-            plugins: {
-                title:{
-                    display: true,
-                    text: "Knee Flex" 
-                },
-                legend: {
-                    display: false
-                },
-            }
-        },
-        plugins: [horizontalDottedLine]
-    };
-
-    const kneeflex_bestfit_config = {
-        type: 'scatter',
-        data: kneeflex_best,
-        options: {
-            scales:{
-                x:{ 
-                    title:{
-                        display: true,
-                        text: "Gait Cycle (%)" 
-                    },
-                },
-                y:{ 
-                    title:{
-                        display: true,
-                        text: "Knee Flex (Degree)"  
-                    },
-                }                
-            },
-            plugins: {
-                title:{
-                    display: true,
-                    text: "Best Fit Curve of Knee Flex" 
-                },
-                legend: {
-                    display: false,
-                },
-            }
-        },
-        plugins: [horizontalDottedLine]
-    };
+    // console.log(data, data_config)
 
     // Rendering block
     var chart = new Chart(
         elem,
-        kneeflex_data_config
+        data_config
     );
 
-    var best_chart = new Chart(
-        best_elem,
-        kneeflex_bestfit_config
-    );
 };
 
-function ankleflex_data(stats, elem, best_elem){
-    // Setup block
-    var dataset = [];
-    var bestfit_data = [];
-
-    for (i=0; i < stats["ankleflex"].length; i++){
-        
-        gait_data = [];
-
-        for (x=0; x < stats["ankleflex"][i]["x"].length; x++){
-            gait_data.push({
-                x: stats["ankleflex"][i]["x"][x], 
-                y: stats["ankleflex"][i]["y"][x]
-            });
-        }
-
-        dataset.push({
-            data: gait_data,
-            tension: 0.25,
-            borderWidth: 1,
-            radius: 1,
-            showLine: true
-        });
-    };
-
-    for (x=0; x < stats["bestankle"]["x"].length; x++){       
-        bestfit_data.push({
-            x: stats["bestankle"]["x"][x], 
-            y: stats["bestankle"]["y"][x]
-        });
-    }  
-
-    const ankleflex_data = {
-        datasets: dataset
-    };
-
-    const ankleflex_best = {
-        datasets: [{
-            data: bestfit_data,
-            tension: 0.25,
-            borderWidth: 1,
-            radius: 1,
-            showLine: true
-        }]
-    };
-
-    const horizontalDottedLine = {
-        id: 'horizontalDottedLine',
-        beforeDatasetsDraw(chart, args, options){
-            const { ctx , chartArea: { top, right, bottom, left, width, height},
-                scales: {x,y}} = chart;
-            ctx.save();
-
-            ctx.strokeStyle = 'grey';
-            ctx.setLineDash([5, 10]);
-            ctx.strokeRect(left, y.getPixelForValue(0), width, 0);
-            ctx.restore();
-        }
-    }
-
-    // Config block
-    const ankleflex_data_config = {
-        type: 'scatter',
-        data: ankleflex_data,
-        options: {
-            scales:{
-                x:{ 
-                    title:{
-                        display: true,
-                        text: "Gait Cycle (%)" 
-                    },
-                },
-                y:{ 
-                    title:{
-                        display: true,
-                        text: "Ankle Flex (Degree)"  
-                    },
-                }                
-            },
-            plugins: {
-                title:{
-                    display: true,
-                    text: "Ankle Flex" 
-                },
-                legend: {
-                    display: false
-                },
-            }
-        },
-        plugins: [horizontalDottedLine]
-    };
-
-    const ankleflex_bestfit_config = {
-        type: 'scatter',
-        data: ankleflex_best,
-        options: {
-            scales:{
-                x:{ 
-                    title:{
-                        display: true,
-                        text: "Gait Cycle (%)" 
-                    },
-                },
-                y:{ 
-                    title:{
-                        display: true,
-                        text: "Ankle Flex (Degree)"  
-                    },
-                }                
-            },
-            plugins: {
-                title:{
-                    display: true,
-                    text: "Best Fit Curve of Ankle Flex" 
-                },
-                legend: {
-                    display: false,
-                },
-            }
-        },
-        plugins: [horizontalDottedLine]
-    };
-
-    // Rendering block
-    var chart = new Chart(
-        elem,
-        ankleflex_data_config
-    );
-
-    var best_chart = new Chart(
-        best_elem,
-        ankleflex_bestfit_config
-    );
-};
+function stats_plot(stats, elem){
+    config = elem_dict[elem.id];
+    elem.innerHTML = config["header"] + ": " + stats[config["statskey"]] + " " + config["units"];
+}

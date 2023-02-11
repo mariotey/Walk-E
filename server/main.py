@@ -2,15 +2,13 @@ from flask import Flask, render_template, request
 import mediapipe as mp
 import json
 import redis
-import RPi.GPIO as GPIO
-import time
 
 import gait_calibrate
 import gait_statistics
 import format_data
 # import motor
-import dist
-import op_encode
+# import dist
+# import op_encode
 
 # Drawing utilities for visualizing poses
 mp_drawing = mp.solutions.drawing_utils
@@ -58,7 +56,7 @@ def get_stats():
 
     global move_stats
 
-    stateCount, stateLast = op_encode.setup()
+    # stateCount, stateLast = op_encode.setup()
 
     if request_data["stats"] == "true": 
         move_stats = True
@@ -77,28 +75,28 @@ def get_stats():
         redis_client.hset("testjoint_data", "world_lm", request_data["worldLandmark"])
         redis_client.hset("testjoint_data", "time", request_data["time"])
 
-    # Logic for Proximity Detection
-    while move_stats: 
+    # # Logic for Proximity Detection
+    # while move_stats: 
     #     ret, frame = cap.read()
     #     results = pose.process(frame)
 
-        try:
-            # print("Walk-E moves")
-            # camera_lm = results.pose_landmarks.landmark
+    #     try:
+    #         print("Walk-E moves")
+    #         camera_lm = results.pose_landmarks.landmark
 
-            # dist.detect(frame, camera_lm)
-            stateCount, stateLast = op_encode.get_stateChange(stateCount, stateLast)
-            # motor.drive(30, 30)
+    #         dist.detect(frame, camera_lm)
+    #         stateCount, stateLast = op_encode.get_stateChange(stateCount, stateLast)
+    #         motor.drive(30, 30)
             
-        except AttributeError:
-            # print("Nothing / Errors detected")
-            pass  # Pass if there is no detection or error   
+    #     except AttributeError:
+    #         # print("Nothing / Errors detected")
+    #         pass  # Pass if there is no detection or error   
 
-    # # motor.stop()
-    print("Walk-E stops")
+    # # # motor.stop()
+    # print("Walk-E stops")
 
-    if stateCount != 0:
-        print("StateCount:", stateCount,"\n")
+    # if stateCount != 0:
+    #     print("StateCount:", stateCount,"\n")
     
     return render_template("main.html")
 

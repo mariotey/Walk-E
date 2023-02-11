@@ -90,13 +90,8 @@ def get_stats():
             # print("Nothing / Errors detected")
             pass  # Pass if there is no detection or error   
 
-<<<<<<< HEAD
     # # motor.stop()
     print("Walk-E stops")
-=======
-    # motor.stop()
-    # print("Walk-E stops")
->>>>>>> 4f5d0964d93be49f32516dc89e58775bbb14b2e0
     
     return render_template("main.html")
 

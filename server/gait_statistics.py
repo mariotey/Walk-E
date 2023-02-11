@@ -19,8 +19,8 @@ ANKLEFLEX_DOF = 7
 def add_points(joint_data, unit_space):
     new_jointdata = {
         "ref_heel": [],
-        "shoulder": [],
-        "hip": [],
+        "left_shoulder": [],
+        "left_hip": [],
         "knee": [],
         "ankle": [],
         "toe": [],
@@ -57,10 +57,7 @@ def add_points(joint_data, unit_space):
                     new_jointdata[bodykey].append({"x": new_x[index],
                                                     "y": new_y[index],
                                                     "z": new_z[index]})
-
-    # print(len(new_jointdata["ref_heel"]), len(new_jointdata["shoulder"]), len(new_jointdata["hip"]), len(
-    #     new_jointdata["knee"]), len(new_jointdata["ankle"]), len(new_jointdata["toe"]), len(new_jointdata["time"]))
-        
+    
     return new_jointdata
 
 def get_gait(heel_baseline, raw_joint):
@@ -76,8 +73,8 @@ def get_gait(heel_baseline, raw_joint):
     # Slice data points based on identified cutoff points
     sine_joint = {
         "ref_heel": [format_jointdata["ref_heel"][cutoff_index[x]:cutoff_index[x+1]] for x in range(0, len(cutoff_index) - 1)],
-        "shoulder": [format_jointdata["shoulder"][cutoff_index[x]:cutoff_index[x+1]] for x in range(0, len(cutoff_index) - 1)],
-        "hip": [format_jointdata["hip"][cutoff_index[x]:cutoff_index[x+1]] for x in range(0, len(cutoff_index) - 1)],
+        "left_shoulder": [format_jointdata["left_shoulder"][cutoff_index[x]:cutoff_index[x+1]] for x in range(0, len(cutoff_index) - 1)],
+        "left_hip": [format_jointdata["left_hip"][cutoff_index[x]:cutoff_index[x+1]] for x in range(0, len(cutoff_index) - 1)],
         "knee": [format_jointdata["knee"][cutoff_index[x]:cutoff_index[x+1]] for x in range(0, len(cutoff_index) - 1)],
         "ankle": [format_jointdata["ankle"][cutoff_index[x]:cutoff_index[x+1]] for x in range(0, len(cutoff_index) - 1)],
         "toe": [format_jointdata["toe"][cutoff_index[x]:cutoff_index[x+1]] for x in range(0, len(cutoff_index) - 1)],
@@ -86,8 +83,8 @@ def get_gait(heel_baseline, raw_joint):
 
     try:
         sine_joint["ref_heel"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
-        sine_joint["shoulder"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
-        sine_joint["hip"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
+        sine_joint["left_shoulder"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
+        sine_joint["left_hip"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
         sine_joint["knee"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
         sine_joint["ankle"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
         sine_joint["toe"].append(format_jointdata["ref_heel"][cutoff_index[-1]:])
@@ -98,8 +95,8 @@ def get_gait(heel_baseline, raw_joint):
     # Remove data points that are too short in length
     sine_joint = {
         "ref_heel": [data for data in sine_joint["ref_heel"] if len(data) > MIN_CHUNKSIZE],
-        "shoulder": [data for data in sine_joint["shoulder"] if len(data) > MIN_CHUNKSIZE],
-        "hip": [data for data in sine_joint["hip"] if len(data) > MIN_CHUNKSIZE],
+        "left_shoulder": [data for data in sine_joint["left_shoulder"] if len(data) > MIN_CHUNKSIZE],
+        "left_hip": [data for data in sine_joint["left_hip"] if len(data) > MIN_CHUNKSIZE],
         "knee": [data for data in sine_joint["knee"] if len(data) > MIN_CHUNKSIZE],
         "ankle": [data for data in sine_joint["ankle"] if len(data) > MIN_CHUNKSIZE],
         "toe": [data for data in sine_joint["toe"] if len(data) > MIN_CHUNKSIZE],
@@ -111,8 +108,8 @@ def get_gait(heel_baseline, raw_joint):
     # Retrieve complete waveforms and remove wavelengths that are too long
     gait_joint = {
         "ref_heel": [],
-        "shoulder": [],
-        "hip": [],
+        "left_shoulder": [],
+        "left_hip": [],
         "knee": [],
         "ankle": [],
         "toe": [],
@@ -139,8 +136,8 @@ def get_gait(heel_baseline, raw_joint):
             max_third_index = ref_list_third.index(max(ref_list_third))
 
             gait_joint["ref_heel"].append(sine_joint["ref_heel"][wave][max_first_index:] + sine_joint["ref_heel"][wave + 1] + sine_joint["ref_heel"][wave + 2 ][:max_third_index])       
-            gait_joint["shoulder"].append(sine_joint["shoulder"][wave][max_first_index:] + sine_joint["shoulder"][wave + 1] + sine_joint["shoulder"][wave + 2][:max_third_index])
-            gait_joint["hip"].append(sine_joint["hip"][wave][max_first_index:] + sine_joint["hip"][wave + 1] + sine_joint["hip"][wave + 2][:max_third_index])
+            gait_joint["left_shoulder"].append(sine_joint["left_shoulder"][wave][max_first_index:] + sine_joint["left_shoulder"][wave + 1] + sine_joint["left_shoulder"][wave + 2][:max_third_index])
+            gait_joint["left_hip"].append(sine_joint["left_hip"][wave][max_first_index:] + sine_joint["left_hip"][wave + 1] + sine_joint["left_hip"][wave + 2][:max_third_index])
             gait_joint["knee"].append(sine_joint["knee"][wave][max_first_index:] + sine_joint["knee"][wave + 1] + sine_joint["knee"][wave + 2][:max_third_index])
             gait_joint["ankle"].append(sine_joint["ankle"][wave][max_first_index:] + sine_joint["ankle"][wave + 1] + sine_joint["ankle"][wave + 2][:max_third_index])
             gait_joint["toe"].append(sine_joint["toe"][wave][max_first_index:] + sine_joint["toe"][wave + 1] + sine_joint["toe"][wave + 2][:max_third_index])
@@ -200,6 +197,9 @@ def get_heel(gait_data, waveform, axis):
     
     return new_x, new_y, y
 
+def get_planeangle(gait_data, waveform, first, secnd):
+    pass
+
 def get_flex(gait_data, waveform, first, secnd, third):
     x, y = [], []
 
@@ -225,6 +225,18 @@ def best_fit(json, dof):
     new_y = [poly(data) for data in x]
     
     return {"x": x, "y": new_y}
+
+#################################################################################################
+
+def get_cadence(gait_data):
+    steps = len(gait_data["time"]) * 2
+    time = (gait_data["time"][-1][-1])/60
+
+    cadence = round((steps/time),3)
+
+    # print(cadence, "steps/min")
+
+    return cadence
 
 #################################################################################################
 
@@ -270,8 +282,12 @@ def stats(raw_data, gait_data, offset):
 
         #########################################################################################
 
-        hipflex_x, hipflex_y, old_hipflex_y = get_flex(gait_data, wave, "shoulder", "hip", "knee")
-        kneeflex_x, kneeflex_y, old_kneeflex_y= get_flex(gait_data, wave, "hip", "knee", "ankle")
+        shoulder_x, shoulder_y = get_planeangle(gait_data, wave)
+
+        #########################################################################################
+
+        hipflex_x, hipflex_y, old_hipflex_y = get_flex(gait_data, wave, "left_shoulder", "left_hip", "knee")
+        kneeflex_x, kneeflex_y, old_kneeflex_y= get_flex(gait_data, wave, "left_hip", "knee", "ankle")
         ankleflex_x, ankleflex_y, old_ankleflex_y = get_flex(gait_data, wave, "knee", "ankle", "toe")
 
         hipflex_list.append({"x": hipflex_x, "y": list(np.array(hipflex_y) - offset["hipflex"])})
@@ -285,10 +301,6 @@ def stats(raw_data, gait_data, offset):
         bestankle_list["x"] += ankleflex_x
         bestankle_list["y"] += list(np.array(ankleflex_y) - offset["ankleflex"])
         
-        # oldHipFlex_list.append({"x": hipflex_x, "y": list(np.array(old_hipflex_y) - offset["hipflex"])})
-        # oldKneeFlex_list.append({"x": kneeflex_x, "y": list(np.array(old_kneeflex_y) - offset["kneeflex"])})
-        # oldAnkleFlex_list.append({"x": ankleflex_x, "y": list(np.array(old_ankleflex_y) - offset["ankleflex"])})
-        
         #########################################################################################
 
     stats = {
@@ -298,16 +310,22 @@ def stats(raw_data, gait_data, offset):
         "heelX": heelX_list, 
         "heelY": heelY_list, 
         "heelZ": heelZ_list, 
+        # "pelvic_obliq": "",
+        # "shoulder": "",
         "hipflex": hipflex_list,
         "kneeflex": kneeflex_list,
         "ankleflex": ankleflex_list,
+        # "bestpevlic":"",
+        # "bestshoulder": "",
         "besthip": best_fit(besthip_list, HIPFLEX_DOF),
         "bestknee": best_fit(bestknee_list, KNEEFLEX_DOF),
-        "bestankle": best_fit(bestankle_list, ANKLEFLEX_DOF)
+        "bestankle": best_fit(bestankle_list, ANKLEFLEX_DOF),
+        "cadence": get_cadence(gait_data),
+        "speed": "-",
+        "dist": "-",
+        "stride_len": "-"
     }
     
-    # walkE_plot.stats(stats)
-
     print("Stats Calculation Complete")
 
     return stats

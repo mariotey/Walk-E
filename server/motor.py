@@ -1,5 +1,4 @@
 import RPi.GPIO as GPIO
-from time import sleep
 
 #Right Motor
 EN1 = 32 #GPIO 12 (PWM0)

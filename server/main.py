@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 import mediapipe as mp
-import cv2
+import time
 import json
 import redis
 
@@ -9,6 +9,7 @@ import gait_statistics
 import format_data
 # import motor
 import dist
+import op_encode
 
 # Drawing utilities for visualizing poses
 mp_drawing = mp.solutions.drawing_utils
@@ -74,22 +75,24 @@ def get_stats():
         redis_client.hset("testjoint_data", "time", request_data["time"])
 
     # Logic for Proximity Detection
-    # while move_stats: 
+    while move_stats: 
     #     ret, frame = cap.read()
     #     results = pose.process(frame)
 
-    #     try:
+        try:
+            print("Walk-E moves")
     #         camera_lm = results.pose_landmarks.landmark
+
     #         dist.detect(frame, camera_lm)
-    #         print("Walk-E moves")
+
     #         motor.drive(30, 30)
             
-    #     except AttributeError:
-    #         # print("Nothing / Errors detected")
-    #         pass  # Pass if there is no detection or error   
+        except AttributeError:
+            # print("Nothing / Errors detected")
+            pass  # Pass if there is no detection or error   
 
     # # motor.stop()
-    # print("Walk-E stops")
+    print("Walk-E stops")
     
     return render_template("main.html")
 

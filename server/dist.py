@@ -1,5 +1,6 @@
 import cv2
 import mediapipe as mp
+
 import walkE_math
 
 mp_pose = mp.solutions.pose # Pose Estimation Model

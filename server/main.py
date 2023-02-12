@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request
 
+import rediscache
 import gait_calibrate
 import gait_statistics
-import modify_data
+import gait_process
 # import hardware
 
 app = Flask(__name__)
@@ -20,7 +21,7 @@ def recalibrate():
     request_data = request.form
 
     # Cache new calibration data into server 
-    modify_data.cache_lm("calibration_data", request_data)
+    rediscache.cache_lm("calibration_data", request_data)
 
     return render_template("main.html")
 
@@ -38,7 +39,7 @@ def get_stats():
         move_stats = False
         
         # Cache joint_data into server
-        modify_data.cache_lm("testjoint_data", request_data)
+        rediscache.cache_lm("testjoint_data", request_data)
     
     # hardware.logic(move_stats)
     
@@ -48,20 +49,19 @@ def get_stats():
 
 @app.route('/PlotStats', methods=["GET", "POST"])
 def plot_stats():
-    # Retrieve calibration data from server 
-    calibrate_world_lm, calibrate_time = modify_data.get_lm("calibration_data")
-    calibrate_data = modify_data.request_lm(calibrate_world_lm, calibrate_time)
-
-    # Retrieve stats data from server
-    joint_world_lm, joint_time = modify_data.get_lm("testjoint_data")
-    joint_data = modify_data.request_lm(joint_world_lm, joint_time)   
+    # Retrieve calibration and stats data from server 
+    calibrate_world_lm, calibrate_time = rediscache.request_lm("calibration_data")
+    joint_world_lm, joint_time = rediscache.request_lm("testjoint_data")
+    
+    calibrate_data = gait_process.get_lm(calibrate_world_lm, calibrate_time)
+    joint_data = gait_process.get_lm(joint_world_lm, joint_time)   
 
     if joint_data == []:
         return render_template("main.html")
 
     # Calculation of Gait Statistics
     offsetdata = gait_calibrate.calibrate(calibrate_data)
-    gait_data = gait_statistics.get_gait(offsetdata["cut_off"], joint_data)
+    gait_data = gait_process.get_gait(offsetdata["cut_off"], joint_data)
     stats_data = gait_statistics.stats(joint_data, gait_data, offsetdata)
 
     return render_template("statistics.html", stats_Info = stats_data)

@@ -1,10 +1,11 @@
 import numpy as np
+import math
 from sklearn.metrics import mean_squared_error as mse
 
 MAX_MSE = 100
 MAX_ITR = 10
 
-def cal_twoD_angle(first, sec, third):
+def threePt_twoD_angle(first, sec, third):
     u = np.array([first[0] - sec[0], first[1] - sec[1]])
     v = np.array([third[0] - sec[0], third[1] - sec[1]])
 
@@ -12,14 +13,14 @@ def cal_twoD_angle(first, sec, third):
     mag_u, mag_v = np.linalg.norm(u), np.linalg.norm(v)
 
     radians = np.arccos(uv/(mag_u * mag_v))
-    result = np.abs(radians * 180.0/np.pi)
+    result = np.abs(math.degrees(radians))
  
     if result > 180.0:
         result = 360 - result
 
     return result
 
-def cal_threeD_angle(first, sec, third):   
+def threePt_threeD_angle(first, sec, third):   
     u = np.array([first["x"] - sec["x"], first["y"] - sec["y"], first["z"] - sec["z"]])    
     v = np.array([third["x"] - sec["x"], third["y"] - sec["y"], third["z"] - sec["z"]])
 
@@ -36,7 +37,7 @@ def cal_threeD_angle(first, sec, third):
     u_proj_mag, v_proj_mag = np.linalg.norm(u_proj), np.linalg.norm(v_proj)
 
     radians = np.arccos(uv_project/(u_proj_mag * v_proj_mag))
-    result = np.abs(radians * 180.0/np.pi)
+    result = np.abs(math.degrees(radians))
 
     if result > 180.0:
         result = 360 - result
@@ -47,7 +48,7 @@ def cal_twopt_angle(first, sec):
     first_pt = np.array([first["x"], first["y"]])
     middle_pt = np.array([(first["x"]+sec["x"])/2, (first["y"]+sec["y"])/2])
     
-    angle = cal_twoD_angle(first_pt, middle_pt, np.array([first_pt[0], middle_pt[1]]))
+    angle = threePt_twoD_angle(first_pt, middle_pt, np.array([first_pt[0], middle_pt[1]]))
 
     return angle
 
@@ -68,23 +69,18 @@ def normalize_gait(time_list):
     for elem in time_list:
         gait_value = (elem - min_time)/(max_time - min_time) * 100
         new_list.append(gait_value)
-
-    # print(time_list[0], "to", time_list[-1], ":", new_list[0], "to", new_list[-1], "\n")
     
     return new_list
 
 def poly_fit(x,y):
-    
-    mse_dof, mean_square =  0, MAX_MSE
-
     def poly_func(x,y,dof):
         curve = np.polyfit(x, y, dof)
         poly = np.poly1d(curve)
-
-        new_x = x
-        new_x.sort()
+        new_x = sorted(x)
 
         return new_x, [poly(data) for data in new_x], dof
+
+    mse_dof, mean_square =  0, MAX_MSE
 
     for dof_itera in range(1, MAX_ITR):
         try:
@@ -93,7 +89,6 @@ def poly_fit(x,y):
             if msq < mean_square:
                 mean_square = msq
                 mse_dof = dof_itera
-
         except:
             pass
     

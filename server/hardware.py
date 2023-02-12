@@ -60,7 +60,7 @@ pose = mp.solutions.pose.Pose(min_detection_confidence=0.5,
                     static_image_mode=False)
 
 # Get Realtime Webcam Feed
-cap = cv2.VideoCapture(0) 
+# cap = cv2.VideoCapture(0) 
 
 #################################################################################################
 
@@ -136,7 +136,7 @@ def encoder_stateChange(encoder, stateCount, stateLast):
 
 #################################################################################################
 
-def logic(move_stats):
+def logic():
     stateCount = 0
     stateLast = GPIO.input(OP_ENCODE_ONE)
     
@@ -144,15 +144,18 @@ def logic(move_stats):
 
     # Logic for Proximity Detection
     while move_stats: 
-        ret, frame = cap.read()
-        results = pose.process(frame)
+        # ret, frame = cap.read()
+        # results = pose.process(frame)
 
         try:
             print("Walk-E moves")
-            camera_lm = results.pose_landmarks.landmark
 
-            dist_status = proxy_detect(frame, camera_lm)
-            motor_drive(*walkE_dict.proxy_status[dist_status])
+            # camera_lm = results.pose_landmarks.landmark
+            # dist_status = proxy_detect(frame, camera_lm)
+
+            # motor_drive(*walkE_dict.proxy_status[dist_status])
+
+            motor_drive(*[50,50])
                         
             stateCount, stateLast = encoder_stateChange(OP_ENCODE_ONE, stateCount, stateLast)
             

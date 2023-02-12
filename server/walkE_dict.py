@@ -78,6 +78,6 @@ mp_pose_dict = {
 
 proxy_status = {
     "TooFar": [0, 0],
-    "TooClose": [100, 100],
-    "Nice": [50,50]
+    "TooClose": [50, 50],
+    "Nice": [25,25]
 }

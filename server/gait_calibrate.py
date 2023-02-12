@@ -1,14 +1,12 @@
 import numpy as np
 import walkE_math
+import dictkeys
 
 #################################################################################################
 
 def calibrate_flex(joint_data, first, sec, third):
-    flex_data = {
-        "flex_data": [],
-        "time": []
-    }
-
+    flex_data = {item: [] for item in dictkeys.flex_list}
+    
     for data_point in range(len(joint_data[first])):
         flex_list, time_list = [], []
         
@@ -25,10 +23,7 @@ def calibrate_flex(joint_data, first, sec, third):
     return flex_data
 
 def calibrate_plane(joint_data, first, sec):
-    angle_data = {
-        "angle_data": [],
-        "time": []
-    }
+    angle_data = {item: [] for item in dictkeys.angle_list}
 
     for data_point in range(len(joint_data[first])):
         flex_list, time_list = [], []
@@ -57,10 +52,6 @@ def calibrate(calibrate_data):
 
     shoulder_data = calibrate_plane(calibrate_data, "left_shoulder", "right_shoulder")
     hip_data = calibrate_plane(calibrate_data, "left_hip", "right_hip")
-
-    # walkE_plot.calibrate(ref_list, heelX_list, heelY_list, heelZ_list, 
-    #                     hipflex_data, kneeflex_data, ankleflex_data,
-    #                     calibrate_data["time"])
 
     offset_json = {
         "cut_off": np.mean(heelY_list),

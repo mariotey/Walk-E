@@ -31,7 +31,7 @@ pwm_left = GPIO.PWM(EN2, 1000)
 pwm_right.start(0)
 pwm_left.start(0)
 
-def drive(duty_left, duty_right):
+def motor_drive(duty_left, duty_right):
     GPIO.output(IN1, 0)
     GPIO.output(IN3, 0)
 
@@ -43,7 +43,7 @@ def drive(duty_left, duty_right):
 
     print("Walk-E is moving. (", duty_left, ",", duty_right, ")\n")
 
-def stop():
+def motor_stop():
     GPIO.output(IN1, 0)
     GPIO.output(IN3, 0)
 

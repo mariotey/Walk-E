@@ -1,63 +1,17 @@
 import numpy as np
 import walkE_math
+import dictkeys
+import modify_data
 
 #################################################################################################
 
 MIN_CHUNKSIZE = 3
 POINTS_SPACE = 20
 
-gait_list = [
-    "ref_heel",
-    "left_shoulder",
-    "right_shoulder",
-    "left_hip",
-    "right_hip",
-    "knee",
-    "ankle",
-    "toe",
-    "time"
-]
-
 #################################################################################################
 
-def add_points(joint_data, unit_space):
-    new_jointdata = {item: [] for item in gait_list}
-
-    # For each component of joint_data
-    for bodykey in joint_data:
-        if bodykey == "time":
-            for index in range(len(joint_data["ref_heel"])-1):
-                new_time = list(np.linspace(joint_data[bodykey][index],
-                                       joint_data[bodykey][index+1],
-                                       num=unit_space))
-
-                new_jointdata["time"] += new_time
-        else:
-            # For each data set of a component of joint_data
-            for index in range(len(joint_data[bodykey])-1):
-                # Create a new list of x,y and z_coord
-                new_x = list(np.linspace(joint_data[bodykey][index]["x"],
-                                    joint_data[bodykey][index+1]["x"],
-                                    num=unit_space))
-
-                new_y = list(np.linspace(joint_data[bodykey][index]["y"],
-                                    joint_data[bodykey][index+1]["y"],
-                                    num=unit_space))
-
-                new_z = list(np.linspace(joint_data[bodykey][index]["z"],
-                                    joint_data[bodykey][index+1]["z"],
-                                    num=unit_space))
-
-                # Append the new x,y and z_coord into new_join_data              
-                for index in range(len(new_x)):
-                    new_jointdata[bodykey].append({"x": new_x[index],
-                                                    "y": new_y[index],
-                                                    "z": new_z[index]})
-    
-    return new_jointdata
-
 def get_gait(heel_baseline, raw_joint):
-    cutoff_index, format_jointdata = [], add_points(raw_joint, POINTS_SPACE)
+    cutoff_index, format_jointdata = [], modify_data.add_points(raw_joint, POINTS_SPACE)
 
     # Identify cutoff points in data
     for elem in format_jointdata["ref_heel"]:
@@ -69,7 +23,7 @@ def get_gait(heel_baseline, raw_joint):
     # Slice data points based on identified cutoff points
     sine_joint = {}
 
-    for item in gait_list:
+    for item in dictkeys.gait_list:
         sine_joint[item] = [format_jointdata[item][cutoff_index[x]:cutoff_index[x+1]] for x in range(0, len(cutoff_index) - 1)]
 
         try:
@@ -83,7 +37,7 @@ def get_gait(heel_baseline, raw_joint):
     ##############################################################################################
 
     # Retrieve complete waveforms and remove wavelengths that are too long
-    gait_joint = {item: [] for item in gait_list}
+    gait_joint = {item: [] for item in dictkeys.gait_list}
     gait_joint["gait_cycle"] = []
 
     ref_first = [sine_joint["ref_heel"][0][data_index]["y"]
@@ -104,7 +58,7 @@ def get_gait(heel_baseline, raw_joint):
             max_first_index = ref_list_first.index(max(ref_list_first))
             max_third_index = ref_list_third.index(max(ref_list_third))
 
-            for item in gait_list:
+            for item in dictkeys.gait_list:
                 gait_joint[item].append(sine_joint[item][wave][max_first_index:] + sine_joint[item][wave + 1] + sine_joint[item][wave + 2 ][:max_third_index])           
                         
         except:

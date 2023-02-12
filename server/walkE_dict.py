@@ -76,3 +76,8 @@ mp_pose_dict = {
     "right_toe": "RIGHT_FOOT_INDEX"
 }
 
+proxy_status = {
+    "TooFar": [0, 0],
+    "TooClose": [100, 100],
+    "Nice": [50,50]
+}

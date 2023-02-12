@@ -1,11 +1,10 @@
 import RPi.GPIO as GPIO
 import mediapipe as mp
 import cv2
+import time
 
 import walkE_math
-# import motor
-# import dist
-# import op_encode
+import walkE_dict
 
 EN1 = 32 #GPIO 12 (PWM0)
 EN2 = 33 #GPIO 13 (PWM1)
@@ -13,8 +12,8 @@ IN1 = 13 #GPIO 27
 IN2 = 15 #GPIO 22
 IN3 = 16 #GPIO 23
 IN4 = 18 #GPIO 24
-SENSOR_ONE = 11 #GPIO 17
-SENSOR_TWO = 36 #GPIO 16
+OP_ENCODE_ONE = 11 #GPIO 17
+OP_ENCODE_TWO = 36 #GPIO 16
 
 DIST_PER_STEP = 0.2075/15 # 1 full rotation = 0.2075m, 15 state changes
 
@@ -46,7 +45,7 @@ pwm_left = GPIO.PWM(EN2, 1000)
 pwm_left.start(0)
 
 # Optical Encoder 1 Setup
-GPIO.setup(SENSOR_ONE, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(OP_ENCODE_ONE, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 #################################################################################################
 
@@ -76,17 +75,20 @@ def proxy_detect(image, landmarks):
     hip_dist = walkE_math.cal_twoD_dist(right_hip_camera, left_hip_camera)
     print("Hip Length:", hip_dist)
     
-    cv2.rectangle(image, (0,0), (300, 25), (245,117,16), -1)
+    # cv2.rectangle(image, (0,0), (300, 25), (245,117,16), -1)
             
     if hip_dist > 0.1:
-        cv2.putText(image, "Too Close! Walk-E will accelerate", (15,12),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
+        # cv2.putText(image, "Too Close! Walk-E will accelerate", (15,12),
+        #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
+        return "TooClose"
     elif hip_dist < 0.07:
-        cv2.putText(image, "Too Far! Walk-E will slow down", (15,12),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
+        # cv2.putText(image, "Too Far! Walk-E will slow down", (15,12),
+        #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
+        return "TooFar"
     else:
-        cv2.putText(image, "Walk-E will maintain current speed", (15,12),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
+        # cv2.putText(image, "Walk-E will maintain current speed", (15,12),
+        #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
+        return "Nice"
         
 #################################################################################################
 
@@ -94,28 +96,25 @@ def motor_drive(duty_left, duty_right):
     GPIO.output(IN1, 0)
     GPIO.output(IN3, 0)
 
-    GPIO.output(IN2, 1)
-    GPIO.output(IN4, 1)
-    
-    pwm_right.ChangeDutyCycle(duty_right)
-    pwm_left.ChangeDutyCycle(duty_left)
+    if duty_left == 0 and duty_right == 0:
+        GPIO.output(IN2, 0)
+        GPIO.output(IN4, 0)
 
-    print("Walk-E is moving. (", duty_left, ",", duty_right, ")\n")
+        print("Walk-E has stopped\n")
+    else:
+        GPIO.output(IN2, 1)
+        GPIO.output(IN4, 1)
+        
+        pwm_right.ChangeDutyCycle(duty_right)
+        pwm_left.ChangeDutyCycle(duty_left)
 
-def motor_stop():
-    GPIO.output(IN1, 0)
-    GPIO.output(IN3, 0)
-
-    GPIO.output(IN2, 0)
-    GPIO.output(IN4, 0)
-
-    print("Walk-E has stopped\n")
+        print("Walk-E is moving. (", duty_left, ",", duty_right, ")\n")
 
 #################################################################################################
 
-def get_stateChange(stateCount, stateLast):
+def encoder_stateChange(encoder, stateCount, stateLast):
 
-    stateCurrent = GPIO.input(SENSOR_ONE)
+    stateCurrent = GPIO.input(encoder)
 
     if stateCurrent != stateLast:
         print("stateCurrent:", stateCurrent)
@@ -139,8 +138,10 @@ def get_stateChange(stateCount, stateLast):
 
 def logic(move_stats):
     stateCount = 0
-    stateLast = GPIO.input(SENSOR_ONE)
+    stateLast = GPIO.input(OP_ENCODE_ONE)
     
+    start_time = time.time()
+
     # Logic for Proximity Detection
     while move_stats: 
         ret, frame = cap.read()
@@ -150,16 +151,33 @@ def logic(move_stats):
             print("Walk-E moves")
             camera_lm = results.pose_landmarks.landmark
 
-            proxy_detect(frame, camera_lm)
-            stateCount, stateLast = get_stateChange(stateCount, stateLast)
-            motor_drive(30, 30)
+            dist_status = proxy_detect(frame, camera_lm)
+            motor_drive(*walkE_dict.proxy_status[dist_status])
+                        
+            stateCount, stateLast = encoder_stateChange(OP_ENCODE_ONE, stateCount, stateLast)
             
         except AttributeError:
             # print("Nothing / Errors detected")
             pass  # Pass if there is no detection or error   
 
-    motor_stop()
+    motor_drive(0, 0)
+    end_time = time.time()
+
     print("Walk-E stops")
 
+
     if stateCount != 0:
+        # Statistical Calulation from Hardware
         print("StateCount:", stateCount,"\n")
+        
+        stats = {}
+
+        stats["distance"] = DIST_PER_STEP * stateCount
+        stats["speed"] = stats["distance"] / (end_time - start_time)
+
+        return stats
+    else:
+        return {
+            "speed": "-",
+            "dist": "-",
+        }

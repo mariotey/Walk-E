@@ -43,6 +43,14 @@ def get_cadence(gait_data):
 
     return cadence
 
+def get_stridelen(gait_data, dist):
+    steps = len(gait_data["time"]) * 2
+    stride_len = dist / steps
+    
+    print(stride_len, "m/step")
+
+    return stride_len 
+
 #################################################################################################
 
 def stats(raw_data, gait_data, offset):
@@ -134,7 +142,10 @@ def stats(raw_data, gait_data, offset):
         "cadence": get_cadence(gait_data),
         "speed": "-",
         "dist": "-",
-        "stride_len": "-"
+        "stride_len": "-",
+        # "speed": hardware_data["speed"],
+        # "dist": hardware_data["dist"],
+        # "stride_len": get_stridelen(gait_data, hardware_data["dist"])
     }
     
     print("Stats Calculation Complete")

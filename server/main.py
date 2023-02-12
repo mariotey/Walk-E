@@ -41,7 +41,8 @@ def get_stats():
         # Cache joint_data into server
         rediscache.cache_lm("testjoint_data", request_data)
     
-    # hardware.logic(move_stats)
+    # hardware_data = hardware.logic(move_stats)
+    # rediscache.cache_hw("hardware_data", hardware_data)
     
     return render_template("main.html")
 
@@ -52,6 +53,7 @@ def plot_stats():
     # Retrieve calibration and stats data from server 
     calibrate_world_lm, calibrate_time = rediscache.request_lm("calibration_data")
     joint_world_lm, joint_time = rediscache.request_lm("testjoint_data")
+    # hardware_data = rediscache.request_hw("hardware_data")
     
     calibrate_data = gait_process.get_lm(calibrate_world_lm, calibrate_time)
     joint_data = gait_process.get_lm(joint_world_lm, joint_time)   
@@ -63,6 +65,7 @@ def plot_stats():
     offsetdata = gait_calibrate.calibrate(calibrate_data)
     gait_data = gait_process.get_gait(offsetdata["cut_off"], joint_data)
     stats_data = gait_statistics.stats(joint_data, gait_data, offsetdata)
+    # stats_data = gait_statistics.stats(joint_data, gait_data, hardware_data, offsetdata)
 
     return render_template("statistics.html", stats_Info = stats_data)
 

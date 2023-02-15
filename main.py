@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request
+import numpy as np
 import time
 import mediapipe as mp
 import cv2
 
-import rediscache
+import walkE_cache
 import gait_statistics
 import gait_process
 import hardware
@@ -52,7 +53,8 @@ def calibrate_hiplen():
 @app.route('/CacheCalibrate', methods=["GET", "POST"])
 def cache_calibrate():
     request_data = request.form
-    rediscache.cache_lm("calibration_data", request_data)
+
+    walkE_cache.cache_lm("calibration_data", request_data)
 
     return render_template("main.html")
 
@@ -63,14 +65,19 @@ def walkE_move():
     ret, frame = cap.read()
     results = pose.process(frame)
 
-    try:
-        # camera_lm = results.pose_landmarks.landmark
-        # dist_status = hardware.proxy_detect(frame, camera_lm)
-        # hardware.motor_drive(*walkE_dict.proxy_status[dist_status])
+    if calibration_hiplen:
+        avg_hiplen = np.mean(calibration_hiplen)
+    else:
+        avg_hiplen = 0.085
 
-        hardware.motor_drive(*[25,25])
+    try:
+        camera_lm = results.pose_landmarks.landmark
+        dist_status = hardware.proxy_detect(frame, camera_lm, avg_hiplen)
+        hardware.motor_drive(*walkE_dict.proxy_status[dist_status])
+
+        # hardware.motor_drive(*[25,25])
         
-        encoder_list.append(hardware.encoder_stateChange(encoder_list[-1], "Nice"))
+        encoder_list.append(hardware.encoder_stateChange(encoder_list[-1], 1))
 
     except AttributeError:
         # Stops if user is not in frame
@@ -88,7 +95,7 @@ def walkE_stop():
 @app.route('/CacheStats', methods=["GET", "POST"])
 def cache_stats():  
     request_data = request.form   
-    rediscache.cache_lm("testjoint_data", request_data)   
+    walkE_cache.cache_lm("testjoint_data", request_data)   
     
     return render_template("main.html")
 
@@ -97,14 +104,14 @@ def cache_stats():
 @app.route('/GetStats', methods=["GET", "POST"])
 def plot_stats():
     # Retrieve calibration and stats data from server 
-    joint_data = rediscache.request_lm("testjoint_data")
+    joint_data = walkE_cache.request_lm("testjoint_data")
 
     if joint_data == []:
         return render_template("main.html")
     
-    offsetdata = rediscache.request_lm("calibration_data")
+    offsetdata = walkE_cache.request_lm("calibration_data")
 
-    hardware_data = rediscache.request_hw("testjoint_data")
+    hardware_data = walkE_cache.request_hw("testjoint_data")
         
     # Calculation of Gait Statistics
     gait_data = gait_process.get_gait(offsetdata["cut_off"], joint_data)

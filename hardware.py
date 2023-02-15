@@ -3,7 +3,7 @@ import mediapipe as mp
 import cv2
 import time
 
-import rediscache
+import walkE_cache
 import walkE_math
 import walkE_dict
 
@@ -16,7 +16,9 @@ IN4 = 18 #GPIO 24
 OP_ENCODE_ONE = 11 #GPIO 17
 OP_ENCODE_TWO = 36 #GPIO 16
 
-DIST_PER_STEP = 0.2075/15 # 1 full rotation = 0.2075m, 15 state changes
+DIST_ZERO = 0.2075 / 30
+DIST_ONE = 0.2075/15 # 1 full rotation = 0.2075m, 15 state changes
+DIST_TWO = 0.2075/2
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
@@ -76,24 +78,24 @@ def hip_detect(landmarks):
     
     return hip_dist
 
-def proxy_detect(image, landmarks):
+def proxy_detect(image, landmarks, thres):
     hip_dist = hip_detect(landmarks)
-    
-    if hip_dist > 0.1:
+
+    if hip_dist > (thres * 1.5):
     # cv2.putText(image, "Too Close! Walk-E will accelerate", (15,12),~~~
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
         print("TooClose")
-        return "TooClose"
-    elif hip_dist < 0.07:
+        return 2
+    elif hip_dist < (thres * 0.5):
         # cv2.putText(image, "Too Far! Walk-E will slow down", (15,12),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
         print("TooFar")
-        return "TooFar"
+        return 0
     else:
         # cv2.putText(image, "Walk-E will maintain current speed", (15,12),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
         print("Nice")
-        return "Nice"       
+        return 1       
 #################################################################################################
 
 def motor_drive(duty_left, duty_right):
@@ -161,13 +163,20 @@ def encoder_process(encoder_list):
         dist_x, encoder_x = 0, []
         
         for count in range(max(data[key] for data in encoder_list) + 1):
-            encoder_x.append(min(filter(lambda x: x[key] == count, encoder_list), 
-                                    key=lambda x:x["time"]))
+            try:
+                encoder_x.append(min(filter(lambda x: x[key] == count, encoder_list), 
+                                        key=lambda x:x["time"]))
+            except:
+                pass
 
         for idx in range(len(encoder_x)):
             try:
-                if encoder_x[idx]["dist_status"] == encoder_x[idx+1]["dist_status"]:
-                    dist_x = dist_x + DIST_PER_STEP
+                if encoder_x[idx]["dist_status"] > encoder_x[idx+1]["dist_status"]:
+                    dist_x = dist_x + DIST_TWO
+                elif encoder_x[idx]["dist_status"] == encoder_x[idx+1]["dist_status"]:
+                    dist_x = dist_x + DIST_ONE
+                else:
+                    pass
             except:
                 pass
         
@@ -181,11 +190,16 @@ def encoder_process(encoder_list):
     else:
         end_time = encoder_two[-1]["time"]
 
-    stats = {
-        "distance": (dist_one + dist_two)/2
-    }
-    stats["speed"] = stats["distance"]/(end_time - init_time)
+    if end_time != init_time:
+        stats = {
+            "distance": (dist_one + dist_two)/2
+        }
+        stats["speed"] = stats["distance"]/(end_time - init_time)
+    else:
+        stats = {
+            "distance": "-",
+            "speed": "-"
+        }
 
-    rediscache.cache_hw("testjoint_data", stats)
-    
+    walkE_cache.cache_hw("testjoint_data", stats)
     print("Encoder Processing Complete")

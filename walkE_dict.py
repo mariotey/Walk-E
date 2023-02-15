@@ -82,7 +82,7 @@ hiplen_joints = [
 ]
 
 proxy_status = {
-    "TooFar": [0, 0],
-    "TooClose": [50, 50],
-    "Nice": [25,25]
+    0 : [0, 0],
+    1 : [25,25],
+    2 : [50, 50],
 }

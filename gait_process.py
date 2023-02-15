@@ -54,12 +54,16 @@ def get_lm(world_lm, time):
     new_data = {item: [] for item in walkE_dict.gaitkeys_list}
     
     for idx, images in enumerate(world_lm):
-        for bodypart in new_data.keys():
-            new_data[bodypart].append(images[mp_pose.PoseLandmark[walkE_dict.mp_pose_dict[bodypart]].value]) if bodypart != "time" else None
-       
-        new_data["time"].append(time[idx] - time[0])
-    
-    return new_data
+        if images is not None:
+            for bodypart in new_data.keys():
+                new_data[bodypart].append(images[mp_pose.PoseLandmark[walkE_dict.mp_pose_dict[bodypart]].value]) if bodypart != "time" else None
+        
+            new_data["time"].append(time[idx] - time[0])
+
+    if new_data != {item: [] for item in walkE_dict.gaitkeys_list}:
+        return new_data
+    else:
+        print("No video coords recorded")
 
 def get_gait(heel_baseline, raw_joint):
     start_time = time.time()
@@ -110,7 +114,7 @@ def get_gait(heel_baseline, raw_joint):
             for item in walkE_dict.gaitkeys_list:
                 gait_joint[item].append(sine_joint[item][wave][max_first_index:] + sine_joint[item][wave + 1] + sine_joint[item][wave + 2 ][:max_third_index])           
                         
-        except:
+        except IndexError:
             pass
     
     gait_joint["gait_cycle"] = [walkE_math.normalize_gait(time) for time in gait_joint["time"]]

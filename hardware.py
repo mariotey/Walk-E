@@ -83,16 +83,19 @@ def proxy_detect(image, landmarks):
     hip_dist = hip_detect(landmarks)
     
     if hip_dist > 0.1:
-        # cv2.putText(image, "Too Close! Walk-E will accelerate", (15,12),
+    # cv2.putText(image, "Too Close! Walk-E will accelerate", (15,12),~~~
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
+        print("TooClose")
         return "TooClose"
     elif hip_dist < 0.07:
         # cv2.putText(image, "Too Far! Walk-E will slow down", (15,12),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
+        print("TooFar")
         return "TooFar"
     else:
         # cv2.putText(image, "Walk-E will maintain current speed", (15,12),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
+        print("Nice")
         return "Nice"       
 #################################################################################################
 

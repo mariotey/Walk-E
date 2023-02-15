@@ -1,5 +1,7 @@
 import mediapipe as mp
 import numpy as np
+import asyncio
+import time
 
 import walkE_math
 import walkE_dict
@@ -60,6 +62,10 @@ def get_lm(world_lm, time):
     return new_data
 
 def get_gait(heel_baseline, raw_joint):
+    start_time = time.time()
+    last_time = time.time()
+    print("Starting Data Slicing...")
+    
     format_jointdata = add_points(raw_joint, POINTS_SPACE)
 
     # Identify cutoff points in data
@@ -69,6 +75,7 @@ def get_gait(heel_baseline, raw_joint):
     ##############################################################################################
 
     # Slice data points based on identified cutoff points
+    
     sine_joint = {}
 
     for item in walkE_dict.gaitkeys_list:
@@ -78,6 +85,9 @@ def get_gait(heel_baseline, raw_joint):
 
         # Remove data points that are too short in length
         sine_joint[item] = [data for data in sine_joint[item] if len(data) > MIN_CHUNKSIZE]
+
+    print("Sine Joint", time.time() - last_time)
+    last_time = time.time()
 
     ##############################################################################################
 
@@ -107,7 +117,8 @@ def get_gait(heel_baseline, raw_joint):
     
     ##############################################################################################
 
-    print("Data Slicing Complete")
+    print(str(time.time() - last_time))
+    print("Data Slicing Complete", time.time() - start_time, "\n")
 
     return gait_joint   
 

@@ -1,16 +1,17 @@
 from flask import Flask, render_template, request
 import time
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import mediapipe as mp
 import cv2
 
 import rediscache
 import gait_statistics
 import gait_process
-# import hardware
+import hardware
+import walkE_dict
 
-# OP_ENCODE_ONE = 11 #GPIO 17
-# OP_ENCODE_TWO = 36 #GPIO 16
+OP_ENCODE_ONE = 11 #GPIO 17
+OP_ENCODE_TWO = 36 #GPIO 16
 
 # Pose Estimation Model
 mp_pose = mp.solutions.pose  
@@ -30,8 +31,8 @@ app = Flask(__name__)
 #################################################################################################
 
 calibration_hiplen = []
-# stateCount_one, stateCount_two = 0, 0
-# stateLast_one, stateLast_two = GPIO.input(OP_ENCODE_ONE), GPIO.input(OP_ENCODE_TWO)  
+stateCount_one, stateCount_two = 0, 0
+stateLast_one, stateLast_two = GPIO.input(OP_ENCODE_ONE), GPIO.input(OP_ENCODE_TWO)  
 
 #################################################################################################
 
@@ -45,13 +46,12 @@ def calibrate_hiplen():
     ret, frame = cap.read()
     results = pose.process(frame)
 
-    # try:
-    #     camera_lm = results.pose_landmarks.landmark
-    #     calibration_hiplen.append(hardware.hip_detect(camera_lm))        
+    try:
+        camera_lm = results.pose_landmarks.landmark
+        calibration_hiplen.append(hardware.hip_detect(camera_lm))        
 
-    # except AttributeError:
-    #     # print("Nothing / Errors detected")
-    #     pass  # Pass if there is no detection or error 
+    except AttributeError:
+        pass  # Pass if there is no detection or error 
 
     return ('', 204)
 
@@ -65,32 +65,22 @@ def cache_calibrate():
 #################################################################################################
 
 @app.route('/walkE_move', methods=["GET", "POST"])
-def walkE_move():
-    # stateCount_one, stateCount_two = 0, 0
-    # stateLast_one, stateLast_two = GPIO.input(OP_ENCODE_ONE), GPIO.input(OP_ENCODE_TWO)
-    
-    # start_time = time.time()
-    
-    # ret, frame = cap.read()
-    # results = pose.process(frame)
+def walkE_move():  
+    ret, frame = cap.read()
+    results = pose.process(frame)
 
-    # try:
-    #     # camera_lm = results.pose_landmarks.landmark
-    #     # dist_status = hardware.proxy_detect(frame, camera_lm)
-        
-    #     # hardware.motor_drive(*walkE_dict.proxy_status[dist_status])
-    #     hardware.motor_drive(*[25,25])
-                    
+    try:
+        camera_lm = results.pose_landmarks.landmark
+        dist_status = hardware.proxy_detect(frame, camera_lm)
+        hardware.motor_drive(*walkE_dict.proxy_status[dist_status])
+
+        # hardware.motor_drive(*[25,25])
+                
     #     # stateCount_one, stateLast_one = hardware.encoder_stateChange(OP_ENCODE_ONE, stateCount_one, stateLast_one)
     #     # stateCount_two, stateLast_two = hardware.encoder_stateChange(OP_ENCODE_TWO, stateCount_two, stateLast_two)
         
-    # except AttributeError:
-    #     # print("Nothing / Errors detected")
-    #     pass  # Pass if there is no detection or error 
-
-    # end_time = time.time()
-
-    # print("Walk-E stops")
+    except AttributeError:
+        hardware.motor_drive(*[0,0])
 
     # hardware.encoder_logic(stateCount_one, stateCount_two, end_time - start_time)
 
@@ -98,7 +88,7 @@ def walkE_move():
 
 @app.route('/walkE_stop', methods=["GET", "POST"])
 def walkE_stop():
-    # hardware.motor_drive(*[0,0])
+    hardware.motor_drive(*[0,0])
     return('', 204)
 
 @app.route('/CacheStats', methods=["GET", "POST"])

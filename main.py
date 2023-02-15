@@ -10,7 +10,6 @@ import hardware
 import walkE_dict
 
 calibration_hiplen = []
-
 encoder_list = hardware.encoder_init()
 
 #################################################################################################

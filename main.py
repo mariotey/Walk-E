@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 import time
 # import RPi.GPIO as GPIO
 # import mediapipe as mp
-# import cv2
+import cv2
 
 import rediscache
 import gait_calibrate
@@ -23,8 +23,8 @@ import hardware
 #                     smooth_landmarks=True,
 #                     static_image_mode=False)
 
-# # Get Realtime Webcam Feed
-# cap = cv2.VideoCapture(0) 
+# Get Realtime Webcam Feed
+cap = cv2.VideoCapture(0) 
 
 app = Flask(__name__)
 

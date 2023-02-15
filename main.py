@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request
 import time
-import RPi.GPIO as GPIO
 import mediapipe as mp
 import cv2
 
@@ -10,12 +9,14 @@ import gait_process
 import hardware
 import walkE_dict
 
-OP_ENCODE_ONE = 11 #GPIO 17
-OP_ENCODE_TWO = 36 #GPIO 16
+calibration_hiplen = []
+
+encoder_list = hardware.encoder_init()
+
+#################################################################################################
 
 # Pose Estimation Model
 mp_pose = mp.solutions.pose  
-
 pose = mp.solutions.pose.Pose(min_detection_confidence=0.5,
                     min_tracking_confidence=0.5,
                     enable_segmentation=True,
@@ -27,12 +28,6 @@ pose = mp.solutions.pose.Pose(min_detection_confidence=0.5,
 cap = cv2.VideoCapture(0) 
 
 app = Flask(__name__)
-
-#################################################################################################
-
-calibration_hiplen = []
-stateCount_one, stateCount_two = 0, 0
-stateLast_one, stateLast_two = GPIO.input(OP_ENCODE_ONE), GPIO.input(OP_ENCODE_TWO)  
 
 #################################################################################################
 
@@ -70,25 +65,25 @@ def walkE_move():
     results = pose.process(frame)
 
     try:
-        camera_lm = results.pose_landmarks.landmark
-        dist_status = hardware.proxy_detect(frame, camera_lm)
-        hardware.motor_drive(*walkE_dict.proxy_status[dist_status])
+        # camera_lm = results.pose_landmarks.landmark
+        # dist_status = hardware.proxy_detect(frame, camera_lm)
+        # hardware.motor_drive(*walkE_dict.proxy_status[dist_status])
 
-        # hardware.motor_drive(*[25,25])
-                
-    #     # stateCount_one, stateLast_one = hardware.encoder_stateChange(OP_ENCODE_ONE, stateCount_one, stateLast_one)
-    #     # stateCount_two, stateLast_two = hardware.encoder_stateChange(OP_ENCODE_TWO, stateCount_two, stateLast_two)
+        hardware.motor_drive(*[25,25])
         
-    except AttributeError:
-        hardware.motor_drive(*[0,0])
+        encoder_list.append(hardware.encoder_stateChange(encoder_list[-1], "Nice"))
 
-    # hardware.encoder_logic(stateCount_one, stateCount_two, end_time - start_time)
+    except AttributeError:
+        # Stops if user is not in frame
+        hardware.motor_drive(*[0,0])
 
     return ('', 204)
 
 @app.route('/walkE_stop', methods=["GET", "POST"])
 def walkE_stop():
     hardware.motor_drive(*[0,0])
+    hardware.encoder_process(encoder_list)
+    
     return('', 204)
 
 @app.route('/CacheStats', methods=["GET", "POST"])

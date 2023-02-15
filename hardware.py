@@ -118,101 +118,109 @@ def motor_drive(duty_left, duty_right):
         print("Walk-E is moving. (", duty_left, ",", duty_right, ")\n")
 
 #################################################################################################
+def encoder_init():
+    return [{
+        "count_one": 0,
+        "count_two": 0,
+        # "current_one": GPIO.input(OP_ENCODE_ONE),
+        # "current_two": GPIO.input(OP_ENCODE_TWO),
+        "last_one": GPIO.input(OP_ENCODE_ONE),
+        "last_two": GPIO.input(OP_ENCODE_TWO),
+        "dist_status": "",
+        "time": time.time()
+    }]
 
-def encoder_stateChange(encoder, stateCount, stateLast):
+def encoder_stateChange(encoder_json, dist_status):
+    count_one = encoder_json["count_one"]
+    count_two = encoder_json["count_two"]
+    last_one = encoder_json["last_one"]    
+    last_two = encoder_json["last_two"]
 
-    stateCurrent = GPIO.input(encoder)
+    current_one = GPIO.input(OP_ENCODE_ONE)
+    current_two = GPIO.input(OP_ENCODE_TWO)
 
-    if stateCurrent != stateLast:
-        # print("stateCurrent:", stateCurrent)
-        # print("stateLast:", stateLast,"\n")
-        
-        stateLast = stateCurrent
-        stateCount = stateCount + 1
+    if current_one != last_one:
+        last_one = current_one
+        count_one = count_one + 1
 
-    return stateCount, stateLast
-            
-    # except KeyboardInterrupt:
-    #     last_time = time.time()
-    #     print("\n###########################################")
-    #     print("stateCount:", stateCount)
-    #     print("Distance:", DIST_PER_STEP*stateCount, "m")
-    #     print("Time Taken:", last_time - start_time, "sec")
-    #     print("Speed:", (DIST_PER_STEP*stateCount)/(last_time - start_time), "m/sec")
-    #     print("\n###########################################")
-
-def encoder_logic(stateCountOne, stateCountTwo, time):
-    if stateCountOne != 0:
-        # Statistical Calulation from Hardware
-        stats = {
-            "distance": DIST_PER_STEP * stateCountOne
-        }
-
-        stats["speed"] = stats["distance"] / time
-
-        # print(stats)
-
-        rediscache.cache_hw("testjoint_data", "hardware_one", stats)
+    if current_two != last_two:
+        last_two = current_two
+        count_two = count_two + 1
     
-    if stateCountTwo != 0:
-        # Statistical Calulation from Hardware
-        stats = {
-            "distance": DIST_PER_STEP * stateCountTwo
-        }
-        
-        stats["speed"] = stats["distance"] / time
+    return {
+        "count_one": count_one,
+        "count_two": count_two,
+        # "current_one": current_one,
+        # "current_two": current_two,
+        "last_one": last_one,
+        "last_two": last_two,
+        "dist_status": dist_status,
+        "time": time.time()
+    }
 
-        # print(stats)
+def encoder_process(encoder_list):
+    dist_one, dist_two = 0,0 
+    encoder_one, encoder_two = [], []
+    init_time, end_time = encoder_list[1]["time"], 0
 
-        rediscache.cache_hw("testjoint_data", "hardware_two", stats)
+    for count in range(max(data["count_one"] for data in encoder_list)):
+        encoder_one.append(max(filter(lambda x: x["count_one"] == count, encoder_list), 
+                                key=lambda x:x["time"]))
 
-#################################################################################################
-
-def logic():
-    stateCount = 0
-    stateLast = GPIO.input(OP_ENCODE_ONE)
+    for count in range(max(data["count_two"] for data in encoder_list)):
+        encoder_two.append(max(filter(lambda x: x["count_two"] == count, encoder_list), 
+                                key=lambda x:x["time"]))
     
-    start_time = time.time()
-
-    # Logic for Proximity Detection
-    while move_stats: 
-        # ret, frame = cap.read()
-        # results = pose.process(frame)
-
+    for idx in range(len(encoder_one)):
         try:
-            print("Walk-E moves")
+            if encoder_one[idx]["dist_status"] == encoder_one[idx+1]["dist_status"]:
+                dist_one = dist_one + DIST_PER_STEP
+        except:
+            pass
 
-            # camera_lm = results.pose_landmarks.landmark
-            # dist_status = proxy_detect(frame, camera_lm)
+    for idx in range(len(encoder_two)):
+        try:
+            if encoder_two[idx]["dist_status"] == encoder_two[idx+1]["dist_status"]:
+                dist_two = dist_two + DIST_PER_STEP
+        except:
+            pass
 
-            # motor_drive(*walkE_dict.proxy_status[dist_status])
-
-            motor_drive(*[50,50])
-                        
-            stateCount, stateLast = encoder_stateChange(OP_ENCODE_ONE, stateCount, stateLast)
-            
-        except AttributeError:
-            # print("Nothing / Errors detected")
-            pass  # Pass if there is no detection or error   
-
-    motor_drive(0, 0)
-    end_time = time.time()
-
-    print("Walk-E stops")
-
-
-    if stateCount != 0:
-        # Statistical Calulation from Hardware
-        print("StateCount:", stateCount,"\n")
-        
-        stats = {}
-
-        stats["distance"] = DIST_PER_STEP * stateCount
-        stats["speed"] = stats["distance"] / (end_time - start_time)
-
-        return stats
+    if encoder_one[-1]["time"] > encoder_two[-1]["time"]:
+        end_time = encoder_one[-1]["time"]
     else:
-        return {
-            "speed": "-",
-            "dist": "-",
-        }
+        end_time = encoder_two[-1]["time"]
+
+    stats = {
+        "distance": (dist_one + dist_two)/2
+    }
+    stats["speed"] = stats["distance"]/(end_time - init_time)
+
+    # rediscache.cache_hw("testjoint_data", "distance", stats["distance"])
+    # rediscache.cache_hw("testjoint_data", "speed", stats["speed"])
+
+    print("Encoder Processing Complete")
+
+# def encoder_logic(stateCountOne, stateCountTwo, time):
+#     if stateCountOne != 0:
+#         # Statistical Calulation from Hardware
+#         stats = {
+#             "distance": DIST_PER_STEP * stateCountOne
+#         }
+
+#         stats["speed"] = stats["distance"] / time
+
+#         # print(stats)
+
+#         rediscache.cache_hw("testjoint_data", "hardware_one", stats)
+    
+#     if stateCountTwo != 0:
+#         # Statistical Calulation from Hardware
+#         stats = {
+#             "distance": DIST_PER_STEP * stateCountTwo
+#         }
+        
+#         stats["speed"] = stats["distance"] / time
+
+#         # print(stats)
+
+#         rediscache.cache_hw("testjoint_data", "hardware_two", stats)

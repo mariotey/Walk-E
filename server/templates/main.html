@@ -15,13 +15,18 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3/drawing_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.4/pose.js" crossorigin="anonymous"></script>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/gh/jquery/jquery-xhr@3.0.0/dist/jquery.xhr.min.js"></script> -->
 
   <script>
     // Global Variables
     let cali_flag = false;
     let stats_flag = false;
     let move_flag = true;
+
+    var hiplen_xhr;
+    var move_xhr;
+    var stop_xhr;
 
     let calibrate_list = {
       "poseLandmark": [],
@@ -60,8 +65,8 @@
     <div class="btn_container">
       <!-- <button id = "walkEEnable" class=" control-panel-toggle positive" onclick="enable()">Walk-E Enabled</button> -->
       <button id = "calibrate" class="control-panel-toggle positive" onclick="get_calibrate()">Calibrate</button>
-      <button id = "walkEMove" class="control-panel-toggle positive" onclick = "walkE_move()">Start</button>
-      <button id = "stats" class=" control-panel-toggle positive" onclick = "get_stats()">Stats</button>
+      <button id = "walkEMove" class="control-panel-toggle positive" onclick = "get_stats()">Start</button>
+      <button id = "stats" class=" control-panel-toggle positive" onclick = "process_stats()">Stats</button>
     </div>
   </div>
 </body>
@@ -74,6 +79,72 @@
   stats_btn = document.getElementById("stats");
   // enable_btn = document.getElementById("walkEEnable");
 
+  var hiplenRequest = function() {
+    hiplen_xhr = new XMLHttpRequest();
+    hiplen_xhr.open("POST", "\calibrate_hiplen", true);
+    hiplen_xhr.onload = function() {
+      console.log("Camera is on");
+      hiplenRequest();
+    };
+    hiplen_xhr.onabort = function () {
+      console.log("Camera is off");
+    };
+    hiplen_xhr.send();
+  };
+  var calibrateRequest = function(ajax_data) {
+    $.ajax({
+      url: '/Recalibrate',
+      type: "POST",
+      data: ajax_data,
+      success: function(result){
+        console.log("Successfully Recalibrated.");
+      },
+      error: function(request, error){
+        console.log("calibrateRequest Error:" + error);
+      }
+    });
+  };
+
+  var moveRequest = function() {
+    move_xhr = new XMLHttpRequest();
+    move_xhr.open("POST", "/walkE_move", true);
+    move_xhr.onload = function() {
+      console.log("Walk-E moves");
+      moveRequest();
+    };
+    move_xhr.onabort = function() {
+      console.log("moveRequest aborted");
+    }
+    move_xhr.send();
+  };
+  var stopRequest = function() {
+    stop_xhr = new XMLHttpRequest();
+    stop_xhr.open("POST", "/walkE_stop", true);
+    stop_xhr.onload = function() {
+      console.log("Walk-E stops");
+    };
+    stop_xhr.send();
+  };
+  var statsRequest = function(ajax_data) {
+    $.ajax({
+      url: '/GetStats',
+      type: "POST",
+      data: ajax_data,
+      success: function(result){
+        console.log("Successfully Calculated Stats.");
+
+        joint_list = {
+          "poseLandmark": [],
+          "worldLandmark":[],
+          "time":[],
+        }
+      },
+      error: function(request, error){
+        console.log("statsRequest Error:" + error);
+      }
+    });
+  }
+
   function get_calibrate(){        
     if (calibrate_btn.className == "control-panel-toggle negative") {
       walkE_btn.disabled = false;
@@ -85,10 +156,9 @@
       stats_btn.className = "control-panel-toggle positive";
 
       cali_flag = false;
-      
-      console.log("Calibration is stopped.\n");
 
       ajax_data = {
+        dataType: "calibration",
         poseLandmark: JSON.stringify(calibrate_list["poseLandmark"]),
         worldLandmark: JSON.stringify(calibrate_list["worldLandmark"]),
         time: JSON.stringify(calibrate_list["time"]),
@@ -96,17 +166,8 @@
 
       console.log(ajax_data);
 
-      $.ajax({
-        url: '/Recalibrate',
-        type: "POST",
-        data: ajax_data,
-        success: function(result){
-          console.log("Successfully Recalibrated.");
-        },
-        error: function(request, error){
-          console.log("Error:" + error);
-        }
-      });
+      calibrateRequest(ajax_data);
+      hiplen_xhr.abort();
 
       calibrate_list = {
         "poseLandmark": [],
@@ -124,12 +185,12 @@
       stats_btn.className = "control-panel-toggle disable";
 
       cali_flag = true;
-
-      console.log("Recalibrating...");      
+      
+      hiplenRequest();
     }
   };
 
-  function walkE_move(){
+  function get_stats(){
     if (walkE_btn.className == "control-panel-toggle negative") {
       calibrate_btn.disabled = false;
       stats_btn.disabled = false;
@@ -140,6 +201,20 @@
       stats_btn.className = "control-panel-toggle positive";   
 
       stats_flag = false;
+
+      ajax_data = {
+        dataType: "movefeed",
+        // stats: JSON.stringify(stats_flag),
+        poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
+        worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
+        time: JSON.stringify(joint_list["time"]),
+      };
+      
+      console.log(ajax_data);
+      
+      statsRequest(ajax_data);
+      move_xhr.abort();
+      stopRequest();
     }
     else{
       calibrate_btn.disabled = true;
@@ -151,33 +226,12 @@
       stats_btn.className = "control-panel-toggle disable";   
 
       stats_flag = true;
+
+      moveRequest();
     }
-
-    ajax_data = {
-      stats: JSON.stringify(stats_flag),
-      poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
-      worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
-      time: JSON.stringify(joint_list["time"]),
-    };
-      
-    $.ajax({
-      url: '/GetStats',
-      type: "POST",
-      data: ajax_data,
-      success: function(result){
-        console.log("Successfully Calculated Stats.");
-
-        joint_list = {
-          "poseLandmark": [],
-          "worldLandmark":[],
-          "time":[],
-        }
-      }
-    });
-
   };
 
-  function get_stats(){
+  function process_stats(){
     calibrate_btn.disabled = true;
     walkE_btn.disabled = true;
     stats_btn.innerHTML = "Processing...";

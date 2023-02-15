@@ -3,6 +3,7 @@ import mediapipe as mp
 import cv2
 import time
 
+import rediscache
 import walkE_math
 import walkE_dict
 
@@ -44,8 +45,9 @@ GPIO.output(IN4, 0)
 pwm_left = GPIO.PWM(EN2, 1000)
 pwm_left.start(0)
 
-# Optical Encoder 1 Setup
+# Optical Encoder Setup
 GPIO.setup(OP_ENCODE_ONE, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(OP_ENCODE_TWO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 #################################################################################################
 
@@ -64,7 +66,7 @@ pose = mp.solutions.pose.Pose(min_detection_confidence=0.5,
 
 #################################################################################################
 
-def proxy_detect(image, landmarks):
+def hip_detect(landmarks):
     
     right_hip = mp_pose.PoseLandmark.RIGHT_HIP.value
     left_hip = mp_pose.PoseLandmark.LEFT_HIP.value
@@ -73,10 +75,13 @@ def proxy_detect(image, landmarks):
     left_hip_camera = [landmarks[left_hip].x, landmarks[left_hip].y]
 
     hip_dist = walkE_math.cal_twoD_dist(right_hip_camera, left_hip_camera)
-    print("Hip Length:", hip_dist)
+    print("Hip Length:  ", hip_dist)
     
-    # cv2.rectangle(image, (0,0), (300, 25), (245,117,16), -1)
-            
+    return hip_dist
+
+def proxy_detect(image, landmarks):
+    hip_dist = hip_detect(landmarks)
+    
     if hip_dist > 0.1:
         # cv2.putText(image, "Too Close! Walk-E will accelerate", (15,12),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
@@ -88,8 +93,7 @@ def proxy_detect(image, landmarks):
     else:
         # cv2.putText(image, "Walk-E will maintain current speed", (15,12),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
-        return "Nice"
-        
+        return "Nice"       
 #################################################################################################
 
 def motor_drive(duty_left, duty_right):
@@ -117,8 +121,8 @@ def encoder_stateChange(encoder, stateCount, stateLast):
     stateCurrent = GPIO.input(encoder)
 
     if stateCurrent != stateLast:
-        print("stateCurrent:", stateCurrent)
-        print("stateLast:", stateLast,"\n")
+        # print("stateCurrent:", stateCurrent)
+        # print("stateLast:", stateLast,"\n")
         
         stateLast = stateCurrent
         stateCount = stateCount + 1
@@ -133,6 +137,31 @@ def encoder_stateChange(encoder, stateCount, stateLast):
     #     print("Time Taken:", last_time - start_time, "sec")
     #     print("Speed:", (DIST_PER_STEP*stateCount)/(last_time - start_time), "m/sec")
     #     print("\n###########################################")
+
+def encoder_logic(stateCountOne, stateCountTwo, time):
+    if stateCountOne != 0:
+        # Statistical Calulation from Hardware
+        stats = {
+            "distance": DIST_PER_STEP * stateCountOne
+        }
+
+        stats["speed"] = stats["distance"] / time
+
+        # print(stats)
+
+        rediscache.cache_hw("testjoint_data", "hardware_one", stats)
+    
+    if stateCountTwo != 0:
+        # Statistical Calulation from Hardware
+        stats = {
+            "distance": DIST_PER_STEP * stateCountTwo
+        }
+        
+        stats["speed"] = stats["distance"] / time
+
+        # print(stats)
+
+        rediscache.cache_hw("testjoint_data", "hardware_two", stats)
 
 #################################################################################################
 

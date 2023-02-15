@@ -76,6 +76,11 @@ mp_pose_dict = {
     "right_toe": "RIGHT_FOOT_INDEX"
 }
 
+hiplen_joints = [
+    "left_hip",
+    "right_hip"
+]
+
 proxy_status = {
     "TooFar": [0, 0],
     "TooClose": [50, 50],

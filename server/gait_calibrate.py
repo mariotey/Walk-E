@@ -25,6 +25,15 @@ def calibrate_plane(joint_data, joint_list):
 
     return angle_data
 
+def calibrate_hiplen(joint_data, joint_list):
+    hiplen_data = []
+
+    for data_point in range(len(joint_data[joint_list[0]])):       
+        coords = [joint_data[joint][data_point] for joint in joint_list]
+        hiplen_data.append(walkE_math.cal_twopt_angle(*coords))
+
+    return hiplen_data
+
 def calibrate(calibrate_data):        
     offset_json = {
         "cut_off": np.mean([data_point["y"] for data_point in calibrate_data[REF_POINT]]),

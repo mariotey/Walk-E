@@ -16,7 +16,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.4/pose.js" crossorigin="anonymous"></script>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <!-- <script src="https://cdn.jsdelivr.net/gh/jquery/jquery-xhr@3.0.0/dist/jquery.xhr.min.js"></script> -->
 
   <script>
     // Global Variables
@@ -93,7 +92,7 @@
   };
   var calibrateRequest = function(ajax_data) {
     $.ajax({
-      url: '/Recalibrate',
+      url: '/CacheCalibrate',
       type: "POST",
       data: ajax_data,
       success: function(result){
@@ -127,7 +126,7 @@
   };
   var statsRequest = function(ajax_data) {
     $.ajax({
-      url: '/GetStats',
+      url: '/CacheStats',
       type: "POST",
       data: ajax_data,
       success: function(result){
@@ -204,7 +203,6 @@
 
       ajax_data = {
         dataType: "movefeed",
-        // stats: JSON.stringify(stats_flag),
         poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
         worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
         time: JSON.stringify(joint_list["time"]),
@@ -249,14 +247,14 @@
       console.log(ajax_data);
 
       $.ajax({
-        url: '/PlotStats',
+        url: '/GetStats',
         type: "POST",
         data: JSON.stringify,
         success: function(result){
           console.log("Successfully Calculated Stats.");
          
           let a_elem = document.createElement("a");
-          a_elem.href = "/PlotStats";
+          a_elem.href = "/GetStats";
           a_elem.click();
         },
         error: function(request, error){

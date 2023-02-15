@@ -33,16 +33,20 @@ def request_lm(key):
 
 #################################################################################################
 
-def cache_hw(key, dictkey, dict_data):
-    redis_client.hset(key, dictkey, json.dumps(dict_data).encode("utf-8"))
+def cache_hw(key, dict_data):
+    redis_client.hset(key, "distance", json.dumps(dict_data["distance"]).encode("utf-8"))
+    redis_client.hset(key, "speed", json.dumps(dict_data["speed"]).encode("utf-8"))
 
-def request_hw(key, dictkey):
+def request_hw(key):
     try:
-        data = json.loads(redis_client.hget(key, dictkey).decode("utf-8"))
+        data = {
+            "dist": json.loads(redis_client.hget(key, "distance").decode("utf-8")),
+            "speed": json.loads(redis_client.hget(key, "speed").decode("utf-8"))
+        }
     except:
         data = {
-            "speed": "-",
             "dist": "-",
+            "speed": "-",
         }
 
     return data

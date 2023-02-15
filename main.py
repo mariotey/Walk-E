@@ -105,15 +105,11 @@ def plot_stats():
     
     offsetdata = rediscache.request_lm("calibration_data")
 
-    hardware_one_data = rediscache.request_hw("testjoint_data", "hardware_one")
-    hardware_two_data = rediscache.request_hw("testjoint_data", "hardware_two")
-
-    print(hardware_one_data, hardware_two_data)
+    hardware_data = rediscache.request_hw("testjoint_data")
         
     # Calculation of Gait Statistics
     gait_data = gait_process.get_gait(offsetdata["cut_off"], joint_data)
-    stats_data = gait_statistics.stats(joint_data, gait_data, offsetdata)
-    # stats_data = gait_statistics.stats(joint_data, gait_data, hardware_data, offsetdata)
+    stats_data = gait_statistics.stats(joint_data, gait_data, hardware_data, offsetdata)
 
     return render_template("statistics.html", stats_Info = stats_data)
 

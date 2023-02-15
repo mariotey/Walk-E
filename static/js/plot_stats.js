@@ -85,20 +85,20 @@ const elem_dict = {
         "header": "Cadence",
         "units": "steps/min"
     },
-    "speed":{
-        "statskey":"speed",
-        "header": "Speed",
-        "units": "m/sec"
-    },
     "distance":{
         "statskey":"dist",
-        "header": "Estimated Distance",
+        "header": "Distance",
         "units": "m"
     },
     "stride_len":{
         "statskey":"stride_len",
-        "header": "Estimated Stride Length",
+        "header": "Stride Length",
         "units": "m"
+    },
+    "speed":{
+        "statskey":"speed",
+        "header": "Speed",
+        "units": "m/sec"
     },
 }
 

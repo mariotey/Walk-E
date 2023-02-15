@@ -61,9 +61,6 @@ pose = mp.solutions.pose.Pose(min_detection_confidence=0.5,
                     smooth_landmarks=True,
                     static_image_mode=False)
 
-# Get Realtime Webcam Feed
-# cap = cv2.VideoCapture(0) 
-
 #################################################################################################
 
 def hip_detect(landmarks):
@@ -118,6 +115,7 @@ def motor_drive(duty_left, duty_right):
         print("Walk-E is moving. (", duty_left, ",", duty_right, ")\n")
 
 #################################################################################################
+
 def encoder_init():
     return [{
         "count_one": 0,
@@ -130,28 +128,25 @@ def encoder_init():
         "time": time.time()
     }]
 
-def encoder_stateChange(encoder_json, dist_status):
-    count_one = encoder_json["count_one"]
-    count_two = encoder_json["count_two"]
-    last_one = encoder_json["last_one"]    
-    last_two = encoder_json["last_two"]
-
-    current_one = GPIO.input(OP_ENCODE_ONE)
-    current_two = GPIO.input(OP_ENCODE_TWO)
-
-    if current_one != last_one:
-        last_one = current_one
-        count_one = count_one + 1
-
-    if current_two != last_two:
-        last_two = current_two
-        count_two = count_two + 1
+def encoder_stateChange(encoder_json, dist_status):    
+    def process_logic(count, last, current):
+        if current != last:
+            last = current
+            count = count + 1
+    
+        return count, last
+    
+    count_one, last_one = process_logic(encoder_json["count_one"],
+                                        encoder_json["last_one"],
+                                        GPIO.input(OP_ENCODE_ONE))
+    
+    count_two, last_two = process_logic(encoder_json["count_two"],
+                                        encoder_json["last_two"],
+                                        GPIO.input(OP_ENCODE_TWO))
     
     return {
         "count_one": count_one,
         "count_two": count_two,
-        # "current_one": current_one,
-        # "current_two": current_two,
         "last_one": last_one,
         "last_two": last_two,
         "dist_status": dist_status,
@@ -159,31 +154,27 @@ def encoder_stateChange(encoder_json, dist_status):
     }
 
 def encoder_process(encoder_list):
-    dist_one, dist_two = 0,0 
-    encoder_one, encoder_two = [], []
     init_time, end_time = encoder_list[1]["time"], 0
+    encoder_list.pop(0)
 
-    for count in range(max(data["count_one"] for data in encoder_list)):
-        encoder_one.append(max(filter(lambda x: x["count_one"] == count, encoder_list), 
-                                key=lambda x:x["time"]))
+    def process_logic(key):
+        dist_x, encoder_x = 0, []
+        
+        for count in range(max(data[key] for data in encoder_list) + 1):
+            encoder_x.append(min(filter(lambda x: x[key] == count, encoder_list), 
+                                    key=lambda x:x["time"]))
 
-    for count in range(max(data["count_two"] for data in encoder_list)):
-        encoder_two.append(max(filter(lambda x: x["count_two"] == count, encoder_list), 
-                                key=lambda x:x["time"]))
-    
-    for idx in range(len(encoder_one)):
-        try:
-            if encoder_one[idx]["dist_status"] == encoder_one[idx+1]["dist_status"]:
-                dist_one = dist_one + DIST_PER_STEP
-        except:
-            pass
+        for idx in range(len(encoder_x)):
+            try:
+                if encoder_x[idx]["dist_status"] == encoder_x[idx+1]["dist_status"]:
+                    dist_x = dist_x + DIST_PER_STEP
+            except:
+                pass
+        
+        return encoder_x, dist_x
 
-    for idx in range(len(encoder_two)):
-        try:
-            if encoder_two[idx]["dist_status"] == encoder_two[idx+1]["dist_status"]:
-                dist_two = dist_two + DIST_PER_STEP
-        except:
-            pass
+    encoder_one, dist_one = process_logic("count_one")
+    encoder_two, dist_two = process_logic("count_two")
 
     if encoder_one[-1]["time"] > encoder_two[-1]["time"]:
         end_time = encoder_one[-1]["time"]
@@ -195,32 +186,6 @@ def encoder_process(encoder_list):
     }
     stats["speed"] = stats["distance"]/(end_time - init_time)
 
-    # rediscache.cache_hw("testjoint_data", "distance", stats["distance"])
-    # rediscache.cache_hw("testjoint_data", "speed", stats["speed"])
-
-    print("Encoder Processing Complete")
-
-# def encoder_logic(stateCountOne, stateCountTwo, time):
-#     if stateCountOne != 0:
-#         # Statistical Calulation from Hardware
-#         stats = {
-#             "distance": DIST_PER_STEP * stateCountOne
-#         }
-
-#         stats["speed"] = stats["distance"] / time
-
-#         # print(stats)
-
-#         rediscache.cache_hw("testjoint_data", "hardware_one", stats)
+    rediscache.cache_hw("testjoint_data", stats)
     
-#     if stateCountTwo != 0:
-#         # Statistical Calulation from Hardware
-#         stats = {
-#             "distance": DIST_PER_STEP * stateCountTwo
-#         }
-        
-#         stats["speed"] = stats["distance"] / time
-
-#         # print(stats)
-
-#         rediscache.cache_hw("testjoint_data", "hardware_two", stats)
+    print("Encoder Processing Complete")

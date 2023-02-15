@@ -13,10 +13,10 @@
             "justMyCode": true
         },
         {
-            "name": "Python: MediaPipe",
+            "name": "Python: Walk-E",
             "type": "python",
             "request": "launch",
-            "program": "./code_python/main_mediapipe.py",
+            "program": "./main.py",
             "console": "integratedTerminal",
             "justMyCode": true
         },

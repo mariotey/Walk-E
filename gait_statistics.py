@@ -76,110 +76,41 @@ def stats(raw_data, gait_data, hardware_data, offset):
     print("Initialization", time.time() - last_time)
     last_time = time.time()
 
-#     async def process_gaitcycle(gaitcycle_num):   
-#         gaitCycle_list.append({"x": [gait_data["time"][gaitcycle_num][index] 
-#                                     for index in range(len(gait_data["time"][gaitcycle_num]))], 
-#                             "y": [gait_data[REF_POINT][gaitcycle_num][index]["y"]
-#                                     for index in range(len(gait_data[REF_POINT][gaitcycle_num]))]})
+################################################################################################## 
 
-#         #########################################################################################
-                
-#         superGaitCycle_list.append({"x": [gait_data["gait_cycle"][gaitcycle_num][index]
-#                                         for index in range(len(gait_data["gait_cycle"][gaitcycle_num]))],
-#                                     "y": [gait_data[REF_POINT][gaitcycle_num][index]["y"]
-#                                         for index in range(len(gait_data[REF_POINT][gaitcycle_num]))]})
-
-#         #########################################################################################
-
-#         print("Gait cycles complete")
-
-#         hipflex_x, hipflex_y, hipflex_dof = get_data(gait_data, gaitcycle_num, walkE_dict.hipflex_joints)
-#         kneeflex_x, kneeflex_y, kneeflex_dof= get_data(gait_data, gaitcycle_num, walkE_dict.kneeflex_joints)
-#         ankleflex_x, ankleflex_y, ankleflex_dof = get_data(gait_data, gaitcycle_num, walkE_dict.ankleflex_joints)
-
-#         hipflex_list.append({"x": hipflex_x, "y": list(np.array(hipflex_y) - offset["hipflex"])})
-#         kneeflex_list.append({"x": kneeflex_x, "y": list(np.array(kneeflex_y) - offset["kneeflex"])})
-#         ankleflex_list.append({"x": ankleflex_x, "y": list(np.array(ankleflex_y) - offset["ankleflex"])})
-
-#         besthip_list["x"] += hipflex_x
-#         besthip_list["y"] += list(np.array(hipflex_y) - offset["hipflex"])
-#         bestknee_list["x"] += kneeflex_x
-#         bestknee_list["y"] += list(np.array(kneeflex_y) - offset["kneeflex"])
-#         bestankle_list["x"] += ankleflex_x
-#         bestankle_list["y"] += list(np.array(ankleflex_y) - offset["ankleflex"])
-        
-#         #########################################################################################
-
-#         shoulder_x, shoulder_y, shoulder_dof = get_data(gait_data, gaitcycle_num, walkE_dict.shoulderplane_joints)
-#         hip_x, hip_y, hip_dof = get_data(gait_data, gaitcycle_num, walkE_dict.hipplane_joints)
-
-#         shoulder_angle_list.append({"x": shoulder_x, "y": list(np.array(shoulder_y) - offset["shoulder"])})
-#         hip_angle_list.append({"x": hip_x, "y": list(np.array(hip_y) - offset["hip"])})
-
-#         bestshoulder_list["x"] += shoulder_x
-#         bestshoulder_list["y"] += list(np.array(shoulder_y) - offset["shoulder"])
-#         bestpelvic_list["x"] += hip_x
-#         bestpelvic_list["y"] += list(np.array(hip_y) - offset["hip"])
-
-#         print(gaitcycle_num, "Gait Cycle Complete", time.time() - last_time)
-
-#         #########################################################################################
-    
-#     async def process_stats():
-#         print("Starting Loop Cycle...")
-
-#         task_list = []
-
-#         for wave in range(len(gait_data[REF_POINT])):
-#             task_list.append(asyncio.ensure_future(process_gaitcycle(wave)))
-
-#         await asyncio.gather(*task_list)
-#         print("Loop Cycle Complete", time.time() - last_time)
-    
-#     asyncio.run(process_stats())
-
-#################################################################################################
-
-    for wave in range(len(gait_data[REF_POINT])):
-        ###############################q##########################################################
-       
-        gaitCycle_list.append({"x": [gait_data["time"][wave][index] 
-                                    for index in range(len(gait_data["time"][wave]))], 
-                            "y": [gait_data[REF_POINT][wave][index]["y"]
-                                    for index in range(len(gait_data[REF_POINT][wave]))]})
+    async def process_gaitcycle(gaitcycle_num):   
+        gaitCycle_list.append({"x": [gait_data["time"][gaitcycle_num][index] 
+                                    for index in range(len(gait_data["time"][gaitcycle_num]))], 
+                            "y": [gait_data[REF_POINT][gaitcycle_num][index]["y"]
+                                    for index in range(len(gait_data[REF_POINT][gaitcycle_num]))]})
 
         #########################################################################################
                 
-        superGaitCycle_list.append({"x": [gait_data["gait_cycle"][wave][index]
-                                        for index in range(len(gait_data["gait_cycle"][wave]))],
-                                    "y": [gait_data[REF_POINT][wave][index]["y"]
-                                        for index in range(len(gait_data[REF_POINT][wave]))]})
+        superGaitCycle_list.append({"x": [gait_data["gait_cycle"][gaitcycle_num][index]
+                                        for index in range(len(gait_data["gait_cycle"][gaitcycle_num]))],
+                                    "y": [gait_data[REF_POINT][gaitcycle_num][index]["y"]
+                                        for index in range(len(gait_data[REF_POINT][gaitcycle_num]))]})
 
         #########################################################################################
 
-        hipflex_x, hipflex_y, hipflex_poly = get_data(gait_data, wave, walkE_dict.hipflex_joints)
-        kneeflex_x, kneeflex_y, kneeflex_poly= get_data(gait_data, wave, walkE_dict.kneeflex_joints)
-        ankleflex_x, ankleflex_y, ankleflex_poly = get_data(gait_data, wave, walkE_dict.ankleflex_joints)
+        print("Gait cycles complete")
+
+        hipflex_x, hipflex_y, hipflex_poly = get_data(gait_data, gaitcycle_num, walkE_dict.hipflex_joints)
+        kneeflex_x, kneeflex_y, kneeflex_poly= get_data(gait_data, gaitcycle_num, walkE_dict.kneeflex_joints)
+        ankleflex_x, ankleflex_y, ankleflex_poly = get_data(gait_data, gaitcycle_num, walkE_dict.ankleflex_joints)
 
         hipflex_list.append({"x": hipflex_x, "y": list(np.array(hipflex_y) - offset["hipflex"])})
         kneeflex_list.append({"x": kneeflex_x, "y": list(np.array(kneeflex_y) - offset["kneeflex"])})
         ankleflex_list.append({"x": ankleflex_x, "y": list(np.array(ankleflex_y) - offset["ankleflex"])})
-
+        
         hipflex_polylist.append(hipflex_poly)
         kneeflex_polylist.append(kneeflex_poly)
         ankleflex_polylist.append(ankleflex_poly)
-
-        # besthip_list["x"] += hipflex_x
-        # besthip_list["y"] += list(np.array(hipflex_y) - offset["hipflex"])
-        # bestknee_list["x"] += kneeflex_x
-        # bestknee_list["y"] += list(np.array(kneeflex_y) - offset["kneeflex"])
-        # bestankle_list["x"] += ankleflex_x
-        # bestankle_list["y"] += list(np.array(ankleflex_y) - offset["ankleflex"])
         
         #########################################################################################
 
-        shoulder_x, shoulder_y, shoulder_poly = get_data(gait_data, wave, walkE_dict.shoulderplane_joints)
-        hip_x, hip_y, pelvic_poly = get_data(gait_data, wave, walkE_dict.hipplane_joints)
+        shoulder_x, shoulder_y, shoulder_poly = get_data(gait_data, gaitcycle_num, walkE_dict.shoulderplane_joints)
+        hip_x, hip_y, pelvic_poly = get_data(gait_data, gaitcycle_num, walkE_dict.hipplane_joints)
 
         shoulder_angle_list.append({"x": shoulder_x, "y": list(np.array(shoulder_y) - offset["shoulder"])})
         hip_angle_list.append({"x": hip_x, "y": list(np.array(hip_y) - offset["hip"])})
@@ -187,12 +118,65 @@ def stats(raw_data, gait_data, hardware_data, offset):
         shoulder_polylist.append(shoulder_poly)
         pelvic_polylist.append(pelvic_poly)
 
-        # bestshoulder_list["x"] += shoulder_x
-        # bestshoulder_list["y"] += list(np.array(shoulder_y) - offset["shoulder"])
-        # bestpelvic_list["x"] += hip_x
-        # bestpelvic_list["y"] += list(np.array(hip_y) - offset["hip"])
+        print(gaitcycle_num, "Gait Cycle Complete", time.time() - last_time)
 
-        print(wave, "Gait Cycle Complete", time.time() - last_time)
+        #########################################################################################
+    
+    async def process_stats():
+        print("Starting Loop Cycle...")
+
+        task_list = []
+
+        for wave in range(len(gait_data[REF_POINT])):
+            task_list.append(asyncio.ensure_future(process_gaitcycle(wave)))
+
+        await asyncio.gather(*task_list)
+    
+    asyncio.run(process_stats())
+
+#################################################################################################
+
+    # for wave in range(len(gait_data[REF_POINT])):
+    #     ###############################q##########################################################
+       
+    #     gaitCycle_list.append({"x": [gait_data["time"][wave][index] 
+    #                                 for index in range(len(gait_data["time"][wave]))], 
+    #                         "y": [gait_data[REF_POINT][wave][index]["y"]
+    #                                 for index in range(len(gait_data[REF_POINT][wave]))]})
+
+    #     #########################################################################################
+                
+    #     superGaitCycle_list.append({"x": [gait_data["gait_cycle"][wave][index]
+    #                                     for index in range(len(gait_data["gait_cycle"][wave]))],
+    #                                 "y": [gait_data[REF_POINT][wave][index]["y"]
+    #                                     for index in range(len(gait_data[REF_POINT][wave]))]})
+
+    #     #########################################################################################
+
+    #     hipflex_x, hipflex_y, hipflex_poly = get_data(gait_data, wave, walkE_dict.hipflex_joints)
+    #     kneeflex_x, kneeflex_y, kneeflex_poly= get_data(gait_data, wave, walkE_dict.kneeflex_joints)
+    #     ankleflex_x, ankleflex_y, ankleflex_poly = get_data(gait_data, wave, walkE_dict.ankleflex_joints)
+
+    #     hipflex_list.append({"x": hipflex_x, "y": list(np.array(hipflex_y) - offset["hipflex"])})
+    #     kneeflex_list.append({"x": kneeflex_x, "y": list(np.array(kneeflex_y) - offset["kneeflex"])})
+    #     ankleflex_list.append({"x": ankleflex_x, "y": list(np.array(ankleflex_y) - offset["ankleflex"])})
+
+    #     hipflex_polylist.append(hipflex_poly)
+    #     kneeflex_polylist.append(kneeflex_poly)
+    #     ankleflex_polylist.append(ankleflex_poly)
+
+    #     #########################################################################################
+
+    #     shoulder_x, shoulder_y, shoulder_poly = get_data(gait_data, wave, walkE_dict.shoulderplane_joints)
+    #     hip_x, hip_y, pelvic_poly = get_data(gait_data, wave, walkE_dict.hipplane_joints)
+
+    #     shoulder_angle_list.append({"x": shoulder_x, "y": list(np.array(shoulder_y) - offset["shoulder"])})
+    #     hip_angle_list.append({"x": hip_x, "y": list(np.array(hip_y) - offset["hip"])})
+
+    #     shoulder_polylist.append(shoulder_poly)
+    #     pelvic_polylist.append(pelvic_poly)
+
+    #     print(wave, "Gait Cycle Complete", time.time() - last_time)
 
 #########################################################################################
     

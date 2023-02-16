@@ -37,7 +37,7 @@ const elem_dict = {
         "y_axis": "Hip Angle (Degree)"  
     },
     "hip_angle_best":{
-        "statskey": "besthip",
+        "statskey": "bestpelvic",
         "title": "Best Fit Curve of Hip Angle",
         "x_axis": "Gait Cycle (%)",
         "y_axis": "Hip Angle (Degree)"  

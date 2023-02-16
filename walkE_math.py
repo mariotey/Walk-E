@@ -1,8 +1,8 @@
 import numpy as np
 import math
+import asyncio
 from sklearn.metrics import mean_squared_error as mse
 
-MAX_MSE = 100
 MAX_ITR = 10
 
 def threePt_twoD_angle(first, sec, third):
@@ -78,29 +78,31 @@ def poly_fit(x,y):
         poly = np.poly1d(curve)
         new_x = sorted(x)
 
-        return new_x, [poly(data) for data in new_x], dof
-
-    mse_dof, mean_square =  0, MAX_MSE
+        return new_x, [poly(data) for data in new_x], poly
+    
+    msq_dof = []
 
     for dof_itera in range(1, MAX_ITR):
         try:
             msq = mse(y, poly_func(x,y,dof_itera)[1]) 
-
-            if msq < mean_square:
-                mean_square = msq
-                mse_dof = dof_itera
+            msq_dof.append([msq, dof_itera])
         except:
             pass
-    
+        
+    mse_dof = min(msq_dof, key=lambda x:x[0])[1]
+
     return poly_func(x,y,mse_dof)
 
-def best_fit(json, dof):
-    x, y = json["x"], json["y"]
-    
-    curve = np.polyfit(x, y, dof)
-    poly = np.poly1d(curve)
+def average_fit(poly_list, offset):
+    x = [i for i in range(0, 101, 1)]
+    y = []
 
-    x.sort()
-    new_y = [poly(data) for data in x]
-    
-    return {"x": x, "y": new_y}
+    for coord in x:
+        ys = []
+        for poly in poly_list:
+            ys.append(poly(coord) - offset)
+        y.append(np.mean(ys))
+
+    new_x, new_y, poly = poly_fit(x,y)
+
+    return {"x": new_x, "y": new_y}

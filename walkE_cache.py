@@ -44,10 +44,7 @@ def request_hw(key):
             "speed": json.loads(redis_client.hget(key, "speed").decode("utf-8"))
         }
     except:
-        data = {
-            "dist": "-",
-            "speed": "-",
-        }
+        data = {"dist": "-", "speed": "-"}
 
     return data
 

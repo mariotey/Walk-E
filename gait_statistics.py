@@ -87,7 +87,7 @@ def gaitcycle_stats(gait_data, gaitcycle_num, offset):
     raw_stats["shoulder_angle_list"] = {"x": shoulder_x, "y": list(np.array(shoulder_y) - offset["shoulder"])}
     raw_stats["hip_angle_list"] = {"x": hip_x, "y": list(np.array(hip_y) - offset["hip"])}
 
-    # print(gaitcycle_num, "Gait Cycle Complete", time.time() - start_time)
+    print("#", gaitcycle_num, "Gait Cycle Complete", time.time() - start_time)
 
     return raw_stats
 
@@ -102,6 +102,8 @@ def stats(raw_data, gait_data, hardware_data, offset):
 
     ################################################################################################## 
     
+    # import asyncio
+    
     # async def process_stats():
     #     print("Starting Loop Cycle...")
 
@@ -114,7 +116,7 @@ def stats(raw_data, gait_data, hardware_data, offset):
 
     #     return [task.result() for task in task_list]
     
-    # stats_unprocessed = asyncio.run(process_stats())
+    # stats_unprocess = asyncio.run(process_stats())
 
     #############################################################################################
     
@@ -141,17 +143,11 @@ def stats(raw_data, gait_data, hardware_data, offset):
         "cadence": get_cadence(gait_data),
     }
 
-    if hardware_data["dist"] == "-":
-        stats["dist"] = hardware_data["dist"]
-        stats["speed"] = hardware_data["speed"]
-        stats["stride_len"] = "-"
-    else:
-        stats["dist"] == round(hardware_data["dist"],3)
-        stats["speed"] = round(hardware_data["speed"],3),
-        stats["stride_len"] = get_stridelen(gait_data, hardware_data["dist"])
+    stats["dist"] = hardware_data["dist"] if hardware_data["dist"] == "-" else round(hardware_data["dist"], 3)
+    stats["speed"] = hardware_data["speed"] if hardware_data["speed"] == "-" else round(hardware_data["speed"], 3)        
+    stats["stride_len"] = "-" if hardware_data["speed"] == "-" else get_stridelen(gait_data, hardware_data["dist"])
     
     print("Stats Calculation Complete", time.time() - start_time,"\n")
-
     return stats
 
 ################################################################################################

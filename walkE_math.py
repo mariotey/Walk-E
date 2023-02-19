@@ -78,7 +78,7 @@ def poly_fit(x,y):
         poly = np.poly1d(curve)
         new_x = sorted(x)
 
-        return new_x, [poly(data) for data in new_x], poly
+        return new_x, list(poly(new_x)), poly
     
     msq_dof = []
 

@@ -102,21 +102,18 @@ def stats(raw_data, gait_data, hardware_data, offset):
 
     ################################################################################################## 
     
-    # import asyncio
+    # import concurrent.futures
+
+    # def parallel_gaitstats(gait_data, offset):
+    #     results = []
+    #     with concurrent.futures.ThreadPoolExecutor() as executor:
+    #         futures = [executor.submit(gaitcycle_stats, *[gait_data, wave, offset]) for wave in range(len(gait_data[REF_POINT]))]
+    #         for future in concurrent.futures.as_completed(futures):
+    #             result = future.result()
+    #             results.append(result)
+    #     return results
     
-    # async def process_stats():
-    #     print("Starting Loop Cycle...")
-
-    #     task_list = []
-
-    #     for wave in range(len(gait_data[REF_POINT])):
-    #         task_list.append(asyncio.ensure_future(gaitcycle_stats(gait_data, wave, offset)))
-
-    #     await asyncio.gather(*task_list)
-
-    #     return [task.result() for task in task_list]
-    
-    # stats_unprocess = asyncio.run(process_stats())
+    # stats_unprocess = parallel_gaitstats(gait_data, offset)
 
     #############################################################################################
     

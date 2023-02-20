@@ -1,4 +1,4 @@
-# BN4101(FYP): Walking Buddy for Prehabilitation #
+# BN4101: Walking Buddy for Prehabilitation #
 Ongoing Project
 
 ## Description ##

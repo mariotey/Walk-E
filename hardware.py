@@ -1,11 +1,9 @@
 import RPi.GPIO as GPIO
 import mediapipe as mp
-import cv2
 import time
 
 import walkE_cache
 import walkE_math
-import walkE_dict
 
 EN1 = 32 #GPIO 12 (PWM0)
 EN2 = 33 #GPIO 13 (PWM1)
@@ -16,9 +14,8 @@ IN4 = 18 #GPIO 24
 OP_ENCODE_ONE = 11 #GPIO 17
 OP_ENCODE_TWO = 36 #GPIO 16
 
-DIST_ZERO = 0.2075 / 30
-DIST_ONE = 0.2075/15 # 1 full rotation = 0.2075m, 15 state changes
-DIST_TWO = 0.2075/2
+DIST_ONE = 0.2075/40 # Circumference of Wheel = 0.2075m
+DIST_TWO = 0.2075*2
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
@@ -81,12 +78,14 @@ def hip_detect(landmarks):
 def proxy_detect(image, landmarks, thres):
     hip_dist = hip_detect(landmarks)
 
-    if hip_dist > (thres * 1.5):
+    print("Hip Len:", hip_dist)
+
+    if hip_dist > (thres * 1.2):
     # cv2.putText(image, "Too Close! Walk-E will accelerate", (15,12),~~~
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
         print("TooClose")
         return 2
-    elif hip_dist < (thres * 0.5):
+    elif hip_dist < (thres * 0.3):
         # cv2.putText(image, "Too Far! Walk-E will slow down", (15,12),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
         print("TooFar")
@@ -106,7 +105,7 @@ def motor_drive(duty_left, duty_right):
         GPIO.output(IN2, 0)
         GPIO.output(IN4, 0)
 
-        print("Walk-E has stopped\n")
+        # print("Walk-E has stopped\n")
     else:
         GPIO.output(IN2, 1)
         GPIO.output(IN4, 1)
@@ -122,8 +121,6 @@ def encoder_init():
     return [{
         "count_one": 0,
         "count_two": 0,
-        # "current_one": GPIO.input(OP_ENCODE_ONE),
-        # "current_two": GPIO.input(OP_ENCODE_TWO),
         "last_one": GPIO.input(OP_ENCODE_ONE),
         "last_two": GPIO.input(OP_ENCODE_TWO),
         "dist_status": "",
@@ -146,9 +143,11 @@ def encoder_stateChange(encoder_json, dist_status):
                                         encoder_json["last_two"],
                                         GPIO.input(OP_ENCODE_TWO))
     
+    print(count_one, count_two)
+
     return {
-        "count_one": count_one,
-        "count_two": count_two,
+        "count_one": count_one, # Right Motor
+        "count_two": count_two, # Left Motor
         "last_one": last_one,
         "last_two": last_two,
         "dist_status": dist_status,
@@ -160,11 +159,18 @@ def encoder_process(encoder_list):
     encoder_list.pop(0)
 
     def process_logic(key):
-        dist_x, encoder_x = 0, []
-        
-        for count in range(max(data[key] for data in encoder_list) + 1):
+        dist_x, encoder_x, processed_encoder = 0, [], []
+
+        for data in encoder_list:
+            processed_encoder.append({
+                "count": data[key],
+                "dist_status": data["dist_status"],
+                "time": data["time"]
+            })
+
+        for count in range(max(data["count"] for data in processed_encoder) + 1):
             try:
-                encoder_x.append(min(filter(lambda x: x[key] == count, encoder_list), 
+                encoder_x.append(min(filter(lambda x: x["count"] == count, processed_encoder), 
                                         key=lambda x:x["time"]))
             except:
                 pass
@@ -200,6 +206,9 @@ def encoder_process(encoder_list):
             "distance": "-",
             "speed": "-"
         }
+
+    print("Distance travelled:", stats["distance"], "m")
+    print("Speed:", stats["speed"], "m/s")
 
     walkE_cache.cache_hw("testjoint_data", stats)
     print("Encoder Processing Complete")

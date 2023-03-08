@@ -104,6 +104,18 @@
     });
   };
 
+  var encodeRequest = function() {
+    encode_xhr = new XMLHttpRequest();
+    encode_xhr.open("POST", "/encode_dist", true);
+    encode_xhr.onload = function() {
+      console.log("Encoder activated");
+    };
+    encode_xhr.onabort = function() {
+      console.log("Encoder deactivated");
+    };
+    encode_xhr.send();
+  };
+
   var moveRequest = function() {
     move_xhr = new XMLHttpRequest();
     move_xhr.open("POST", "/walkE_move", true);
@@ -113,7 +125,7 @@
     };
     move_xhr.onabort = function() {
       console.log("moveRequest aborted");
-    }
+    };
     move_xhr.send();
   };
   var stopRequest = function() {
@@ -213,6 +225,7 @@
       statsRequest(ajax_data);
       move_xhr.abort();
       stopRequest();
+      // encode_xhr.abort();
     }
     else{
       calibrate_btn.disabled = true;
@@ -225,6 +238,7 @@
 
       stats_flag = true;
 
+      encodeRequest();
       moveRequest();
     }
   };

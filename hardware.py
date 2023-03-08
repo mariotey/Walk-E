@@ -159,32 +159,45 @@ def encoder_process(encoder_list):
     encoder_list.pop(0)
 
     def process_logic(key):
-        dist_x, encoder_x, processed_encoder = 0, [], []
+        processed_encoder = [{"count": data[key], "dist_status": data["dist_status"], "time": data["time"]} 
+                         for data in encoder_list]
+        
+        encoder_x = [min((x for x in processed_encoder if x["count"] == count), key=lambda x:x["time"]) 
+                 for count in range(max(data["count"] for data in processed_encoder) + 1)]
+    
+        dist_x = 0
+        for idx, data in enumerate(encoder_x[:-1]):
+            if data["dist_status"] > encoder_x[idx+1]["dist_status"]:
+                dist_x += DIST_TWO
+            elif data["dist_status"] == encoder_x[idx+1]["dist_status"]:
+                dist_x += DIST_ONE
+        
+        # dist_x, encoder_x, processed_encoder = 0, [], []
 
-        for data in encoder_list:
-            processed_encoder.append({
-                "count": data[key],
-                "dist_status": data["dist_status"],
-                "time": data["time"]
-            })
+        # for data in encoder_list:
+        #     processed_encoder.append({
+        #         "count": data[key],
+        #         "dist_status": data["dist_status"],
+        #         "time": data["time"]
+        #     })
 
-        for count in range(max(data["count"] for data in processed_encoder) + 1):
-            try:
-                encoder_x.append(min(filter(lambda x: x["count"] == count, processed_encoder), 
-                                        key=lambda x:x["time"]))
-            except:
-                pass
+        # for count in range(max(data["count"] for data in processed_encoder) + 1):
+        #     try:
+        #         encoder_x.append(min(filter(lambda x: x["count"] == count, processed_encoder), 
+        #                                 key=lambda x:x["time"]))
+        #     except:
+        #         pass
 
-        for idx in range(len(encoder_x)):
-            try:
-                if encoder_x[idx]["dist_status"] > encoder_x[idx+1]["dist_status"]:
-                    dist_x = dist_x + DIST_TWO
-                elif encoder_x[idx]["dist_status"] == encoder_x[idx+1]["dist_status"]:
-                    dist_x = dist_x + DIST_ONE
-                else:
-                    pass
-            except:
-                pass
+        # for idx in range(len(encoder_x)):
+        #     try:
+        #         if encoder_x[idx]["dist_status"] > encoder_x[idx+1]["dist_status"]:
+        #             dist_x = dist_x + DIST_TWO
+        #         elif encoder_x[idx]["dist_status"] == encoder_x[idx+1]["dist_status"]:
+        #             dist_x = dist_x + DIST_ONE
+        #         else:
+        #             pass
+        #     except:
+        #         pass
         
         return encoder_x, dist_x
 

@@ -97,10 +97,11 @@ def walkE_stop():
     encoder_stat = False
     
     hardware.motor_drive(*[0,0])
-    hardware.encoder_process(encoder_list)
 
-    encoder_stat = True
+    walkE_cache.cache_encode("testjoint_data", encoder_list)
     
+    encoder_stat = True
+
     return('', 204)
 
 @app.route('/CacheStats', methods=["GET", "POST"])

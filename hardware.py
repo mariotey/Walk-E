@@ -162,31 +162,16 @@ def encoder_process(encoder_list):
         processed_encoder = [{"count": data[key], "dist_status": data["dist_status"], "time": data["time"]} 
                          for data in encoder_list]
         
-        encoder_x = [min((x for x in processed_encoder if x["count"] == count), key=lambda x:x["time"]) 
-                 for count in range(max(data["count"] for data in processed_encoder) + 1)]
-    
-        dist_x = 0
-        for idx, data in enumerate(encoder_x[:-1]):
-            if data["dist_status"] > encoder_x[idx+1]["dist_status"]:
-                dist_x += DIST_TWO
-            elif data["dist_status"] == encoder_x[idx+1]["dist_status"]:
-                dist_x += DIST_ONE
-        
-        # dist_x, encoder_x, processed_encoder = 0, [], []
+        encoder_x, dist_x = [], 0
 
-        # for data in encoder_list:
-        #     processed_encoder.append({
-        #         "count": data[key],
-        #         "dist_status": data["dist_status"],
-        #         "time": data["time"]
-        #     })
+        for count in range(max(data["count"] for data in processed_encoder) + 1):
+            try:
+                encoder_x.append(min(filter(lambda x: x["count"] == count, processed_encoder), 
+                                        key=lambda x:x["time"]))
+            except:
+                pass
 
-        # for count in range(max(data["count"] for data in processed_encoder) + 1):
-        #     try:
-        #         encoder_x.append(min(filter(lambda x: x["count"] == count, processed_encoder), 
-        #                                 key=lambda x:x["time"]))
-        #     except:
-        #         pass
+        dist_x = DIST_ONE* (len(encoder_x) - 1)
 
         # for idx in range(len(encoder_x)):
         #     try:
@@ -204,22 +189,11 @@ def encoder_process(encoder_list):
     encoder_one, dist_one = process_logic("count_one")
     encoder_two, dist_two = process_logic("count_two")
 
-    if encoder_one[-1]["time"] > encoder_two[-1]["time"]:
-        end_time = encoder_one[-1]["time"]
-    else:
-        end_time = encoder_two[-1]["time"]
+    end_time = max(encoder_one[-1]["time"], encoder_two[-1]["time"])
 
-    if end_time != init_time:
-        stats = {
-            "distance": (dist_one + dist_two)/2
-        }
-        stats["speed"] = stats["distance"]/(end_time - init_time)
-    else:
-        stats = {
-            "distance": "-",
-            "speed": "-"
-        }
-
+    stats = {"distance": (dist_one + dist_two)/2}
+    stats["speed"] = stats["distance"]/(end_time - init_time) if end_time != init_time else "-" 
+    
     print("Distance travelled:", stats["distance"], "m")
     print("Speed:", stats["speed"], "m/s")
 

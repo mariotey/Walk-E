@@ -33,6 +33,23 @@ def request_lm(key):
 
 #################################################################################################
 
+def cache_encode(key, encoder_list):
+    
+    encoder_list.pop(0)
+
+    def cache_data(count_key, dict_name):
+        
+        processed_encoder = {
+            "count": [data[count_key] for data in encoder_list],
+            "dist_status": [data["dist_status"] for data in encoder_list],
+            "time": [data["time"] for data in encoder_list]
+        }
+        
+        redis_client.hset(key, dict_name, json.dumps(processed_encoder).encode("utf-8"))
+
+    cache_data("count_one", "encoder_one")
+    cache_data("count_two", "encoder_two")
+
 def cache_hw(key, dict_data):
     redis_client.hset(key, "distance", json.dumps(dict_data["distance"]).encode("utf-8"))
     redis_client.hset(key, "speed", json.dumps(dict_data["speed"]).encode("utf-8"))

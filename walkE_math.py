@@ -1,6 +1,5 @@
 import numpy as np
 import math
-import asyncio
 from sklearn.metrics import mean_squared_error as mse
 
 MAX_ITR = 10
@@ -13,10 +12,14 @@ def threePt_twoD_angle(first, sec, third):
     mag_u, mag_v = np.linalg.norm(u), np.linalg.norm(v)
 
     radians = np.arccos(uv/(mag_u * mag_v))
-    result = np.abs(math.degrees(radians))
+    result = np.degrees(radians)
  
-    if result > 180.0:
+    if result > 90:
         result = 360 - result
+    
+    # Check if the acute angle is positive or negative
+    if first[1] == sec[1] and first[0] < sec[0] or third[1] == sec[1] and third[0] < sec[0]:
+        result = -result
 
     return result
 

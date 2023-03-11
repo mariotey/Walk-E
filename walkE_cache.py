@@ -50,6 +50,15 @@ def cache_encode(key, encoder_list):
     cache_data("count_one", "encoder_one")
     cache_data("count_two", "encoder_two")
 
+def request_encode(key):
+    try:
+        return {
+            "encoder_one": json.loads(redis_client.hget(key, "encoder_one").decode("utf-8")),
+            "encoder_two": json.loads(redis_client.hget(key, "encoder_two").decode("utf-8"))
+        }
+    except:
+        return ""
+    
 def cache_hw(key, dict_data):
     redis_client.hset(key, "distance", json.dumps(dict_data["distance"]).encode("utf-8"))
     redis_client.hset(key, "speed", json.dumps(dict_data["speed"]).encode("utf-8"))

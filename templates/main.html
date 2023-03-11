@@ -203,16 +203,8 @@
 
   function get_stats(){
     if (walkE_btn.className == "control-panel-toggle negative") {
-      calibrate_btn.disabled = false;
-      stats_btn.disabled = false;
-      walkE_btn.innerHTML = "Start";
-
-      calibrate_btn.className = "control-panel-toggle positive";     
-      walkE_btn.className = "control-panel-toggle positive";
-      stats_btn.className = "control-panel-toggle positive";   
-
       stats_flag = false;
-
+      
       ajax_data = {
         dataType: "movefeed",
         poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
@@ -220,14 +212,25 @@
         time: JSON.stringify(joint_list["time"]),
       };
       
-      console.log(ajax_data);
-      
       statsRequest(ajax_data);
       move_xhr.abort();
       encode_xhr.abort();
       stopRequest();
+
+      calibrate_btn.disabled = false;
+      stats_btn.disabled = false;
+      walkE_btn.innerHTML = "Start";
+
+      calibrate_btn.className = "control-panel-toggle positive";     
+      walkE_btn.className = "control-panel-toggle positive";
+      stats_btn.className = "control-panel-toggle positive";   
     }
     else{
+      stats_flag = true;
+
+      encodeRequest();
+      moveRequest();
+
       calibrate_btn.disabled = true;
       stats_btn.disabled = true;
       walkE_btn.innerHTML = "Stop";
@@ -236,10 +239,6 @@
       walkE_btn.className = "control-panel-toggle negative";
       stats_btn.className = "control-panel-toggle disable";   
 
-      stats_flag = true;
-
-      encodeRequest();
-      moveRequest();
     }
   };
 

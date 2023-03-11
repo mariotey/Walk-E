@@ -4,6 +4,8 @@ import mediapipe as mp
 import cv2
 
 import walkE_cache
+import gait_statistics
+import gait_process
 import hardware
 import walkE_dict
 
@@ -83,7 +85,7 @@ def walkE_move():
         # dist_status = hardware.proxy_detect(frame, camera_lm, avg_hiplen)
         
         # hardware.motor_drive(*walkE_dict.proxy_status[dist_status])
-        hardware.motor_drive(*[23, 23])
+        hardware.motor_drive(*[100, 100])
         
     except AttributeError:
         # Stops if user is not in frame
@@ -110,6 +112,27 @@ def cache_stats():
     walkE_cache.cache_lm("testjoint_data", request_data)   
     
     return render_template("main.html")
+
+#################################################################################################
+
+@app.route('/GetStats', methods=["GET", "POST"])
+def plot_stats():
+    # Retrieve calibration and stats data from server 
+    joint_data = walkE_cache.request_lm("testjoint_data")
+
+    if joint_data == []:
+        return render_template("main.html")
+    
+    offsetdata = walkE_cache.request_lm("calibration_data")
+    
+    encoderdata = hardware.encode_process(walkE_cache.request_encode("testjoint_data"))
+    # hardware_data = walkE_cache.request_hw("testjoint_data")
+
+    # Calculation of Gait Statistics
+    gait_data = gait_process.get_gait(offsetdata["cut_off"], joint_data)
+    stats_data = gait_statistics.stats(joint_data, gait_data, encoderdata, offsetdata)
+
+    return render_template("statistics.html", stats_Info = stats_data)
 
 #################################################################################################
 

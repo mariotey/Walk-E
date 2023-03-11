@@ -2,7 +2,6 @@ import RPi.GPIO as GPIO
 import mediapipe as mp
 import time
 
-import walkE_cache
 import walkE_math
 
 EN1 = 32 #GPIO 12 (PWM0)
@@ -14,8 +13,8 @@ IN4 = 18 #GPIO 24
 OP_ENCODE_ONE = 11 #GPIO 17
 OP_ENCODE_TWO = 36 #GPIO 16
 
-DIST_ONE = 0.2075/40 # Circumference of Wheel = 0.2075m
-DIST_TWO = 0.2075*2
+DIST_ONE = 0.25/40 # Circumference of Wheel = 0.22m
+# DIST_TWO = 0.22*2
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
@@ -154,48 +153,34 @@ def encoder_stateChange(encoder_json, dist_status):
         "time": time.time()
     }
 
-def encoder_process(encoder_list):
-    init_time, end_time = encoder_list[1]["time"], 0
-    encoder_list.pop(0)
+def encode_process(encoder_data):
+    print("Processing Encoder Data...")
 
-    def process_logic(key):
-        processed_encoder = [{"count": data[key], "dist_status": data["dist_status"], "time": data["time"]} 
-                         for data in encoder_list]
+    if encoder_data != "":
+        def process_data(encode):
+            max_count = max(encode["count"])
+
+            endtime = encode["time"][encode["count"].index(max_count)]
+            dist_x = DIST_ONE * max_count
+
+            return encode["time"][0], endtime, dist_x
+
+        inittime_one, endtime_one, dist_one = process_data(encoder_data["encoder_one"])
+        inittime_two, endtime_two, dist_two = process_data(encoder_data["encoder_two"])
+
+        init_time, end_time = min(inittime_one, inittime_two), max(endtime_one, endtime_two)
+
+        stats = {"dist": (dist_one + dist_two)/2}
+        stats["speed"] = stats["dist"]/(end_time - init_time) if end_time != init_time else "-" 
         
-        encoder_x, dist_x = [], 0
+        print("Distance:", stats["dist"], "m")
+        print("Speed:", stats["speed"], "m/s")
 
-        for count in range(max(data["count"] for data in processed_encoder) + 1):
-            try:
-                encoder_x.append(min(filter(lambda x: x["count"] == count, processed_encoder), 
-                                        key=lambda x:x["time"]))
-            except:
-                pass
+        print("Encoder Data Retrieved\n")
 
-        dist_x = DIST_ONE* (len(encoder_x) - 1)
+        return stats
 
-        # for idx in range(len(encoder_x)):
-        #     try:
-        #         if encoder_x[idx]["dist_status"] > encoder_x[idx+1]["dist_status"]:
-        #             dist_x = dist_x + DIST_TWO
-        #         elif encoder_x[idx]["dist_status"] == encoder_x[idx+1]["dist_status"]:
-        #             dist_x = dist_x + DIST_ONE
-        #         else:
-        #             pass
-        #     except:
-        #         pass
-        
-        return encoder_x, dist_x
-
-    encoder_one, dist_one = process_logic("count_one")
-    encoder_two, dist_two = process_logic("count_two")
-
-    end_time = max(encoder_one[-1]["time"], encoder_two[-1]["time"])
-
-    stats = {"distance": (dist_one + dist_two)/2}
-    stats["speed"] = stats["distance"]/(end_time - init_time) if end_time != init_time else "-" 
-    
-    print("Distance travelled:", stats["distance"], "m")
-    print("Speed:", stats["speed"], "m/s")
-
-    walkE_cache.cache_hw("testjoint_data", stats)
-    print("Encoder Processing Complete")
+    return {
+        "dist":"-",
+        "speed":"-"
+    }

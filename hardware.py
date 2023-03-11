@@ -82,17 +82,17 @@ def proxy_detect(image, landmarks, thres):
     if hip_dist > (thres * 1.2):
     # cv2.putText(image, "Too Close! Walk-E will accelerate", (15,12),~~~
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
-        print("TooClose")
+        print("TooClose\n")
         return 2
     elif hip_dist < (thres * 0.3):
         # cv2.putText(image, "Too Far! Walk-E will slow down", (15,12),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
-        print("TooFar")
+        print("TooFar\n")
         return 0
     else:
         # cv2.putText(image, "Walk-E will maintain current speed", (15,12),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
-        print("Nice")
+        print("Nice\n")
         return 1       
 #################################################################################################
 
@@ -112,7 +112,10 @@ def motor_drive(duty_left, duty_right):
         pwm_right.ChangeDutyCycle(duty_right)
         pwm_left.ChangeDutyCycle(duty_left)
 
-        print("Walk-E is moving. (", duty_left, ",", duty_right, ")\n")
+        if duty_left == 0 and duty_right == 0:
+            print("Walk-E has stopped")
+        # else:
+        #     print("Walk-E is moving. (", duty_left, ",", duty_right, ")\n")
 
 #################################################################################################
 
@@ -141,8 +144,6 @@ def encoder_stateChange(encoder_json, dist_status):
     count_two, last_two = process_logic(encoder_json["count_two"],
                                         encoder_json["last_two"],
                                         GPIO.input(OP_ENCODE_TWO))
-    
-    print(count_one, count_two)
 
     return {
         "count_one": count_one, # Right Motor

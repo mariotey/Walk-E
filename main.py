@@ -48,6 +48,8 @@ def calibrate_hiplen():
     except AttributeError:
         pass  # Pass if there is no detection or error 
 
+    print(calibration_hiplen)
+
     return ('', 204)
 
 @app.route('/CacheCalibrate', methods=["GET", "POST"])
@@ -62,13 +64,11 @@ def cache_calibrate():
 
 @app.route('/encode_dist', methods=["GET", "POST"])
 def encode_req():
-   
     while encoder_stat:
         encoder_list.append(hardware.encoder_stateChange(encoder_list[-1], 1))    
 
+    print(encoder_list)
     return ('', 204)
-
-#################################################################################################
 
 @app.route('/walkE_move', methods=["GET", "POST"])
 def walkE_move():  
@@ -78,14 +78,13 @@ def walkE_move():
     if calibration_hiplen:
         avg_hiplen = np.mean(calibration_hiplen)
     else:
-        avg_hiplen = 0.015
+        avg_hiplen = 0.1
 
     try:
-        # camera_lm = results.pose_landmarks.landmark
-        # dist_status = hardware.proxy_detect(frame, camera_lm, avg_hiplen)
+        dist_status = hardware.proxy_detect(frame, results.pose_landmarks.landmark, avg_hiplen)
+        hardware.motor_drive(*walkE_dict.proxy_status[dist_status])
         
-        # hardware.motor_drive(*walkE_dict.proxy_status[dist_status])
-        hardware.motor_drive(*[100, 100])
+        # hardware.motor_drive(*[25, 25])
         
     except AttributeError:
         # Stops if user is not in frame
@@ -93,13 +92,17 @@ def walkE_move():
 
     return ('', 204)
 
+#################################################################################################
+
 @app.route('/walkE_stop', methods=["GET", "POST"])
 def walkE_stop():
     global encoder_stat
     encoder_stat = False
     
+    # Stop Motors
     hardware.motor_drive(*[0,0])
-
+    
+    # Cache Optical Encoder Data
     walkE_cache.cache_encode("testjoint_data", encoder_list)
     
     encoder_stat = True
@@ -108,10 +111,10 @@ def walkE_stop():
 
 @app.route('/CacheStats', methods=["GET", "POST"])
 def cache_stats():  
-    request_data = request.form   
-    walkE_cache.cache_lm("testjoint_data", request_data)   
+    # Cache Gait Data
+    walkE_cache.cache_lm("testjoint_data", request.form)   
     
-    return render_template("main.html")
+    return('', 204)
 
 #################################################################################################
 
@@ -123,11 +126,13 @@ def plot_stats():
     if joint_data == []:
         return render_template("main.html")
     
+    # Retrieve Calibration Data
     offsetdata = walkE_cache.request_lm("calibration_data")
     
+    # Retrieve Optical Encoder Data
     encoderdata = hardware.encode_process(walkE_cache.request_encode("testjoint_data"))
 
-    # Calculation of Gait Statistics
+    # Retrieve and Calculate Gait Statistics
     gait_data = gait_process.get_gait(offsetdata["cut_off"], joint_data)
     stats_data = gait_statistics.stats(joint_data, gait_data, encoderdata, offsetdata)
 

@@ -64,6 +64,7 @@ def cache_calibrate():
 
 @app.route('/encode_dist', methods=["GET", "POST"])
 def encode_req():
+    global encoder_stat
     while encoder_stat:
         encoder_list.append(hardware.encoder_stateChange(encoder_list[-1], 1))    
 

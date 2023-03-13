@@ -212,10 +212,10 @@
         time: JSON.stringify(joint_list["time"]),
       };
       
-      statsRequest(ajax_data);
       move_xhr.abort();
       encode_xhr.abort();
       stopRequest();
+      statsRequest(ajax_data);
 
       calibrate_btn.disabled = false;
       stats_btn.disabled = false;

@@ -75,3 +75,16 @@ def request_hw(key):
     return data
 
 #################################################################################################
+
+def cache_proxy(key, hiplen_list):
+    result = {
+        "hiplen": [data["hiplen"] for data in hiplen_list],
+        "time": [data["time"] for data in hiplen_list]
+    }
+
+    redis_client.hset(key, "proxy", json.dumps(result).encode("utf-8"))
+
+def request_proxy(key):
+    data = json.loads(redis_client.hget(key, "proxy").decode("utf-8"))
+
+    return data

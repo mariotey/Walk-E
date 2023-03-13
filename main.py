@@ -2,16 +2,19 @@ from flask import Flask, render_template, request
 import numpy as np
 import mediapipe as mp
 import cv2
+import time
 
 import walkE_cache
 import gait_statistics
 import gait_process
 import hardware
 import walkE_dict
+import walkE_admin
 
 calibration_hiplen = []
+hiplen_list = []
+
 encoder_list = hardware.encoder_init()
-encoder_stat = True
 
 #################################################################################################
 
@@ -65,11 +68,12 @@ def cache_calibrate():
 @app.route('/encode_dist', methods=["GET", "POST"])
 def encode_req():
     global encoder_stat
+    encoder_stat = True
+
     while encoder_stat:
         encoder_list.append(hardware.encoder_stateChange(encoder_list[-1], 1))    
 
-    print(encoder_list)
-    return ('', 204)
+    return ('', 204) 
 
 @app.route('/walkE_move', methods=["GET", "POST"])
 def walkE_move():  
@@ -79,12 +83,14 @@ def walkE_move():
     if calibration_hiplen:
         avg_hiplen = np.mean(calibration_hiplen)
     else:
-        avg_hiplen = 0.1
+        avg_hiplen = 0.15
 
     try:
-        dist_status = hardware.proxy_detect(frame, results.pose_landmarks.landmark, avg_hiplen)
-        hardware.motor_drive(*walkE_dict.proxy_status[dist_status])
-        
+        hip_len, dist_stat = hardware.proxy_detect(frame, results.pose_landmarks.landmark, avg_hiplen)
+  
+        hiplen_list.append({"hiplen": hip_len, "time": time.time(), "dist_status": dist_stat})
+        hardware.motor_drive(*walkE_dict.proxy_status[dist_stat])
+
         # hardware.motor_drive(*[25, 25])
         
     except AttributeError:
@@ -105,6 +111,9 @@ def walkE_stop():
     
     # Cache Optical Encoder Data
     walkE_cache.cache_encode("testjoint_data", encoder_list)
+
+    # Cache Admin Data
+    walkE_cache.cache_proxy("admin_data", hiplen_list)
     
     encoder_stat = True
 
@@ -139,6 +148,22 @@ def plot_stats():
 
     return render_template("statistics.html", stats_Info = stats_data)
 
+#################################################################################################
+
+@app.route('/Admin', methods=["GET", "POST"])
+def admin():
+    # Retrieve Optical Encoder Data
+    encoderdata = walkE_cache.request_encode("testjoint_data")
+
+    # Retrieve data for Admin
+    hiplendata = walkE_cache.request_proxy("admin_data")
+    encode_data = walkE_admin.get_encoder(hiplendata, encoderdata)
+
+    admin_data = {
+        "encode_data": encode_data
+    }
+
+    return render_template("admin.html", admin_Info = admin_data)
 #################################################################################################
 
 if __name__ == "__main__":

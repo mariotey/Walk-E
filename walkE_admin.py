@@ -43,8 +43,6 @@ def get_encoder(hiplen, encoder):
 
                 encode_data["velocity"].append((grad_one + grad_two)/2)
             
-            print(idx, "Complete")
-
         return encode_data
     
     def process_hiplen(hiplen):

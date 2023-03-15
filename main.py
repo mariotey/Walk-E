@@ -90,9 +90,9 @@ def walkE_move():
     #     hiplen_list.append({"hiplen": hip_len, "time": time.time(), "dist_status": dist_stat})
     #     hardware.motor_drive(*walkE_dict.proxy_status[dist_stat])
        
-    except AttributeError:
-        # Stops if user is not in frame
-        hardware.motor_drive(*[0,0])
+    # except AttributeError:
+    #     # Stops if user is not in frame
+    #     hardware.motor_drive(*[0,0])
 
     # hardware.motor_drive(*[35,25])
     hardware.motor_drive(*[100,90])

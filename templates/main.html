@@ -25,7 +25,7 @@
 
     var hiplen_xhr;
     var move_xhr;
-    var stop_xhr;
+    var encode_xhr;
 
     let calibrate_list = {
       "poseLandmark": [],
@@ -104,38 +104,47 @@
     });
   };
 
-  var encodeRequest = function() {
-    encode_xhr = new XMLHttpRequest();
-    encode_xhr.open("POST", "/encode_dist", true);
-    encode_xhr.onload = function() {
-      console.log("Encoder activated");
-    };
-    encode_xhr.onabort = function() {
-      console.log("Encoder deactivated");
-    };
-    encode_xhr.send();
+  var stopRequest = function() {    
+    if (!stats_flag){
+      stop_xhr = new XMLHttpRequest();
+      stop_xhr.open("POST", "/walkE_stop", true);
+      stop_xhr.onload = function() {
+        console.log("Walk-E stops");
+      }
+
+      move_xhr.abort();
+      encode_xhr.abort();
+      stop_xhr.send();
+    }
   };
 
-  var moveRequest = function() {
-    move_xhr = new XMLHttpRequest();
-    move_xhr.open("POST", "/walkE_move", true);
-    move_xhr.onload = function() {
-      console.log("Walk-E moves");
-      moveRequest();
-    };
-    move_xhr.onabort = function() {
-      console.log("moveRequest aborted");
-    };
-    move_xhr.send();
+  var moveRequest = function() {    
+    if (stats_flag) {
+      move_xhr = new XMLHttpRequest();
+      move_xhr.open("POST", "/walkE_move", true);
+      move_xhr.onload = function() {
+        console.log("Walk-E moves");
+      };
+      move_xhr.onabort = function() {
+        console.log("moveRequest aborted");
+      };
+      move_xhr.send();
+    }
   };
-  var stopRequest = function() {
-    stop_xhr = new XMLHttpRequest();
-    stop_xhr.open("POST", "/walkE_stop", true);
-    stop_xhr.onload = function() {
-      console.log("Walk-E stops");
-    };
-    stop_xhr.send();
+  var encodeRequest = function() {
+    if (stats_flag) {
+      encode_xhr = new XMLHttpRequest();
+      encode_xhr.open("POST", "/encode_dist", true);
+      encode_xhr.onload = function() {
+        console.log("Encoder activated");
+      };
+      encode_xhr.onabort = function() {
+        console.log("encodeRequest aborted");
+      };
+      encode_xhr.send();
+    }
   };
+
   var statsRequest = function(ajax_data) {
     $.ajax({
       url: '/CacheStats',
@@ -202,31 +211,11 @@
   };
 
   function get_stats(){
-    if (walkE_btn.className == "control-panel-toggle negative") {
-      stats_flag = false;
-      
-      ajax_data = {
-        dataType: "movefeed",
-        poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
-        worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
-        time: JSON.stringify(joint_list["time"]),
-      };
-      
-      move_xhr.abort();
-      encode_xhr.abort();
-      stopRequest();
-      statsRequest(ajax_data);
+    console.log(stats_flag);
 
-      calibrate_btn.disabled = false;
-      stats_btn.disabled = false;
-      walkE_btn.innerHTML = "Start";
-
-      calibrate_btn.className = "control-panel-toggle positive";     
-      walkE_btn.className = "control-panel-toggle positive";
-      stats_btn.className = "control-panel-toggle positive";   
-    }
-    else{
+    if (stats_flag == false) {
       stats_flag = true;
+      stop_flag = true;
 
       encodeRequest();
       moveRequest();
@@ -237,9 +226,30 @@
 
       calibrate_btn.className = "control-panel-toggle disable";    
       walkE_btn.className = "control-panel-toggle negative";
-      stats_btn.className = "control-panel-toggle disable";   
-
+      stats_btn.className = "control-panel-toggle disable";  
     }
+    else {
+      stats_flag = false;
+      stop_flag = false;
+      
+      ajax_data = {
+        dataType: "movefeed",
+        poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
+        worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
+        time: JSON.stringify(joint_list["time"]),
+      };
+      
+      stopRequest();
+      statsRequest(ajax_data)
+      
+      calibrate_btn.disabled = false;
+      stats_btn.disabled = false;
+      walkE_btn.innerHTML = "Start";
+
+      calibrate_btn.className = "control-panel-toggle positive";     
+      walkE_btn.className = "control-panel-toggle positive";
+      stats_btn.className = "control-panel-toggle positive";   
+    }      
   };
 
   function process_stats(){

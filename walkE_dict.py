@@ -82,7 +82,8 @@ hiplen_joints = [
 ]
 
 proxy_status = {
+    #dist stat: [Left Motor, Right Motor]
     0 : [0, 0],
-    1 : [28,25],
-    2 : [88, 80],
+    1 : [35,25],
+    2 : [90, 80],
 }

@@ -41,10 +41,9 @@ def home():
 #################################################################################################
 @app.route('/calibrate_hiplen', methods =["GET", "POST"])
 def calibrate_hiplen():
-    ret, frame = cap.read()
-    results = pose.process(frame)
-
     try:
+        ret, frame = cap.read()
+        results = pose.process(frame)
         camera_lm = results.pose_landmarks.landmark
         calibration_hiplen.append(hardware.hip_detect(camera_lm))        
 
@@ -76,27 +75,28 @@ def encode_req():
     return ('', 204) 
 
 @app.route('/walkE_move', methods=["GET", "POST"])
-def walkE_move():  
-    ret, frame = cap.read()
-    results = pose.process(frame)
+def walkE_move():     
+    # if calibration_hiplen:
+    #     avg_hiplen = np.mean(calibration_hiplen)
+    # else:
+    #     avg_hiplen = 0.15  
+    
+    # try:
+    #     ret, frame = cap.read()
+    #     results = pose.process(frame)
 
-    if calibration_hiplen:
-        avg_hiplen = np.mean(calibration_hiplen)
-    else:
-        avg_hiplen = 0.15
-
-    try:
-        hip_len, dist_stat = hardware.proxy_detect(frame, results.pose_landmarks.landmark, avg_hiplen)
+    #     hip_len, dist_stat = hardware.proxy_detect(frame, results.pose_landmarks.landmark, avg_hiplen)
   
-        hiplen_list.append({"hiplen": hip_len, "time": time.time(), "dist_status": dist_stat})
-        hardware.motor_drive(*walkE_dict.proxy_status[dist_stat])
+    #     hiplen_list.append({"hiplen": hip_len, "time": time.time(), "dist_status": dist_stat})
+    #     hardware.motor_drive(*walkE_dict.proxy_status[dist_stat])
 
-        # hardware.motor_drive(*[25, 25])
-        
-    except AttributeError:
-        # Stops if user is not in frame
-        hardware.motor_drive(*[0,0])
+    # except:
+    #     Stops if user is not in frame
+    #     hardware.motor_drive(*[0,0])
 
+    # hardware.motor_drive(*[35,25])
+    hardware.motor_drive(*[100,90])
+    
     return ('', 204)
 
 #################################################################################################
@@ -105,16 +105,10 @@ def walkE_move():
 def walkE_stop():
     global encoder_stat
     encoder_stat = False
-    
+
+    print("Stop Motor")
     # Stop Motors
     hardware.motor_drive(*[0,0])
-    
-    # Cache Optical Encoder Data
-    walkE_cache.cache_encode("testjoint_data", encoder_list)
-
-    # Cache Admin Data
-    walkE_cache.cache_proxy("admin_data", hiplen_list)
-    
     encoder_stat = True
 
     return('', 204)
@@ -122,7 +116,13 @@ def walkE_stop():
 @app.route('/CacheStats', methods=["GET", "POST"])
 def cache_stats():  
     # Cache Gait Data
-    walkE_cache.cache_lm("testjoint_data", request.form)   
+    walkE_cache.cache_lm("testjoint_data", request.form)  
+
+    # Cache Optical Encoder Data
+    walkE_cache.cache_encode("testjoint_data", encoder_list)
+
+    # Cache Admin Data
+    # walkE_cache.cache_proxy("admin_data", hiplen_list) 
     
     return('', 204)
 

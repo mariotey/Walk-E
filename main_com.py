@@ -6,7 +6,6 @@ import cv2
 import walkE_cache
 import gait_statistics
 import gait_process
-# import hardware
 import walkE_dict
 
 calibration_hiplen = []
@@ -36,10 +35,9 @@ def home():
 #################################################################################################
 @app.route('/calibrate_hiplen', methods =["GET", "POST"])
 def calibrate_hiplen():
-    ret, frame = cap.read()
-    results = pose.process(frame)
-
     try:
+        ret, frame = cap.read()
+        results = pose.process(frame)
         camera_lm = results.pose_landmarks.landmark   
 
     except AttributeError:
@@ -59,15 +57,14 @@ def cache_calibrate():
 
 @app.route('/walkE_move', methods=["GET", "POST"])
 def walkE_move():  
-    ret, frame = cap.read()
-    results = pose.process(frame)
-
     if calibration_hiplen:
         avg_hiplen = np.mean(calibration_hiplen)
     else:
         avg_hiplen = 0.015
 
     try:
+        ret, frame = cap.read()
+        results = pose.process(frame)
         camera_lm = results.pose_landmarks.landmark
     except AttributeError:
         pass

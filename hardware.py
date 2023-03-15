@@ -6,10 +6,10 @@ import walkE_math
 
 EN1 = 32 #GPIO 12 (PWM0)
 EN2 = 33 #GPIO 13 (PWM1)
-IN1 = 13 #GPIO 27
-IN2 = 15 #GPIO 22
-IN3 = 16 #GPIO 23
-IN4 = 18 #GPIO 24
+IN1 = 13 #GPIO 27, input pin for Right Motor
+IN2 = 15 #GPIO 22, input pin for Right Motor
+IN3 = 16 #GPIO 23, input pin for Left Motor
+IN4 = 18 #GPIO 24, input pin for Left Motor
 OP_ENCODE_ONE = 11 #GPIO 17
 OP_ENCODE_TWO = 36 #GPIO 16
 
@@ -23,22 +23,20 @@ GPIO.setmode(GPIO.BOARD)
 
 # Right Motor Setup
 GPIO.setup(EN1, GPIO.OUT)
-GPIO.setup(IN1, GPIO.OUT) 
+# GPIO.setup(IN1, GPIO.OUT) 
 GPIO.setup(IN2, GPIO.OUT)
 
-GPIO.output(IN1, 0)
-GPIO.output(IN2, 0) 
-
+# GPIO.output(IN1, 0)
+    
 pwm_right = GPIO.PWM(EN1, 1000)
 pwm_right.start(0)
 
 # Left Motor Setup
 GPIO.setup(EN2, GPIO.OUT)
-GPIO.setup(IN3, GPIO.OUT)
+# GPIO.setup(IN3, GPIO.OUT)
 GPIO.setup(IN4, GPIO.OUT)
 
-GPIO.output(IN3, 0)
-GPIO.output(IN4, 0) 
+# GPIO.output(IN3, 0)
 
 pwm_left = GPIO.PWM(EN2, 1000)
 pwm_left.start(0)
@@ -77,29 +75,24 @@ def hip_detect(landmarks):
 def proxy_detect(image, landmarks, thres):
     hip_dist = hip_detect(landmarks)
 
-    print("Hip Len:", hip_dist)
-
-    if hip_dist > (thres * 1.2):
+    if hip_dist > (thres * 1.05):
     # cv2.putText(image, "Too Close! Walk-E will accelerate", (15,12),~~~
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
-        print("TooClose\n")
+        print(f"TooClose. {hip_dist} \n")
         return hip_dist, 2
     elif hip_dist < (thres * 0.8):
         # cv2.putText(image, "Too Far! Walk-E will slow down", (15,12),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
-        print("TooFar\n")
+        print(f"TooFar. {hip_dist} \n")
         return hip_dist, 0
     else:
         # cv2.putText(image, "Walk-E will maintain current speed", (15,12),
         #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, cv2.LINE_AA)
-        print("Nice\n")
+        print(f"Nice. {hip_dist} \n")
         return hip_dist, 1       
 #################################################################################################
 
 def motor_drive(duty_left, duty_right):
-    GPIO.output(IN1, 0)
-    GPIO.output(IN3, 0)
-
     if duty_left == 0 and duty_right == 0:
         GPIO.output(IN2, 0)
         GPIO.output(IN4, 0)
@@ -112,10 +105,7 @@ def motor_drive(duty_left, duty_right):
         pwm_right.ChangeDutyCycle(duty_right)
         pwm_left.ChangeDutyCycle(duty_left)
 
-        # if duty_left == 0 and duty_right == 0:
-        #     print("Walk-E has stopped")
-        # else:
-        #     print("Walk-E is moving. (", duty_left, ",", duty_right, ")\n")
+        #print("Walk-E is moving. (", duty_left, ",", duty_right, ")\n")
 
 #################################################################################################
 

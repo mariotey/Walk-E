@@ -1,75 +1,21 @@
-import mediapipe as mp
 import numpy as np
 import time
 
+import gait_process
 import walkE_math
 import walkE_dict
-
-#################################################################################################
 
 REF_POINT = walkE_dict.ref_pt
 MIN_CHUNKSIZE = 3
 POINTS_SPACE = 20
 
-mp_pose = mp.solutions.pose
-
-#################################################################################################
-
-def add_points(joint_data, unit_space):
-    new_jointdata = {item: [] for item in walkE_dict.gaitkeys_list}
-
-    # For each component of joint_data
-    for bodykey in joint_data:
-        if bodykey == "time":
-            for index in range(len(joint_data[REF_POINT])-1):
-                new_time = list(np.linspace(joint_data[bodykey][index],
-                                       joint_data[bodykey][index+1],
-                                       num=unit_space))
-
-                new_jointdata["time"] += new_time
-        else:
-            # For each data set of a component of joint_data
-            for index in range(len(joint_data[bodykey])-1):
-                # Create a new list of x,y and z_coord
-                new_x = list(np.linspace(joint_data[bodykey][index]["x"],
-                                    joint_data[bodykey][index+1]["x"],
-                                    num=unit_space))
-
-                new_y = list(np.linspace(joint_data[bodykey][index]["y"],
-                                    joint_data[bodykey][index+1]["y"],
-                                    num=unit_space))
-
-                new_z = list(np.linspace(joint_data[bodykey][index]["z"],
-                                    joint_data[bodykey][index+1]["z"],
-                                    num=unit_space))
-
-                # Append the new x,y and z_coord into new_join_data 
-                new_jointdata[bodykey].extend([{"x": x, "y": y, "z": z} 
-                                               for x, y, z in zip(new_x, new_y, new_z)])             
-    
-    return new_jointdata
-
-def get_lm(world_lm, time):
-    new_data = {item: [] for item in walkE_dict.gaitkeys_list}
-    
-    for idx, images in enumerate(world_lm):
-        if images is not None:
-            for bodypart in new_data.keys():
-                new_data[bodypart].append(images[mp_pose.PoseLandmark[walkE_dict.mp_pose_dict[bodypart]].value]) if bodypart != "time" else None
-        
-            new_data["time"].append(time[idx] - time[0])
-
-    if new_data != {item: [] for item in walkE_dict.gaitkeys_list}:
-        return new_data
-    else:
-        print("No video coords recorded")
 
 def get_gait(heel_baseline, raw_joint):
     start_time = time.time()
     last_time = time.time()
     print("Starting Data Slicing...")
     
-    format_jointdata = add_points(raw_joint, POINTS_SPACE)
+    format_jointdata = gait_process.add_points(raw_joint, POINTS_SPACE)
 
     # Identify cutoff points in data
     cutoff_index = [index for index, elem in enumerate(format_jointdata[REF_POINT]) 
@@ -78,7 +24,6 @@ def get_gait(heel_baseline, raw_joint):
     ##############################################################################################
 
     # Slice data points based on identified cutoff points
-    
     sine_joint = {}
 
     for item in walkE_dict.gaitkeys_list:

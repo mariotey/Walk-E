@@ -31,7 +31,35 @@ const horizontalDottedLine = {
 
         ctx.strokeStyle = 'grey';
         ctx.setLineDash([5, 10]);
-        ctx.strokeRect(left, y.getPixelForValue(0), width, 0);
+        ctx.strokeRect(left, y.getPixelForValue(0.15), width, 0);
+        ctx.restore();
+    }
+}
+
+const upperBound = {
+    id: 'horizontalDottedLine',
+    beforeDatasetsDraw(chart, args, options){
+        const { ctx , chartArea: { top, right, bottom, left, width, height},
+            scales: {x,y}} = chart;
+        ctx.save();
+
+        ctx.strokeStyle = 'red';
+        ctx.setLineDash([5, 10]);
+        ctx.strokeRect(left, y.getPixelForValue(0.15 * 1.05), width, 0);
+        ctx.restore();
+    }
+}
+
+const lowerBound = {
+    id: 'horizontalDottedLine',
+    beforeDatasetsDraw(chart, args, options){
+        const { ctx , chartArea: { top, right, bottom, left, width, height},
+            scales: {x,y}} = chart;
+        ctx.save();
+
+        ctx.strokeStyle = 'blue';
+        ctx.setLineDash([5, 10]);
+        ctx.strokeRect(left, y.getPixelForValue(0.15 * 0.8), width, 0);
         ctx.restore();
     }
 }
@@ -61,6 +89,7 @@ function admin_plot(stats, elem){
 
         data = {
             datasets: [{
+                label: "Encoder One (Right Motor)",
                 data: encoder_one,
                 tension: 0.25,
                 borderWidth: 1,
@@ -68,6 +97,7 @@ function admin_plot(stats, elem){
                 showLine: true
             },
             {
+                label: "Encoder Two (Left Motor)",
                 data: encoder_two,
                 tension: 0.25,
                 borderWidth: 1,
@@ -96,6 +126,7 @@ function admin_plot(stats, elem){
 
         data = {
             datasets: [{
+                label: "Encoder One (Right Motor)",
                 data: encoder_one,
                 tension: 0.25,
                 borderWidth: 1,
@@ -103,6 +134,7 @@ function admin_plot(stats, elem){
                 showLine: true
             },
             {
+                label: "Encoder Two (Left Motor)",
                 data: encoder_two,
                 tension: 0.25,
                 borderWidth: 1,
@@ -158,12 +190,17 @@ function admin_plot(stats, elem){
                   display: true,
                   text: config["title"] 
                 },
-                legend: {
-                    display: false
+                legend:{
+                    display: true
                 }
             }
         }
     };
+
+    if (elem.id == "hiplen_data"){
+        data_config.options.plugins.legend.display = false;
+        data_config["plugins"] = [upperBound, lowerBound];
+    }
 
     // Rendering block
     var chart = new Chart(

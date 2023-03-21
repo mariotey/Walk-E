@@ -120,9 +120,6 @@ def cache_stats():
 
     # Cache Optical Encoder Data
     walkE_cache.cache_encode("testjoint_data", encoder_list)
-
-    # Cache Admin Data
-    # walkE_cache.cache_proxy("admin_data", hiplen_list) 
     
     return('', 204)
 

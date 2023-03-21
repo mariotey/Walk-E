@@ -120,7 +120,7 @@ def cache_stats():
 
     # Cache Optical Encoder Data
     walkE_cache.cache_encode("testjoint_data", encoder_list)
-
+    
     encoderdata = walkE_cache.request_encode("testjoint_data")
     encode_one = walkE_admin.process_encode(encoderdata, "encoder_one")
     encode_two = walkE_admin.process_encode(encoderdata, "encoder_two")

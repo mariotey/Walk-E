@@ -1,20 +1,29 @@
 import cv2
 import mediapipe as mp
-import lm_identify
+import time
 
-mp_pose = mp.solutions.pose # Pose Estimation Model
-
-# Drawing utilities for visualizing poses
-mp_drawing = mp.solutions.drawing_utils
-mp_pose = mp.solutions.pose  # Pose Estimation Model
+import lm_identify as lm_i
+import gaitAnalysis_sagg as ga
+import cam_plot
+import cam_dict
 
 WAIT_TIME = 5
 
-# Get Realtime Webcam Feed
-cap = cv2.VideoCapture(1)  # Get Video Capture Device
+record_flag = False
+calibrate_flag = False
 
-hiplen_list = []
+# Drawing utilities for visualizing poses
+mp_drawing = mp.solutions.drawing_utils
 
+# Pose Estimation Model
+mp_pose = mp.solutions.pose  
+
+joint_data = {item: [] for item in cam_dict.gaitkeys_list}
+calibrate_data = {item: [] for item in cam_dict.gaitkeys_list}
+
+# Get Realtime Webcam Feed from Video Capture Device
+cap = cv2.VideoCapture(1)  
+        
 #################################################################################################
 
 with mp_pose.Pose(  # Setting up Pose Estimation Model
@@ -24,6 +33,8 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
         smooth_segmentation=True,
         smooth_landmarks=True,
         static_image_mode=False) as pose:
+    
+    start_time = time.time()
     
     while cap.isOpened():
         ret, frame = cap.read()  # Reads feed from Webcam
@@ -57,8 +68,13 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
             camera_lm = results.pose_landmarks.landmark
             world_lm = results.pose_world_landmarks.landmark
 
-            lm_identify.hip(image, camera_lm, world_lm)
-            hiplen_list.append(lm_identify.detect(image, camera_lm))
+            lm_i.gait_logic(image, camera_lm, world_lm)
+
+            if record_flag == True:
+                ga.get_lm(joint_data, world_lm, start_time)
+
+            if calibrate_flag == True:
+                ga.get_lm(calibrate_data, world_lm, start_time)
 
         except AttributeError:
             # print("Nothing / Errors detected")
@@ -69,11 +85,31 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
         # TBC when integrated with Walk-E
         if cv2.waitKey(WAIT_TIME) & 0xFF == ord("q"):
             break
+        elif cv2.waitKey(WAIT_TIME) & 0xFF == ord("r"):
+            print("Recording...")
+            record_flag = True
+            calibrate_flag = False
+        elif cv2.waitKey(WAIT_TIME) & 0xFF == ord("c"):
+            print("Calibrating...")
+            record_flag = False
+            calibrate_flag = True
+        elif cv2.waitKey(WAIT_TIME) & 0xFF == ord("s"):
+            print("Stopping...")
+            record_flag = False
+            calibrate_flag = False
+        else:
+            pass
+
+offsetdata = ga.calibrate(calibrate_data)
+gait_data = ga.get_gait(offsetdata["cut_off"], joint_data)
+stats_data = ga.stats(joint_data, gait_data, offsetdata)
+
+cam_plot.left_heel(joint_data)
+cam_plot.stats(stats_data)
+
+print("Complete")
 
 ###################################################################################################
-
-print("\nHip Max:", max(hiplen_list))
-print("Hip Min:", min(hiplen_list),"\n")
 
 cap.release()  # Release camera
 cv2.destroyAllWindows()  # Destroy all cv2 windows

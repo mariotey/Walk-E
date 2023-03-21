@@ -121,8 +121,9 @@ def cache_stats():
     # Cache Optical Encoder Data
     walkE_cache.cache_encode("testjoint_data", encoder_list)
 
-    # Cache Admin Data
-    # walkE_cache.cache_proxy("admin_data", hiplen_list) 
+    encoderdata = walkE_cache.request_encode("testjoint_data")
+    encode_one = walkE_admin.process_encode(encoderdata, "encoder_one")
+    encode_two = walkE_admin.process_encode(encoderdata, "encoder_two")
     
     return('', 204)
 
@@ -157,7 +158,7 @@ def admin():
 
     # Retrieve data for Admin
     hiplendata = walkE_cache.request_proxy("admin_data")
-    encode_data = walkE_admin.get_encoder(hiplendata, encoderdata)
+    encode_data = walkE_admin.stats(hiplendata, encoderdata)
 
     admin_data = {
         "encode_data": encode_data

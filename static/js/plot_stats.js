@@ -32,15 +32,15 @@ const elem_dict = {
     },
     "hip_angle": {
         "statskey": "hip_obliq",
-        "title": "Hip" ,
+        "title": "Pelvic Obliquity " ,
         "x_axis": "Gait Cycle (%)",
-        "y_axis": "Hip Angle (Degree)"  
+        "y_axis": "Pelvic Obliquity (Degree)"  
     },
     "hip_angle_best":{
         "statskey": "bestpelvic",
-        "title": "Best Fit Curve of Hip Angle",
+        "title": "Best Fit Curve of Pelvic Obliquity ",
         "x_axis": "Gait Cycle (%)",
-        "y_axis": "Hip Angle (Degree)"  
+        "y_axis": "Pelvic Obliquity (Degree)"  
     },
     "hip_flex":{
         "statskey": "hipflex",

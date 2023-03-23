@@ -1,7 +1,3 @@
-import time
-import math
-import numpy as np
-
 DIST = 0.25/40
 
 def get_encoder(hiplen, encoder):

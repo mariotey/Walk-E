@@ -6,7 +6,40 @@ import cv2
 import walkE_cache
 import gait_statistics
 import gait_process
-import walkE_dict
+
+DIST = 0.25/40 # Circumference of Wheel = 0.22m
+
+def encode_process(encoder_data):
+    print("Processing Encoder Data...")
+
+    if encoder_data != "":
+        def process_data(encode):
+            max_count = max(encode["count"])
+
+            endtime = encode["time"][encode["count"].index(max_count)]
+            dist_x = DIST * max_count
+
+            return encode["time"][0], endtime, dist_x
+
+        inittime_one, endtime_one, dist_one = process_data(encoder_data["encoder_one"])
+        inittime_two, endtime_two, dist_two = process_data(encoder_data["encoder_two"])
+
+        init_time, end_time = min(inittime_one, inittime_two), max(endtime_one, endtime_two)
+
+        stats = {"dist": (dist_one + dist_two)/2}
+        stats["speed"] = stats["dist"]/(end_time - init_time) if end_time != init_time else "-" 
+        
+        print("Distance:", stats["dist"], "m")
+        print("Speed:", stats["speed"], "m/s")
+
+        print("Encoder Data Retrieved\n")
+
+        return stats
+
+    return {
+        "dist":"-",
+        "speed":"-"
+    }
 
 calibration_hiplen = []
 
@@ -66,6 +99,7 @@ def walkE_move():
         ret, frame = cap.read()
         results = pose.process(frame)
         camera_lm = results.pose_landmarks.landmark
+        
     except AttributeError:
         pass
 
@@ -94,11 +128,12 @@ def plot_stats():
     
     offsetdata = walkE_cache.request_lm("calibration_data")
 
-    hardware_data = walkE_cache.request_hw("testjoint_data")
+   # Retrieve Optical Encoder Data
+    encoderdata = encode_process(walkE_cache.request_encode("testjoint_data"))
         
     # Calculation of Gait Statistics
     gait_data = gait_process.get_gait(offsetdata["cut_off"], joint_data)
-    stats_data = gait_statistics.stats(joint_data, gait_data, hardware_data, offsetdata)
+    stats_data = gait_statistics.stats(joint_data, gait_data, encoderdata, offsetdata)
 
     return render_template("statistics.html", stats_Info = stats_data)
 

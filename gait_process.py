@@ -71,7 +71,19 @@ def get_gait(heel_baseline, raw_joint):
     
     format_jointdata = add_points(raw_joint, POINTS_SPACE)
 
+    ##############################################################################################
+
     # Identify cutoff points in data
+
+    # Ground Configuration
+    # cutoff_index = [index for index, elem in enumerate(format_jointdata[REF_POINT]) 
+    #                 if round(elem["y"], 2) == round(heel_baseline - 0.07, 2)]
+    
+    # Stand Configuration
+    # cutoff_index = [index for index, elem in enumerate(format_jointdata[REF_POINT]) 
+    #                 if round(elem["y"], 2) == round(heel_baseline - 0.1, 2)]
+    
+    # Video Configuration
     cutoff_index = [index for index, elem in enumerate(format_jointdata[REF_POINT]) 
                     if round(elem["y"], 2) == round(heel_baseline, 2)]
 

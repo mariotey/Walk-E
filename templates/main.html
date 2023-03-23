@@ -152,12 +152,6 @@
       data: ajax_data,
       success: function(result){
         console.log("Successfully Calculated Stats.");
-
-        joint_list = {
-          "poseLandmark": [],
-          "worldLandmark":[],
-          "time":[],
-        }
       },
       error: function(request, error){
         console.log("statsRequest Error:" + error);
@@ -262,34 +256,34 @@
     stats_btn.className = "control-panel-toggle negative";
 
     ajax_data = {
-        poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
-        worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
-        time: JSON.stringify(joint_list["time"]),
-      };
+      poseLandmark: JSON.stringify(joint_list["poseLandmark"]),
+      worldLandmark: JSON.stringify(joint_list["worldLandmark"]),
+      time: JSON.stringify(joint_list["time"]),
+    };
 
-      console.log(ajax_data);
+    console.log(ajax_data);
 
-      $.ajax({
-        url: '/GetStats',
-        type: "POST",
-        data: JSON.stringify,
-        success: function(result){
-          console.log("Successfully Calculated Stats.");
-         
-          let a_elem = document.createElement("a");
-          a_elem.href = "/GetStats";
-          a_elem.click();
-        },
-        error: function(request, error){
-          console.log("Error:" + error);
-        }
-      });
-
-      let joint_list = {
-        "poseLandmark": [],
-        "worldLandmark":[],
-        "time":[],
+    $.ajax({
+      url: '/GetStats',
+      type: "POST",
+      data: JSON.stringify,
+      success: function(result){
+        console.log("Successfully Calculated Stats.");
+        
+        let a_elem = document.createElement("a");
+        a_elem.href = "/GetStats";
+        a_elem.click();
+      },
+      error: function(request, error){
+        console.log("Error:" + error);
       }
+    });
+
+    // let joint_list = {
+    //   "poseLandmark": [],
+    //   "worldLandmark":[],
+    //   "time":[],
+    // }
   };
 
   // function enable(){

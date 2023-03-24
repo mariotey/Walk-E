@@ -2,13 +2,11 @@ from flask import Flask, render_template, request
 import numpy as np
 import mediapipe as mp
 import cv2
-import time
 
 import walkE_cache
 import gait_statistics
 import gait_process
 import hardware
-import walkE_dict
 import walkE_admin
 
 calibration_hiplen = []

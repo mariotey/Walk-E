@@ -13,8 +13,7 @@ IN4 = 18 #GPIO 24, input pin for Left Motor
 OP_ENCODE_ONE = 11 #GPIO 17
 OP_ENCODE_TWO = 36 #GPIO 16
 
-DIST_ONE = 0.25/40 # Circumference of Wheel = 0.22m
-# DIST_TWO = 0.22*2
+DIST = 0.25/40 # Circumference of Wheel = 0.22m
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
@@ -152,7 +151,7 @@ def encode_process(encoder_data):
             max_count = max(encode["count"])
 
             endtime = encode["time"][encode["count"].index(max_count)]
-            dist_x = DIST_ONE * max_count
+            dist_x = DIST * max_count
 
             return encode["time"][0], endtime, dist_x
 

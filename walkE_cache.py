@@ -25,6 +25,27 @@ def cache_lm(key, request_data):
 def request_lm(key):
     if key == "calibration_data":
         data = json.loads(redis_client.hget(key, "offset").decode("utf-8"))
+
+        # Ground Configuration
+        # data["hipflex"] += 50
+        # data["kneeflex"] += -70
+        # data["ankleflex"] += 3
+        # data["shoulder"] += 2
+        # data["hip"] += -0.5
+
+        # Stand Configuration
+        # data["hipflex"] += 30
+        # data["kneeflex"] += -20
+        # data["ankleflex"] += 110
+        # data["shoulder"] += -2.8
+        # data["hip"] += 0
+
+        # Video Configuration
+        data["hipflex"] += 0
+        data["kneeflex"] += 0
+        data["ankleflex"] += 0
+        data["shoulder"] += 0
+        data["hip"] += 0
     
     if key == "testjoint_data":
         data = json.loads(redis_client.hget(key, "joints").decode("utf-8"))
@@ -58,21 +79,6 @@ def request_encode(key):
         }
     except:
         return ""
-    
-def cache_hw(key, dict_data):
-    redis_client.hset(key, "distance", json.dumps(dict_data["distance"]).encode("utf-8"))
-    redis_client.hset(key, "speed", json.dumps(dict_data["speed"]).encode("utf-8"))
-
-def request_hw(key):
-    try:
-        data = {
-            "dist": json.loads(redis_client.hget(key, "distance").decode("utf-8")),
-            "speed": json.loads(redis_client.hget(key, "speed").decode("utf-8"))
-        }
-    except:
-        data = {"dist": "-", "speed": "-"}
-
-    return data
 
 #################################################################################################
 

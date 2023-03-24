@@ -6,10 +6,25 @@ import walkE_dict
 
 REF_POINT = walkE_dict.ref_pt
 
-HIPFLEX_COEFF = 8/3
-KNEEFLEX_COEFF = 5/2 * 1.5
-ANKLEFLEX_COEFF = 1.5
-SHOULDER_COEFF = 2
+# Ground Configuration
+# HIPFLEX_COEFF = 8/3 * 2
+# KNEEFLEX_COEFF = 15/16 * 60/71
+# ANKLEFLEX_COEFF = 1.5
+# SHOULDER_COEFF = 2
+# PELVIC_COEFF = 1
+
+# Stand Configuration
+# HIPFLEX_COEFF = 8/3* 4/3 * 4/3
+# KNEEFLEX_COEFF = 5/2 
+# ANKLEFLEX_COEFF = 3
+# SHOULDER_COEFF = 2
+# PELVIC_COEFF = 1
+
+# Video Configuration
+HIPFLEX_COEFF = 1
+KNEEFLEX_COEFF = 1 
+ANKLEFLEX_COEFF = 1
+SHOULDER_COEFF = 1
 PELVIC_COEFF = 1
 
 #################################################################################################
@@ -58,7 +73,7 @@ def get_stridelen(gait_data, dist):
 
 #################################################################################################
 
-def gaitcycle_stats(gait_data, gaitcycle_num, offset):   
+def gaitcycle_stats(gait_data, gaitcycle_num, offset):       
     start_time = time.time()
     
     raw_stats = {}
@@ -100,7 +115,6 @@ def gaitcycle_stats(gait_data, gaitcycle_num, offset):
 ################################################################################################## 
     
 def stats(raw_data, gait_data, hardware_data, offset):
-
     start_time = time.time()
     print("Starting Stats Calculation...")
 
@@ -130,9 +144,9 @@ def stats(raw_data, gait_data, hardware_data, offset):
         "bestankle": walkE_math.average_fit([gaitcycle["ankleflex_polylist"]*ANKLEFLEX_COEFF for gaitcycle in stats_unprocess], offset["ankleflex"]),
         "cadence": get_cadence(gait_data),
     }
-
+    
     stats["dist"] = hardware_data["dist"] if hardware_data["dist"] == "-" else round(hardware_data["dist"], 3)
-    stats["speed"] = hardware_data["speed"] if hardware_data["speed"] == "-" else round(hardware_data["speed"], 3)        
+    stats["speed"] = hardware_data["speed"] if hardware_data["speed"] == "-" else round(hardware_data["speed"], 3)
     stats["stride_len"] = "-" if hardware_data["speed"] == "-" else get_stridelen(gait_data, hardware_data["dist"])
     
     print("Stats Calculation Complete", time.time() - start_time,"\n")

@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request
-import numpy as np
 import mediapipe as mp
 import cv2
 
@@ -115,6 +114,9 @@ def walkE_stop():
 def cache_stats():  
     # Cache Gait Data
     walkE_cache.cache_lm("testjoint_data", request.form)  
+
+    # Cache Hip Len
+    walkE_cache.cache_proxy("admin_data", hiplen_list)
 
     # Cache Optical Encoder Data
     walkE_cache.cache_encode("testjoint_data", encoder_list)

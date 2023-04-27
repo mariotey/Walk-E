@@ -155,8 +155,16 @@ def get_data(gait_data, waveform, joint_list):
     for index in range(len(gait_data[joint_list[0]][waveform])):
         coords = [gait_data[joint][waveform][index] for joint in joint_list]
 
-        x.append(gait_data["gait_cycle"][waveform][index])
-        y.append(180 - cam_math.cal_twoD_angle(*coords)) 
+        if joint_list == ['left_shoulder', 'left_hip', 'left_knee']:
+            if gait_data["left_knee"][waveform][index]["x"] > gait_data["left_hip"][waveform][index]["x"]: 
+                x.append(gait_data["gait_cycle"][waveform][index])
+                y.append(-(180 - cam_math.cal_twoD_angle(*coords)))
+            else:
+                x.append(gait_data["gait_cycle"][waveform][index])
+                y.append(180 - cam_math.cal_twoD_angle(*coords))
+        else:
+            x.append(gait_data["gait_cycle"][waveform][index])
+            y.append(180 - cam_math.cal_twoD_angle(*coords)) 
 
     return cam_math.poly_fit(x,y)
 

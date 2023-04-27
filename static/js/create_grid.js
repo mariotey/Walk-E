@@ -12,7 +12,7 @@ export default function create_grid() {
         range: 2,
         fitToGrid: true,
         labelSuffix: 'm',
-        landmarkSize: 1.25,
+        landmarkSize: 1.2,
         numCellsPerAxis: 4,
         showHidden: false,
         centered: true,

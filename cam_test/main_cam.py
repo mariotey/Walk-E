@@ -11,7 +11,7 @@ mp_pose = mp.solutions.pose  # Pose Estimation Model
 WAIT_TIME = 5
 
 # Get Realtime Webcam Feed
-cap = cv2.VideoCapture(1)  # Get Video Capture Device
+cap = cv2.VideoCapture(0)  # Get Video Capture Device
 
 hiplen_list = []
 
@@ -58,6 +58,8 @@ with mp_pose.Pose(  # Setting up Pose Estimation Model
             world_lm = results.pose_world_landmarks.landmark
 
             lm_identify.hip(image, camera_lm, world_lm)
+            lm_identify.left_heel(image, camera_lm, world_lm)
+
             hiplen_list.append(lm_identify.detect(image, camera_lm))
 
         except AttributeError:

@@ -14,12 +14,12 @@ def threePt_twoD_angle(first, sec, third):
     radians = np.arccos(uv/(mag_u * mag_v))
     result = np.degrees(radians)
  
-    if result > 90:
+    if result > 180:
         result = 360 - result
     
     # Check if the acute angle is positive or negative
-    if first[1] == sec[1] and first[0] < sec[0] or third[1] == sec[1] and third[0] < sec[0]:
-        result = -result
+    # if first[1] == sec[1] and first[0] < sec[0] or third[1] == sec[1] and third[0] < sec[0]:
+    #     result = -result
 
     return result
 

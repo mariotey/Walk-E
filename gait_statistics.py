@@ -6,6 +6,12 @@ import walkE_dict
 
 REF_POINT = walkE_dict.ref_pt
 
+HIPFLEX_COEFF = 1
+KNEEFLEX_COEFF = 1 
+ANKLEFLEX_COEFF = 1
+SHOULDER_COEFF = 1
+PELVIC_COEFF = 1
+
 # Ground Configuration
 # HIPFLEX_COEFF = 8/3 * 2
 # KNEEFLEX_COEFF = 15/16 * 60/71
@@ -18,14 +24,7 @@ REF_POINT = walkE_dict.ref_pt
 # KNEEFLEX_COEFF = 5/2 
 # ANKLEFLEX_COEFF = 3
 # SHOULDER_COEFF = 2
-# PELVIC_COEFF = 1
-
-# Video Configuration
-HIPFLEX_COEFF = 1
-KNEEFLEX_COEFF = 1 
-ANKLEFLEX_COEFF = 1
-SHOULDER_COEFF = 1
-PELVIC_COEFF = 1
+# PELVIC_COEFF = 4
 
 #################################################################################################
 
@@ -48,7 +47,10 @@ def get_data(gait_data, waveform, joint_list):
         x.append(gait_data["gait_cycle"][waveform][index])
         
         if len(coords) == 3:
-            y.append(180 - walkE_math.threePt_threeD_angle(*coords)) 
+            if joint_list == walkE_dict.ankleflex_joints:
+                y.append(90 - walkE_math.threePt_threeD_angle(*coords)) 
+            else:
+                y.append(180 - walkE_math.threePt_threeD_angle(*coords)) 
         else:
             y.append((walkE_math.cal_twopt_angle(*coords)))
 
@@ -106,7 +108,7 @@ def gaitcycle_stats(gait_data, gaitcycle_num, offset):
     hip_x, hip_y, raw_stats["pelvic_polylist"] = get_data(gait_data, gaitcycle_num, walkE_dict.hipplane_joints)
 
     raw_stats["shoulder_angle_list"] = {"x": shoulder_x, "y": list(np.array(shoulder_y)*SHOULDER_COEFF - offset["shoulder"])}
-    raw_stats["hip_angle_list"] = {"x": hip_x, "y": list(np.array(hip_y)*PELVIC_COEFF - offset["hip"])}
+    raw_stats["hip_angle_list"] = {"x": hip_x, "y": list(np.array(hip_y)*PELVIC_COEFF - offset["hip"] - 5)}
 
     print("#", gaitcycle_num, "Gait Cycle Complete", time.time() - start_time)
 
@@ -138,7 +140,7 @@ def stats(raw_data, gait_data, hardware_data, offset):
         "kneeflex": [gaitcycle["kneeflex_list"] for gaitcycle in stats_unprocess],
         "ankleflex": [gaitcycle["ankleflex_list"] for gaitcycle in stats_unprocess],
         "bestshoulder": walkE_math.average_fit([gaitcycle["shoulder_polylist"]*SHOULDER_COEFF for gaitcycle in stats_unprocess], offset["shoulder"]),
-        "bestpelvic": walkE_math.average_fit([gaitcycle["pelvic_polylist"]*PELVIC_COEFF for gaitcycle in stats_unprocess], offset["hip"]),
+        "bestpelvic": walkE_math.average_fit([gaitcycle["pelvic_polylist"]*PELVIC_COEFF for gaitcycle in stats_unprocess], offset["hip"] + 5),
         "besthip": walkE_math.average_fit([gaitcycle["hipflex_polylist"]*HIPFLEX_COEFF for gaitcycle in stats_unprocess], offset["hipflex"]),
         "bestknee": walkE_math.average_fit([gaitcycle["kneeflex_polylist"]*KNEEFLEX_COEFF for gaitcycle in stats_unprocess], offset["kneeflex"]),
         "bestankle": walkE_math.average_fit([gaitcycle["ankleflex_polylist"]*ANKLEFLEX_COEFF for gaitcycle in stats_unprocess], offset["ankleflex"]),

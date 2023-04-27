@@ -33,12 +33,22 @@ def calibrate_hiplen(hiplen_list):
 def calibrate(calibrate_data):        
     offset_json = {
         "cut_off": np.mean([data_point["y"] for data_point in calibrate_data[REF_POINT]]),
-        "shoulder": np.mean(calibrate_plane(calibrate_data, walkE_dict.shoulderplane_joints)) + 2.5,
-        "hip": np.mean(calibrate_plane(calibrate_data, walkE_dict.hipplane_joints)) + 2,
+        "shoulder": np.mean(calibrate_plane(calibrate_data, walkE_dict.shoulderplane_joints)),
+        "hip": np.mean(calibrate_plane(calibrate_data, walkE_dict.hipplane_joints)),
         "hipflex": np.mean(calibrate_flex(calibrate_data, walkE_dict.hipflex_joints)),
-        "kneeflex": np.mean(calibrate_flex(calibrate_data, walkE_dict.kneeflex_joints)) + 60,
-        "ankleflex": np.mean(calibrate_flex(calibrate_data, walkE_dict.ankleflex_joints)) + 30
+        "kneeflex": np.mean(calibrate_flex(calibrate_data, walkE_dict.kneeflex_joints)),
+        "ankleflex": np.mean(calibrate_flex(calibrate_data, walkE_dict.ankleflex_joints))
     }
+    
+    # Ground Configuration
+    # offset_json = {
+    #     "cut_off": np.mean([data_point["y"] for data_point in calibrate_data[REF_POINT]]),
+    #     "shoulder": np.mean(calibrate_plane(calibrate_data, walkE_dict.shoulderplane_joints)) + 2.5,
+    #     "hip": np.mean(calibrate_plane(calibrate_data, walkE_dict.hipplane_joints)) + 2,
+    #     "hipflex": np.mean(calibrate_flex(calibrate_data, walkE_dict.hipflex_joints)),
+    #     "kneeflex": np.mean(calibrate_flex(calibrate_data, walkE_dict.kneeflex_joints)) + 60,
+    #     "ankleflex": np.mean(calibrate_flex(calibrate_data, walkE_dict.ankleflex_joints)) + 30
+    # }
 
     print("Calibration Complete")
 

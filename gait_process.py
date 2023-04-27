@@ -75,19 +75,16 @@ def get_gait(heel_baseline, raw_joint):
 
     # Identify cutoff points in data
 
-    # Ground Configuration
-    # cutoff_index = [index for index, elem in enumerate(format_jointdata[REF_POINT]) 
-    #                 if round(elem["y"], 2) == round(heel_baseline - 0.07, 2)]
-    
-    # Stand Configuration
-    # cutoff_index = [index for index, elem in enumerate(format_jointdata[REF_POINT]) 
-    #                 if round(elem["y"], 2) == round(heel_baseline - 0.1, 2)]
-    
-    # Video Configuration
-    cutoff_index = [index for index, elem in enumerate(format_jointdata[REF_POINT]) 
-                    if round(elem["y"], 2) == round(heel_baseline, 2)]
+    print(heel_baseline)
 
-    ##############################################################################################
+    # cutoff_index = [index for index, elem in enumerate(format_jointdata[REF_POINT]) 
+    #                 if round(elem["y"], 2) == round(heel_baseline, 2)]
+
+    # Configuration
+    cutoff_index = [index for index, elem in enumerate(format_jointdata[REF_POINT]) 
+                    if round(elem["y"], 2) == round(heel_baseline - 0.1 , 2)]
+    
+     ##############################################################################################
 
     # Slice data points based on identified cutoff points
     

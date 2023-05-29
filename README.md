@@ -1,5 +1,4 @@
 # BN4101: Walking Buddy for Prehabilitation #
-Project Status: Completed
 
 ## Description ##
 Prehabilitation is an intervention that is introduced prior to surgery to raise a patient’s functional capacity and reduce their risk of post-surgical complications. To evaluate a patient’s recovery and the effectiveness of the prehabilitative programme, gait analysis is often employed, particularly for patients undergoing lower limb surgery.

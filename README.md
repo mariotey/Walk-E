@@ -18,10 +18,14 @@ Given the diverse range of patients receiving lower limb surgeries and the incre
 - scikit-learn
 
 ### Installing ###
-- Project is still incomplete
+- Fork project from this repository
+- Install all dependencies that were stated above
+- Install redis server on local device (Raspberry Pi / Computer)
 
 ### Executing Program ###
-- Project is still incomplete
+- Run redis servers on Raspberry Pi
+- If the codes are on Raspberry Pi, run main_rasp.py
+- If the codes are on Computer, run main_com.py
 
 ### Demonstration ###
 - https://drive.google.com/file/d/1KwERTNXW4ly4oGkfd7G8EUDZwm02rYaV/view?usp=share_link
